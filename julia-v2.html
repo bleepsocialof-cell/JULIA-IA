@@ -645,7 +645,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     <div class="ni" data-v="vAjuda" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Ajuda</div>
   </nav>
   <div class="cta-julia" onclick="breve('Falar com a Julia')"><div class="jav">Ju</div><span>Falar com a Julia</span></div>
-  <div class="sfoot"><span><b>20</b> contatos</span><button class="sair">↪ Sair</button></div>
+  <div class="sfoot"><span><b>20</b> contatos</span><button class="sair" onclick="sairJulia()">↪ Sair</button></div>
 </aside>
 
 <!-- ═════════ MAIN ═════════ -->
@@ -728,7 +728,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       <div class="cch">
         <div class="cav c1">JP</div>
         <div><div class="nm">João Pereira</div><div class="st"><span class="p"></span>Julia respondendo automaticamente</div></div>
-        <div class="acts"><button class="ghost">Transferir</button><button class="pillbtn" style="padding:9px 16px;">Assumir conversa</button></div>
+        <div class="acts"><button class="ghost" onclick="alert('Transferir para um corretor — entra com os Acessos de Equipe (R$ 97/mês cada)')">Transferir</button><button class="pillbtn" id="btnAssumir" style="padding:9px 16px;" onclick="assumir()">Assumir conversa</button></div>
       </div>
       <div class="msgs">
         <div class="dia">HOJE</div>
@@ -738,12 +738,12 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
         <div class="marco">✓ JULIA IDENTIFICOU O INTERESSE · SCORE SUBIU PARA 20</div>
         <div class="m ju">Perfeito! Vou te mandar as 2 opções a menos de 300m da praia. Posso agendar uma visita pra essa semana?<div class="mt">17:15 <span class="tk2">✓✓</span></div></div>
       </div>
-      <div class="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
+      <div class="stbar" id="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
       <div class="comp">
-        <input placeholder="Digite uma mensagem…"/>
-        <button class="desc">Descartar</button>
-        <button class="qual">Qualificar ✦</button>
-        <button class="send">➤</button>
+        <input id="msgIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key==='Enter')enviarMsg()"/>
+        <button class="desc" onclick="if(confirm('Descartar este lead? Ele sai da fila da Julia.'))alert('Lead descartado (demo)')">Descartar</button>
+        <button class="qual" onclick="qualificarLead()">Qualificar ✦</button>
+        <button class="send" onclick="enviarMsg()">➤</button>
       </div>
     </div>
 
@@ -770,8 +770,8 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       <div class="kv"><span>Potencial</span><b>R$ 350 mil</b></div>
       <div class="kv"><span>Última msg</span><b>há 2 min</b></div>
       <div class="lcta">
-        <button class="a1">Assumir conversa</button>
-        <button class="a2">Analisar com IA</button>
+        <button class="a1" onclick="assumir()">Assumir conversa</button>
+        <button class="a2" onclick="alert('Análise da IA (demo):\n\n• João busca apto até R$ 350 mil perto da praia em Boa Viagem\n• Alta intenção: respondeu rápido e aceitou receber opções\n• Próximo passo: propor visita quinta ou sexta à tarde')">Analisar com IA</button>
       </div>
     </div>
   </div>
@@ -1113,7 +1113,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   <div class="view" id="vLeads">
     <div class="k-top">
       <div><h1>Leads</h1><p>Pipeline em tempo real — leads agrupados por etapa</p></div>
-      <button class="pillbtn">⟳ Atualizar</button>
+      <button class="pillbtn" onclick="alert('Pipeline atualizado ✓')">⟳ Atualizar</button>
     </div>
     <div class="kb">
       <div class="kcol"><div class="kch"><span class="kd" style="background:#7c3aed"></span><b>Novo lead</b><span class="kn">2</span></div>
@@ -1239,7 +1239,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       <div class="cf-card cf-danger">
         <h3>Sessão</h3>
         <div class="sb">Encerrar o acesso neste e em outros dispositivos</div>
-        <button onclick="if(confirm('Sair de todos os dispositivos?'))alert('Sessões encerradas — entra com o Supabase Auth')">Sair de todos os dispositivos</button>
+        <button onclick="if(confirm('Sair de todos os dispositivos?')){try{localStorage.removeItem('sessao_julia');}catch(e){}window.location.href='login-julia.html';}">Sair de todos os dispositivos</button>
       </div>
 
     </div>
@@ -1608,6 +1608,44 @@ function guStep(el){
   goTo(el.dataset.go);
 }
 function ajFaq(el){el.parentElement.classList.toggle('open');}
+/* ── SAIR / CHAT ── */
+function sairJulia(){
+  try{localStorage.removeItem('sessao_julia');}catch(e){}
+  window.location.href='login-julia.html';
+}
+var chatAssumido=false;
+function assumir(){
+  chatAssumido=!chatAssumido;
+  var st=document.getElementById('stbar'),b=document.getElementById('btnAssumir');
+  if(chatAssumido){
+    st.innerHTML='<span class="p" style="background:#f59e0b;"></span>Você está no comando — Julia pausada só neste contato';
+    b.textContent='Devolver pra Julia';
+    document.querySelectorAll('.lcta .a1').forEach(function(x){x.textContent='Devolver pra Julia';});
+  }else{
+    st.innerHTML='<span class="p"></span>Julia está respondendo automaticamente — digite para assumir';
+    b.textContent='Assumir conversa';
+    document.querySelectorAll('.lcta .a1').forEach(function(x){x.textContent='Assumir conversa';});
+  }
+}
+function horaAgora(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+function enviarMsg(){
+  var i=document.getElementById('msgIn'),t=i.value.trim();
+  if(!t)return;
+  if(!chatAssumido)assumir();
+  var m=document.createElement('div');
+  m.className='m ju';
+  m.innerHTML='<span style="display:block;font-size:8px;font-family:Sora;font-weight:800;letter-spacing:.8px;color:#e84393;margin-bottom:3px;">VOCÊ</span>'+t.replace(/</g,'&lt;')+'<div class="mt">'+horaAgora()+' <span class="tk2">✓✓</span></div>';
+  document.querySelector('.msgs').appendChild(m);
+  document.querySelector('.msgs').scrollTop=99999;
+  i.value='';
+}
+function qualificarLead(){
+  var m=document.createElement('div');
+  m.className='marco';
+  m.textContent='✦ LEAD QUALIFICADO MANUALMENTE POR VOCÊ · '+horaAgora();
+  document.querySelector('.msgs').appendChild(m);
+  document.querySelector('.msgs').scrollTop=99999;
+}
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
