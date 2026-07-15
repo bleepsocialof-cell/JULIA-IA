@@ -1560,7 +1560,6 @@ function ccCarregar(){
     console.log('contas: '+CC.length+' carregadas do Supabase');
   }).catch(function(e){console.warn('contas indisponíveis',e);});
 }
-ccCarregar();
 var ccF='todos', ccEdit=-1;
 function ccIni(s){return s.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();}
 function ccStBadge(st){
@@ -1741,7 +1740,7 @@ function supaTempo(ts){
   return 'há '+Math.floor(d/1440)+' dias';
 }
 function carregarLeadsReais(){
-  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200',
+  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1767,7 +1766,6 @@ function carregarLeadsReais(){
   })
   .catch(function(e){console.warn('Supabase indisponível — mantendo dados de demonstração.',e);});
 }
-carregarLeadsReais();
 /* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
 function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
@@ -1897,7 +1895,7 @@ var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'jul.ia@bleesocial.com.br':[
 function perfilDados(){
   var email='';
   try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=s.email;}catch(e){}
-  var nm=PF_NOMES[email]||['Bleepsocialof','S.'];
+  var nm=(window.PF_OVERRIDE)||PF_NOMES[email]||['Bleepsocialof','S.'];
   return{email:email,nome:nm[0],sobre:nm[1]};
 }
 function perfilPintar(){
@@ -1949,6 +1947,40 @@ function criarLoginCliente(o){
   })
   .catch(function(e){return 'Conta salva ✓ — mas o login falhou: '+e.message;});
 }
+/* ── BOOT MULTI-TENANT: quem entrou decide o que carrega ── */
+var ADMIN_EMAILS=['jul.ia@bleesocial.com.br','admin@julia.com'];
+var CONTA_ID=null, EH_ADMIN=false;
+function bootPainel(){
+  var email='';
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
+  EH_ADMIN=ADMIN_EMAILS.indexOf(email)>-1;
+  if(EH_ADMIN){
+    carregarLeadsReais();dbCarregar();ccCarregar();
+    return;
+  }
+  /* cliente: esconder área ADMIN */
+  var niAdm=document.querySelector('.ni[data-v="vClientes"]');
+  if(niAdm)niAdm.style.display='none';
+  /* descobrir a conta do cliente pelo e-mail de login */
+  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa,responsavel&email_login=eq.'+encodeURIComponent(email),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    if(rows.length){
+      CONTA_ID=rows[0].id;
+      var partes=String(rows[0].responsavel||rows[0].empresa||'Cliente').split(' ');
+      window.PF_OVERRIDE=[partes[0],partes.slice(1).join(' ')||''];
+      if(typeof perfilPintar==='function')perfilPintar();
+      console.log('conta do cliente: '+rows[0].empresa+' ('+CONTA_ID+')');
+    }else{
+      console.warn('nenhuma conta encontrada para '+email+' — carregando vazio');
+      CONTA_ID='00000000-0000-0000-0000-000000000000';
+    }
+    carregarLeadsReais();dbCarregar();
+  })
+  .catch(function(e){console.warn('falha ao identificar a conta',e);carregarLeadsReais();dbCarregar();});
+}
+bootPainel();
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
@@ -2046,7 +2078,7 @@ function dbTipoVal(){
 }
 var DB=[];
 function dbCarregar(){
-  fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
     DB=rows.map(function(p){
@@ -2057,7 +2089,6 @@ function dbCarregar(){
     console.log('produtos: '+DB.length+' carregados do Supabase');
   }).catch(function(e){console.warn('produtos indisponíveis',e);});
 }
-dbCarregar();
 var dbEdit=-1, DB_MAX=15;
 function dbRender(){
   var q=(document.getElementById('dbBusca').value||'').toLowerCase();
@@ -2101,7 +2132,7 @@ function dbSalvar(){
   var nome=fNome.value.trim(); if(!nome){alert('Dá um nome pro produto');fNome.focus();return;}
   if(dbEdit<0 && DB.length>=DB_MAX){alert('Limite do plano PRO atingido ('+DB_MAX+'). Faça upgrade.');return;}
   var tg={}; ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){tg[id]=document.getElementById(id).checked;});
-  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,
+  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,conta_id:CONTA_ID,
     caracteristicas:{loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',qtos:fQtos.value,ent:document.getElementById('fEnt').value,tg:tg}};
   var editId=(dbEdit>=0 && DB[dbEdit])?DB[dbEdit].id:null;
   var url=SUPA_URL+'/rest/v1/produtos'+(editId?('?id=eq.'+editId):'');
