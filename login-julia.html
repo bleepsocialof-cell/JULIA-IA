@@ -111,18 +111,42 @@ const USERS=[
   {email:'cliente@julia.com', senha:'123456', nome:'Cliente'},
 ];
 const SKEY='sessao_julia';
-const DESTINO='julia-v2.html';
+const DESTINO='painel-julia-modulo.html';
 
+const SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
+const SUPA_KEY='sb_publishable_zgWKIwXALOWRbac_13-DWg_ruoyaNkg';
 function doLogin(){
   const e=document.getElementById('email').value.trim().toLowerCase();
   const p=document.getElementById('senha').value;
-  const u=USERS.find(u=>u.email===e&&u.senha===p);
   const err=document.getElementById('err');
-  if(!u){err.style.display='block';return;}
   err.style.display='none';
-  /* grava a sessão que o painel do produto reconhece → entra direto, sem login antigo */
-  try{localStorage.setItem(SKEY,JSON.stringify({email:u.email,em:Date.now()}));}catch(_){}
-  location.href=DESTINO;
+  /* 1) Autenticação REAL no Supabase Auth */
+  fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{
+    method:'POST',
+    headers:{apikey:SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({email:e,password:p})
+  })
+  .then(r=>r.json().then(j=>({ok:r.ok,j})))
+  .then(({ok,j})=>{
+    if(ok&&j.access_token){
+      try{localStorage.setItem(SKEY,JSON.stringify({email:e,token:j.access_token,em:Date.now()}));}catch(_){}
+      location.href=DESTINO;
+      return;
+    }
+    /* 2) Fallback temporário: contas demo (remover quando todos os usuários estiverem no Auth) */
+    const u=USERS.find(u=>u.email===e&&u.senha===p);
+    if(u){
+      try{localStorage.setItem(SKEY,JSON.stringify({email:u.email,em:Date.now()}));}catch(_){}
+      location.href=DESTINO;
+      return;
+    }
+    err.style.display='block';
+  })
+  .catch(()=>{
+    const u=USERS.find(u=>u.email===e&&u.senha===p);
+    if(u){try{localStorage.setItem(SKEY,JSON.stringify({email:u.email,em:Date.now()}));}catch(_){}location.href=DESTINO;return;}
+    err.style.display='block';
+  });
 }
 function toast(m){
   const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');

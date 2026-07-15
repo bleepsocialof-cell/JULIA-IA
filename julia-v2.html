@@ -1547,11 +1547,20 @@ function pcSeat(d){
 function pcSeatBuy(){alert(pcSeats+' acesso(s) de equipe — '+pcFmt(pcSeats*97)+'/mês. Entra com o gateway de pagamento.');}
 /* ── CONTAS DE CLIENTES (ADMIN) ── */
 var CC_PLANOS={Start:1347,Plus:1647,Pro:1997,Customizado:2997};
-var CC=[
- {emp:'Blee Social',cnpj:'54.054.265/0001-00',resp:'Thais',zapDono:'+55 81 98888-0001',mail:'jul.ia@bleesocial.com.br',senha:'Blee@2026',zap:'+55 81 99933-1884',link:'https://julia-ia-nine.vercel.app',plano:'Pro',seats:2,st:'ativa'},
- {emp:'Imobiliária Horizonte',cnpj:'12.345.678/0001-90',resp:'Marcos Andrade',zapDono:'+55 81 98811-2040',mail:'contato@horizonteimob.com.br',senha:'Hzt#4821',zap:'+55 81 97700-3355',link:'https://julia-ia-nine.vercel.app',plano:'Start',seats:0,st:'ativa'},
- {emp:'RecifePrime Imóveis',cnpj:'98.765.432/0001-10',resp:'Carla Nunes',zapDono:'+55 81 99720-5511',mail:'carla@recifeprime.com.br',senha:'Rcp!7093',zap:'+55 81 96600-8822',link:'https://julia-ia-nine.vercel.app',plano:'Plus',seats:1,st:'inadimplente'}
-];
+var CC=[];
+function ccCarregar(){
+  fetch(SUPA_URL+'/rest/v1/contas?select=*&order=criada_em.asc',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    CC=rows.map(function(c){return{id:c.id,emp:c.empresa,cnpj:c.cnpj||'',resp:c.responsavel||'',
+      zapDono:c.zap_dono||'',zap:c.zap_360||'',mail:c.email_login||'',senha:c.senha_provisoria||'',
+      link:c.link_acesso||'https://julia-ia-nine.vercel.app',
+      plano:(CC_PLANOS[c.plano]?c.plano:'Start'),seats:c.acessos_extras||0,st:c.status||'ativa'};});
+    ccRender();
+    console.log('contas: '+CC.length+' carregadas do Supabase');
+  }).catch(function(e){console.warn('contas indisponíveis',e);});
+}
+ccCarregar();
 var ccF='todos', ccEdit=-1;
 function ccIni(s){return s.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();}
 function ccStBadge(st){
@@ -1617,24 +1626,53 @@ function ccSalvar(enviar){
   var mail=document.getElementById('ccFMail').value.trim(),senha=document.getElementById('ccFSenha').value.trim();
   if(!emp||!resp){alert('Empresa e Responsável são obrigatórios');return;}
   if(!mail||!senha){alert('E-mail de login e Senha são obrigatórios — use ⚡ Gerar se quiser');return;}
-  var o={emp:emp,resp:resp,mail:mail,senha:senha,
+  var payload={empresa:emp,responsavel:resp,email_login:mail,senha_provisoria:senha,
     cnpj:document.getElementById('ccFCnpj').value.trim(),
-    zapDono:document.getElementById('ccFZapDono').value.trim(),
-    zap:document.getElementById('ccFZap').value.trim(),
-    link:document.getElementById('ccFLink').value.trim()||'https://julia-ia-nine.vercel.app',
+    zap_dono:document.getElementById('ccFZapDono').value.trim(),
+    zap_360:document.getElementById('ccFZap').value.trim(),
+    link_acesso:document.getElementById('ccFLink').value.trim()||'https://julia-ia-nine.vercel.app',
     plano:document.getElementById('ccFPlano').value,
-    seats:Math.max(0,parseInt(document.getElementById('ccFSeats').value||'0',10)),
-    st:document.getElementById('ccFSt').value};
-  if(ccEdit<0)CC.push(o);else CC[ccEdit]=o;
-  ccVoltar();ccRender();
-  if(enviar){
-    if(!o.zapDono){alert('Conta salva! Mas sem o WhatsApp do dono não dá pra enviar o acesso.');return;}
-    window.open(ccWa(o),'_blank');
-  }
+    acessos_extras:Math.max(0,parseInt(document.getElementById('ccFSeats').value||'0',10)),
+    status:document.getElementById('ccFSt').value};
+  var editId=(ccEdit>=0&&CC[ccEdit])?CC[ccEdit].id:null;
+  fetch(SUPA_URL+'/rest/v1/contas'+(editId?('?id=eq.'+editId):''),{
+    method:editId?'PATCH':'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=representation'},
+    body:JSON.stringify(payload)})
+  .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+' — '+t.slice(0,160));});return r.json();})
+  .then(function(rows){
+    var s=rows[0]||payload;
+    var o={id:s.id||editId,emp:s.empresa,resp:s.responsavel,mail:s.email_login,senha:s.senha_provisoria,
+      cnpj:s.cnpj||'',zapDono:s.zap_dono||'',zap:s.zap_360||'',link:s.link_acesso,
+      plano:(CC_PLANOS[s.plano]?s.plano:'Start'),seats:s.acessos_extras||0,st:s.status||'ativa'};
+    var novaConta=(ccEdit<0);
+    if(ccEdit<0)CC.push(o);else CC[ccEdit]=o;
+    ccVoltar();ccRender();
+    function enviarZap(){
+      if(!enviar)return;
+      if(!o.zapDono){alert('Conta salva! Mas sem o WhatsApp do dono não dá pra enviar o acesso.');return;}
+      window.open(ccWa(o),'_blank');
+    }
+    if(novaConta){
+      criarLoginCliente(o).then(function(msg){if(msg)alert(msg);enviarZap();});
+    }else{enviarZap();}
+  })
+  .catch(function(e){alert('Não consegui salvar a conta ('+e.message+').');});
 }
-function ccPausa(i){CC[i].st=(CC[i].st==='ativa'?'pausada':'ativa');ccRender();}
-function ccExcluir(i){if(confirm('Excluir a conta de '+CC[i].emp+'? O painel e a Julia desse cliente param de funcionar.')){CC.splice(i,1);ccRender();}}
-ccRender();
+function ccPausa(i){
+  var novo=(CC[i].st==='ativa'?'pausada':'ativa');
+  fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+CC[i].id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({status:novo})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);CC[i].st=novo;ccRender();})
+  .catch(function(e){alert('Não consegui alterar o status ('+e.message+').');});
+}
+function ccExcluir(i){
+  if(!confirm('Excluir a conta de '+CC[i].emp+'? O painel e a Julia desse cliente param de funcionar.'))return;
+  fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+CC[i].id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);CC.splice(i,1);ccRender();})
+  .catch(function(e){alert('Não consegui excluir ('+e.message+').');});
+}
 /* ── CONFIGURAÇÕES ── */
 function cfSalvar(){alert('Configurações salvas ✓ (persistência entra com o Supabase)');}
 function cfPausar(el){
@@ -1811,7 +1849,36 @@ function convAbrir(i,el){
   var nm=document.querySelector('.cch .nm'); if(nm)nm.textContent=l.n;
   var av=document.querySelector('.cch .cav'); if(av)av.textContent=iniciais(l.n);
   var ms=document.querySelector('.msgs');
-  if(ms)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>'+ehtml(l.n)+'</b><small>O histórico de mensagens deste lead entra quando o n8n religar com o 360dialog.</small></div>';
+  if(ms){
+    ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando histórico…</b></div>';
+    var tel=String(l.t||'').replace(/\D/g,'');
+    fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.asc&limit=200&telefone=like.*'+tel.slice(-8),
+      {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(msgs){
+      if(!msgs.length){
+        ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>'+ehtml(l.n)+'</b><small>Ainda sem mensagens registradas — o histórico enche quando o n8n religar com o 360dialog.</small></div>';
+        return;
+      }
+      var h='', dia='';
+      msgs.forEach(function(m){
+        var d=m.criado_em?new Date(m.criado_em):null;
+        if(d){
+          var dl=d.toLocaleDateString('pt-BR');
+          if(dl!==dia){dia=dl;h+='<div class="dia">'+dl+'</div>';}
+        }
+        var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
+        var p=String(m.papel||'').toLowerCase();
+        var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
+        h+='<div class="m '+(cli?'cli':'ju')+'">'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+      });
+      ms.innerHTML=h;
+      ms.scrollTop=999999;
+    })
+    .catch(function(e){
+      ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">⚠️</span><b>Não consegui carregar o histórico</b><small>'+ehtml(e.message)+'</small></div>';
+    });
+  }
   var lpn=document.querySelector('.lp .nm'); if(lpn)lpn.textContent=l.n;
   var lpa=document.querySelector('.lph .cav'); if(lpa)lpa.textContent=iniciais(l.n);
   var lpp=document.querySelector('.lp .ph2'); if(lpp)lpp.textContent=l.t;
@@ -1826,7 +1893,7 @@ function convAbrir(i,el){
   });
 }
 /* ── MEU PERFIL ── */
-var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'cliente@julia.com':['Cliente','Demo']};
+var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'jul.ia@bleesocial.com.br':['Jadson','Santos'],'cliente@julia.com':['Cliente','Demo']};
 function perfilDados(){
   var email='';
   try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=s.email;}catch(e){}
@@ -1864,6 +1931,24 @@ function perfilSalvar(){
   perfilFechar();
 }
 perfilPintar();
+/* ── CRIAR LOGIN DO CLIENTE (Edge Function, só admin) ── */
+function criarLoginCliente(o){
+  var token='';
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.token)token=s.token;}catch(e){}
+  if(!token){
+    return Promise.resolve('Conta salva ✓ — mas o LOGIN do cliente não foi criado: entre no painel com seu usuário de administrador (Auth) e salve de novo, ou crie manualmente no Supabase.');
+  }
+  return fetch(SUPA_URL+'/functions/v1/criar-usuario',{
+    method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({email:o.mail,senha:o.senha,nome:o.resp,conta_id:o.id})})
+  .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+  .then(function(x){
+    if(x.ok)return 'Conta salva e LOGIN do cliente criado ✓ ('+o.mail+')';
+    return 'Conta salva ✓ — mas o login falhou: '+(x.j.erro||'erro desconhecido');
+  })
+  .catch(function(e){return 'Conta salva ✓ — mas o login falhou: '+e.message;});
+}
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
