@@ -620,6 +620,23 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .vazio .ic{font-size:30px;}
 .vazio b{font-family:'Sora';font-size:13px;color:var(--ink);}
 .vazio small{font-size:11.5px;line-height:1.5;max-width:260px;}
+/* ── MEU PERFIL ── */
+.pf-ov{position:fixed;inset:0;background:rgba(15,11,34,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:99;backdrop-filter:blur(3px);}
+.pf-ov.on{display:flex;}
+.pf-md{background:#fff;border-radius:18px;width:100%;max-width:420px;padding:26px;box-shadow:0 30px 70px rgba(15,11,34,.35);}
+.pf-md h2{font-family:'Sora';font-size:16px;font-weight:800;letter-spacing:-.3px;margin-bottom:18px;}
+.pf-foto{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.pf-av{width:64px;height:64px;border-radius:18px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:20px;overflow:hidden;flex-shrink:0;box-shadow:0 10px 22px rgba(168,85,247,.3);}
+.pf-av img,.uav img{width:100%;height:100%;object-fit:cover;border-radius:inherit;}
+.pf-up{display:inline-block;border:1.5px solid #a855f7;color:#a855f7;font-family:'Sora';font-weight:700;font-size:11.5px;border-radius:9px;padding:8px 14px;cursor:pointer;}
+.pf-foto small{display:block;font-size:10px;color:var(--sub);margin-top:6px;}
+.pf-fl{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.pf-fl label{font-size:9.5px;font-family:'Sora';font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);}
+.pf-fl input{border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:12.5px;color:var(--ink);outline:none;font-family:'Inter';}
+.pf-fl input:focus{border-color:#a855f7;}
+.pf-fl input[disabled]{background:#f7f5fb;color:var(--mut);cursor:not-allowed;}
+.pf-lock{font-size:10.5px;color:var(--sub);line-height:1.5;margin:-4px 0 14px;}
+.pf-bts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
 </style>
 </head>
 <body>
@@ -657,7 +674,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   <div class="top">
     <div class="status"><span class="p"></span>Julia ativa · atendimento humanizado 24h</div>
     <div class="sp"></div>
-    <div class="user"><div class="uav">B</div><div><div class="un">Bleepsocialof S.</div><div class="ur">Administrador</div></div></div>
+    <div class="user" onclick="perfilAbrir()" style="cursor:pointer;" title="Editar perfil"><div class="uav" id="pfTopAv">B</div><div><div class="un" id="pfTopNome">Bleepsocialof S.</div><div class="ur">Administrador · <span style="color:#a855f7;font-weight:700;">Editar perfil</span></div></div></div>
   </div>
 
   <!-- ══ INÍCIO ══ -->
@@ -1469,6 +1486,29 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   </div>
 </div>
 
+<div class="pf-ov" id="pfModal" onclick="if(event.target===this)perfilFechar()">
+  <div class="pf-md">
+    <h2>Meu perfil</h2>
+    <div class="pf-foto">
+      <div class="pf-av" id="pfAv">B</div>
+      <div style="flex:1;">
+        <label class="pf-up">📷 Escolher foto<input type="file" accept="image/*" style="display:none" onchange="perfilFoto(this)"></label>
+        <small>JPG ou PNG · aparece na topbar e nas conversas</small>
+      </div>
+    </div>
+    <div class="pf-fl"><label>Nome</label><input id="pfNome" disabled></div>
+    <div class="pf-fl"><label>Sobrenome</label><input id="pfSobre" disabled></div>
+    <div class="pf-lock">🔒 Nome e sobrenome vêm do cadastro e são fixos — ligam você ao seu histórico. Precisa corrigir? Fale com o administrador.</div>
+    <div class="cc-sec" style="margin-top:14px;">TROCAR SENHA · OPCIONAL</div>
+    <div class="pf-fl"><label>Senha atual</label><input type="password" id="pfS1" placeholder="••••••••"></div>
+    <div class="pf-fl"><label>Nova senha</label><input type="password" id="pfS2" placeholder="mínimo 6 caracteres"></div>
+    <div class="pf-bts">
+      <button class="ghost" onclick="perfilFechar()">Cancelar</button>
+      <button class="pillbtn" onclick="perfilSalvar()">Salvar perfil</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function go(el){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -1785,6 +1825,45 @@ function convAbrir(i,el){
     if(ix<idx)e.classList.add('done'); else if(ix===idx)e.classList.add('now');
   });
 }
+/* ── MEU PERFIL ── */
+var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'cliente@julia.com':['Cliente','Demo']};
+function perfilDados(){
+  var email='';
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=s.email;}catch(e){}
+  var nm=PF_NOMES[email]||['Bleepsocialof','S.'];
+  return{email:email,nome:nm[0],sobre:nm[1]};
+}
+function perfilPintar(){
+  var d=perfilDados(), foto=null;
+  try{foto=localStorage.getItem('perfil_foto');}catch(e){}
+  var ini=(d.nome[0]||'')+(d.sobre[0]||'');
+  var top=document.getElementById('pfTopAv'), md=document.getElementById('pfAv');
+  [top,md].forEach(function(el){if(!el)return;el.innerHTML=foto?'<img src="'+foto+'">':ini.toUpperCase();});
+  var tn=document.getElementById('pfTopNome'); if(tn)tn.textContent=d.nome+' '+d.sobre;
+  var n=document.getElementById('pfNome'), s=document.getElementById('pfSobre');
+  if(n)n.value=d.nome; if(s)s.value=d.sobre;
+}
+function perfilAbrir(){perfilPintar();document.getElementById('pfModal').classList.add('on');}
+function perfilFechar(){document.getElementById('pfModal').classList.remove('on');}
+function perfilFoto(inp){
+  var f=inp.files[0]; if(!f)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{localStorage.setItem('perfil_foto',e.target.result);}catch(err){alert('Foto muito grande — tente uma menor.');return;}
+    perfilPintar();
+  };
+  r.readAsDataURL(f);
+}
+function perfilSalvar(){
+  var s1=document.getElementById('pfS1').value, s2=document.getElementById('pfS2').value;
+  if(s1||s2){
+    if(!s1||!s2){alert('Pra trocar a senha, preencha os dois campos.');return;}
+    if(s2.length<6){alert('A nova senha precisa de pelo menos 6 caracteres.');return;}
+    alert('Foto salva ✓ — a troca de senha real entra com o Supabase Auth (próxima etapa).');
+  }
+  perfilFechar();
+}
+perfilPintar();
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
