@@ -1959,7 +1959,20 @@ function dbTipoVal(){
   if(sel.value==='__outro')return (document.getElementById('fTipoOutro').value.trim()||'Outro');
   return sel.value;
 }
-var DB=[{nome:'TESTE',tipo:'Apartamento',loc:'—',valor:'—',qtos:'2 quartos'}];
+var DB=[];
+function dbCarregar(){
+  fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    DB=rows.map(function(p){
+      var c=p.caracteristicas||{};
+      return{id:p.id,nome:p.nome,tipo:p.tipo||'—',loc:c.loc||'—',valor:c.valor||'—',qtos:c.qtos||'2 quartos',ent:c.ent||'',obs:p.obs||'',tg:c.tg||{}};
+    });
+    dbRender();
+    console.log('produtos: '+DB.length+' carregados do Supabase');
+  }).catch(function(e){console.warn('produtos indisponíveis',e);});
+}
+dbCarregar();
 var dbEdit=-1, DB_MAX=15;
 function dbRender(){
   var q=(document.getElementById('dbBusca').value||'').toLowerCase();
@@ -1986,14 +1999,38 @@ function dbEditar(i){
   if(ops.indexOf(p.tipo)>=0){fTipo.value=p.tipo;}else{fTipo.value='__outro';}
   dbTipoTroca();
   if(fTipo.value==='__outro')document.getElementById('fTipoOutro').value=p.tipo;fLoc.value=p.loc==='—'?'':p.loc;fValor.value=p.valor==='—'?'':p.valor;
+  document.getElementById('fObs').value=p.obs||'';document.getElementById('fEnt').value=p.ent||'';
+  ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){document.getElementById(id).checked=!!(p.tg&&p.tg[id]);});
+  fCont.textContent=(p.obs||'').length+'/1000 caracteres';
   document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);
 }
-function dbExcluir(i){if(confirm('Excluir "'+DB[i].nome+'"?')){DB.splice(i,1);dbRender();}}
+function dbExcluir(i){
+  if(!confirm('Excluir "'+DB[i].nome+'"?'))return;
+  var id=DB[i].id;
+  if(!id){DB.splice(i,1);dbRender();return;}
+  fetch(SUPA_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);DB.splice(i,1);dbRender();})
+  .catch(function(e){alert('Não consegui excluir ('+e.message+').');});
+}
 function dbSalvar(){
   var nome=fNome.value.trim(); if(!nome){alert('Dá um nome pro produto');fNome.focus();return;}
-  var p={nome:nome,tipo:dbTipoVal(),loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',qtos:fQtos.value};
-  if(dbEdit>=0)DB[dbEdit]=p; else{ if(DB.length>=DB_MAX){alert('Limite do plano PRO atingido ('+DB_MAX+'). Faça upgrade.');return;} DB.push(p); }
-  dbTroca(false);dbRender();
+  if(dbEdit<0 && DB.length>=DB_MAX){alert('Limite do plano PRO atingido ('+DB_MAX+'). Faça upgrade.');return;}
+  var tg={}; ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){tg[id]=document.getElementById(id).checked;});
+  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,
+    caracteristicas:{loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',qtos:fQtos.value,ent:document.getElementById('fEnt').value,tg:tg}};
+  var editId=(dbEdit>=0 && DB[dbEdit])?DB[dbEdit].id:null;
+  var url=SUPA_URL+'/rest/v1/produtos'+(editId?('?id=eq.'+editId):'');
+  fetch(url,{method:editId?'PATCH':'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=representation'},
+    body:JSON.stringify(payload)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    var s=rows[0]||payload, c=s.caracteristicas||payload.caracteristicas;
+    var p={id:s.id||editId,nome:s.nome,tipo:s.tipo,loc:c.loc,valor:c.valor,qtos:c.qtos,ent:c.ent,obs:s.obs||'',tg:c.tg||{}};
+    if(dbEdit>=0)DB[dbEdit]=p; else DB.push(p);
+    dbTroca(false);dbRender();
+  })
+  .catch(function(e){alert('Não consegui salvar no Supabase ('+e.message+'). Tente de novo.');});
 }
 function dbVoltar(){dbTroca(false);}
 function dbTroca(form){document.getElementById('dbLista').style.display=form?'none':'block';document.getElementById('dbForm').style.display=form?'block':'none';}
