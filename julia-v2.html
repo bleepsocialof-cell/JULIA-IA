@@ -616,6 +616,10 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .aj-faq .a{display:none;padding:0 18px 14px;font-size:12px;color:var(--tx);line-height:1.65;}
 .aj-faq.open .a{display:block;}
 .aj-faq.open .q span{transform:rotate(45deg);}
+.vazio{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:44px 20px;text-align:center;color:var(--sub);}
+.vazio .ic{font-size:30px;}
+.vazio b{font-family:'Sora';font-size:13px;color:var(--ink);}
+.vazio small{font-size:11.5px;line-height:1.5;max-width:260px;}
 </style>
 </head>
 <body>
@@ -1645,6 +1649,141 @@ function qualificarLead(){
   m.textContent='✦ LEAD QUALIFICADO MANUALMENTE POR VOCÊ · '+horaAgora();
   document.querySelector('.msgs').appendChild(m);
   document.querySelector('.msgs').scrollTop=99999;
+}
+/* ── SUPABASE · LEADS REAIS ── */
+var SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
+var SUPA_KEY='sb_publishable_zgWKIwXALOWRbac_13-DWg_ruoyaNkg';
+function supaTempo(ts){
+  if(!ts)return '—';
+  var d=(Date.now()-new Date(ts).getTime())/60000;
+  if(d<1)return 'agora';
+  if(d<60)return 'há '+Math.floor(d)+' min';
+  if(d<1440)return 'há '+Math.floor(d/60)+'h';
+  if(d<2880)return 'ontem';
+  return 'há '+Math.floor(d/1440)+' dias';
+}
+function carregarLeadsReais(){
+  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200',
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    GL.length=0;
+    rows.forEach(function(r,ix){
+      var etapa=String(r.etapa||'').toLowerCase(), status=String(r.status||'').toLowerCase();
+      var st = (r.crm_enviado===true||etapa==='crm') ? 'crm'
+             : (etapa==='qualificacao'||status.indexOf('qualific')>-1) ? 'qualificado'
+             : (status.indexOf('descart')>-1||status.indexOf('nao')>-1||status.indexOf('não')>-1) ? 'nq'
+             : 'pendente';
+      var et=['chegou','conversa','qualificacao','documentacao','agendamento','crm'].indexOf(etapa)>-1?etapa:(st==='crm'?'crm':st==='qualificado'?'qualificacao':st==='nq'?'descartado':'chegou');
+      GL.push({n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',st:st,e:et,
+               sc:(typeof r.score==='number'?r.score:0),
+               u:supaTempo(r.updated_at||r.created_at),cor:['c1','c2','c3',''][ix%4]});
+    });
+    if(typeof gRender==='function')gRender(1);
+    pintarReal();
+    var bd=document.querySelector('.ni[data-v="vConversas"] .bd');
+    if(bd)bd.textContent=rows.length;
+    var sf=document.querySelector('.sfoot b');
+    if(sf)sf.textContent=rows.length;
+    console.log('Supabase OK — '+rows.length+' leads reais carregados');
+  })
+  .catch(function(e){console.warn('Supabase indisponível — mantendo dados de demonstração.',e);});
+}
+carregarLeadsReais();
+/* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
+function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
+var ETAPAS=[['chegou','Novo lead','#7c3aed'],['conversa','Em conversa','#a855f7'],['qualificacao','Qualificação','#10b981'],['documentacao','Documentação','#0ea5e9'],['agendamento','Agendamento','#f59e0b'],['crm','Enviado ao CRM','#14b8a6'],['descartado','Descartado','#94a3b8']];
+function pintarReal(){
+  var n=GL.length;
+  /* — Conversas: lista — */
+  var cits=document.querySelector('.cits');
+  if(cits){
+    if(n===0){
+      cits.innerHTML='<div class="vazio"><span class="ic">💬</span><b>Nenhuma conversa ainda</b><small>Quando o WhatsApp religar (360dialog), os clientes da Julia aparecem aqui em tempo real.</small></div>';
+    }else{
+      cits.innerHTML=GL.map(function(l,i){
+        return '<div class="cit'+(i===0?' on':'')+'" onclick="convAbrir('+i+',this)"><div class="cav '+l.cor+'">'+iniciais(l.n)+'</div>'
+        +'<div class="tx"><div class="nm">'+ehtml(l.n)+' <small>'+l.u+'</small></div><div class="pv">'+ehtml(l.i)+'</div>'
+        +'<div class="mini"><span class="mp e">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1].toUpperCase()+'</span></div></div></div>';
+      }).join('');
+      convAbrir(0,null);
+    }
+  }
+  /* — Conversas: chat vazio — */
+  if(n===0){
+    var ms=document.querySelector('.msgs');
+    if(ms)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🤖</span><b>A Julia está pronta</b><small>Histórico de mensagens entra assim que o número for registrado no 360dialog e o n8n religado.</small></div>';
+    var nm=document.querySelector('.cch .nm'); if(nm)nm.textContent='—';
+    var lpn=document.querySelector('.lp .nm'); if(lpn)lpn.textContent='Nenhum lead selecionado';
+    var lpp=document.querySelector('.lp .ph2'); if(lpp)lpp.textContent='—';
+    var sn=document.querySelector('.score .n'); if(sn)sn.innerHTML='0 <small>/100</small>';
+    var sf2=document.querySelector('.score .fl'); if(sf2)sf2.style.width='0%';
+    document.querySelectorAll('.lp .kv b').forEach(function(b){b.textContent='—';});
+    document.querySelectorAll('.jorn .et').forEach(function(e){e.classList.remove('done','now');});
+  }
+  /* — Início: hero funil — */
+  var q=GL.filter(function(l){return l.e==='qualificacao'||l.e==='crm';}).length;
+  var hf=document.querySelectorAll('#vInicio .hf');
+  if(hf.length>=3){
+    function sethf(el,num,pct,txt){
+      var N=el.querySelector('.n'),C=el.querySelector('.c'),F=el.querySelector('.fl');
+      if(N)N.textContent=num; if(C)C.innerHTML='<b>'+pct+'%</b> '+txt; if(F)F.style.width=Math.max(2,pct)+'%';
+    }
+    sethf(hf[0],n,100,'do período');
+    sethf(hf[1],n,n?100:0,'de aproveitamento');
+    sethf(hf[2],q,n?Math.round(q/n*100):0,'de conversão');
+  }
+  /* — Início: funil de hoje por etapa — */
+  var mfs=document.querySelectorAll('#vInicio .mf');
+  ETAPAS.slice(0,6).forEach(function(e,ix){
+    if(!mfs[ix])return;
+    var c=GL.filter(function(l){return l.e===e[0];}).length;
+    var B=mfs[ix].querySelector('b'),F=mfs[ix].querySelector('.fl');
+    if(B)B.textContent=c; if(F)F.style.width=(n?Math.max(2,Math.round(c/n*100)):0)+'%';
+  });
+  /* — Início: canais e prioridades (sem origem no banco ainda) — */
+  document.querySelectorAll('#vInicio .cn').forEach(function(cn){
+    var B=cn.querySelector('b'),F=cn.querySelector('.fl');
+    if(B)B.textContent=n?'—':'0'; if(F)F.style.width='0%';
+  });
+  var acs=document.querySelectorAll('#vInicio .ac b');
+  if(acs.length>=3){
+    acs[0].textContent=GL.filter(function(l){return l.e==='qualificacao';}).length+' leads qualificados';
+    acs[1].textContent=GL.filter(function(l){return l.e==='agendamento';}).length+' visitas agendadas';
+    acs[2].textContent=GL.filter(function(l){return l.e==='documentacao';}).length+' documentações em andamento';
+  }
+  /* — Kanban real — */
+  var kb=document.querySelector('.kb');
+  if(kb){
+    kb.innerHTML=ETAPAS.map(function(e){
+      var ls=GL.filter(function(l){return l.e===e[0];});
+      return '<div class="kcol"><div class="kch"><span class="kd" style="background:'+e[2]+'"></span><b>'+e[1]+'</b><span class="kn">'+ls.length+'</span></div>'
+        +ls.map(function(l){return '<div class="kc"><div class="nm2">'+ehtml(l.n)+'</div><div class="ph3">'+ehtml(l.t)+'</div><div class="tags"><span class="mp a">'+e[1].toUpperCase()+'</span></div><div class="foot"><span class="tm">'+l.u+'</span><span class="kav">JU</span></div></div>';}).join('')
+        +(ls.length===0?'<div style="padding:14px 10px;font-size:10.5px;color:var(--sub);text-align:center;">vazio</div>':'')
+        +'</div>';
+    }).join('');
+  }
+}
+function convAbrir(i,el){
+  if(el){document.querySelectorAll('.cit').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
+  var l=GL[i]; if(!l)return;
+  var nm=document.querySelector('.cch .nm'); if(nm)nm.textContent=l.n;
+  var av=document.querySelector('.cch .cav'); if(av)av.textContent=iniciais(l.n);
+  var ms=document.querySelector('.msgs');
+  if(ms)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>'+ehtml(l.n)+'</b><small>O histórico de mensagens deste lead entra quando o n8n religar com o 360dialog.</small></div>';
+  var lpn=document.querySelector('.lp .nm'); if(lpn)lpn.textContent=l.n;
+  var lpa=document.querySelector('.lph .cav'); if(lpa)lpa.textContent=iniciais(l.n);
+  var lpp=document.querySelector('.lp .ph2'); if(lpp)lpp.textContent=l.t;
+  var sn=document.querySelector('.score .n'); if(sn)sn.innerHTML=l.sc+' <small>/100</small>';
+  var sf2=document.querySelector('.score .fl'); if(sf2)sf2.style.width=l.sc+'%';
+  var kvs=document.querySelectorAll('.lp .kv b');
+  if(kvs.length>=3){kvs[0].textContent=l.i;kvs[1].textContent='—';kvs[2].textContent=l.u;}
+  var idx=ETAPAS.map(function(e){return e[0];}).indexOf(l.e);
+  document.querySelectorAll('.jorn .et').forEach(function(e,ix){
+    e.classList.remove('done','now');
+    if(ix<idx)e.classList.add('done'); else if(ix===idx)e.classList.add('now');
+  });
 }
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
