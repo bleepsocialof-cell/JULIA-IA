@@ -2100,10 +2100,40 @@ function jVar(v){
   t.value=t.value.slice(0,p)+v+t.value.slice(p);
   jConta();jTab(document.querySelector('[data-t="jpPrompt"]'));t.focus();
 }
+var JC_ID=null;
+function jCarregar(){
+  fetch(SUPA_URL+'/rest/v1/julia_config?select=*&limit=1',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    if(!rows.length){console.warn('julia_config vazia');return;}
+    var c=rows[0]; JC_ID=c.id;
+    var ta=document.getElementById('jTa');
+    if(ta&&c.prompt_completo){ta.value=c.prompt_completo;if(typeof jConta==='function')jConta();}
+    if(c.tom_voz){var t=document.getElementById('jTom');
+      for(var i=0;i<t.options.length;i++)if(t.options[i].text.toLowerCase().indexOf(String(c.tom_voz).toLowerCase())>-1)t.selectedIndex=i;}
+    if(c.objetivo){var o=document.getElementById('jObj');
+      for(var j=0;j<o.options.length;j++)if(o.options[j].text.toLowerCase().indexOf(String(c.objetivo).toLowerCase().slice(0,8))>-1)o.selectedIndex=j;}
+    if(c.updated_at)document.getElementById('jUpd').textContent=supaTempo(c.updated_at);
+    console.log('julia_config carregada do Supabase');
+  }).catch(function(e){console.warn('julia_config indisponível',e);});
+}
+jCarregar();
 function jSalvar(){
-  var d=new Date();
-  document.getElementById('jUpd').textContent='hoje, '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-  alert('Prompt salvo ✓ (na versão conectada, grava no Supabase e o n8n usa na próxima resposta)');
+  var body={prompt_completo:document.getElementById('jTa').value,
+            tom_voz:document.getElementById('jTom').value.split(' — ')[0],
+            objetivo:document.getElementById('jObj').value,
+            updated_at:new Date().toISOString()};
+  var url=SUPA_URL+'/rest/v1/julia_config'+(JC_ID?('?id=eq.'+JC_ID):'?limit=1');
+  fetch(url,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify(body)})
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var d=new Date();
+    document.getElementById('jUpd').textContent='hoje, '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    alert('Prompt salvo no Supabase ✓ — o n8n usa na próxima resposta da Julia');
+  })
+  .catch(function(e){alert('Não consegui salvar no Supabase ('+e.message+'). Verifique a internet e tente de novo.');});
 }
 function jTestar(){
   var m=document.getElementById('jMsg'), c=document.getElementById('jChat');
