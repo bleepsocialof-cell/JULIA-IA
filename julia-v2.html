@@ -652,6 +652,47 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .pa-fat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 18px;font-size:12.5px;border-bottom:1px solid var(--line2);}
 .pa-fat:last-child{border-bottom:none;}
 .pa-fat b{font-family:'Sora';}
+/* ── VENDEDOR DE PLANTÃO (estilo WhatsApp) ── */
+#vPlantao{padding:0;height:100%;overflow:hidden;}
+#vPlantao.on{display:flex;}
+.pl-lista{width:320px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:#fbfaff;flex-shrink:0;}
+.pl-hd{padding:18px 16px 10px;}
+.pl-hd b{font-family:'Sora';font-size:15px;display:block;}
+.pl-hd small{font-size:11px;color:var(--sub);}
+.pl-filtros{padding:0 12px 10px;display:flex;gap:5px;flex-wrap:wrap;}
+.pl-busca{margin:0 12px 10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:12px;}
+.pl-busca input{border:none;outline:none;width:100%;font-size:12px;font-family:'Inter';}
+.pl-convs{flex:1;overflow:auto;}
+.pl-cv{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid #f2f0f8;align-items:center;cursor:pointer;}
+.pl-cv.on{background:#fff;box-shadow:inset 3px 0 0 #a855f7;}
+.pl-cav{width:40px;height:40px;border-radius:50%;background:#f2e8fd;color:#a855f7;display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:12px;flex-shrink:0;}
+.pl-cv .tx{flex:1;min-width:0;}
+.pl-cv .nm{font-family:'Sora';font-weight:700;font-size:12.5px;display:flex;justify-content:space-between;gap:6px;}
+.pl-cv .nm small{font-weight:600;color:var(--sub);font-size:10px;white-space:nowrap;}
+.pl-cv .pv2{font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.pl-tag{display:inline-block;font-size:8px;font-family:'Sora';font-weight:800;letter-spacing:.5px;border-radius:99px;padding:2px 8px;margin-top:4px;}
+.pl-tag.novo{background:#e8f7ef;color:#12b76a;}
+.pl-tag.eu{background:#fdf2ff;color:#c731df;}
+.pl-tag.jul{background:#eef4ff;color:#3b6fe0;}
+.pl-tag.outro{background:#f4f2f8;color:#6b6580;}
+.pl-chat{flex:1;display:flex;flex-direction:column;background:#f4f1fa;min-width:0;}
+.pl-chd{background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;gap:12px;}
+.pl-chd b{font-family:'Sora';font-size:13.5px;display:block;}
+.pl-chd small{font-size:10.5px;font-weight:600;color:var(--mut);}
+.pl-chd .acts2{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.pl-chd select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:11px;font-family:'Sora';font-weight:700;background:#fff;}
+.pl-dev{background:#fff;border:1.5px solid #161129;color:#161129;border-radius:9px;padding:8px 13px;font-family:'Sora';font-weight:700;font-size:10.5px;}
+.pl-msgs{flex:1;padding:18px 22px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+.pl-msgs .m{max-width:62%;}
+.m.eu2{background:#dff5e6;align-self:flex-end;border-bottom-right-radius:4px;color:var(--ink);}
+.m.eu2 .et2{display:block;font-size:7.5px;font-family:'Sora';font-weight:800;letter-spacing:.8px;margin-bottom:3px;color:#12b76a;}
+.pl-marco{align-self:center;background:#fdf2ff;border:1px solid #f0d5f7;color:#a12bc4;border-radius:99px;padding:5px 16px;font-size:9.5px;font-family:'Sora';font-weight:700;letter-spacing:.4px;}
+.pl-assumir{background:#fff;border-top:1px solid var(--line);padding:14px 18px;text-align:center;}
+.pl-assumir p{font-size:11.5px;color:var(--mut);margin-bottom:10px;}
+.pl-assumir button{background:var(--grad);color:#fff;border:none;border-radius:12px;padding:13px 26px;font-family:'Sora';font-weight:800;font-size:13px;box-shadow:0 10px 22px rgba(168,85,247,.35);}
+.pl-comp{background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center;}
+.pl-comp input{flex:1;border:1px solid var(--line);border-radius:99px;padding:11px 16px;font-size:12.5px;outline:none;font-family:'Inter';}
+.pl-comp .send2{width:42px;height:42px;border-radius:50%;background:var(--grad);color:#fff;border:none;font-size:15px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -665,6 +706,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   <nav class="nav">
     <div class="ni" data-v="vInicio" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</div>
     <div class="ni on" data-v="vConversas" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversas<span class="bd">20</span></div>
+    <div class="ni" data-v="vPlantao" id="niPlantao" style="display:none;" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Plantão</div>
     <div class="ni" data-v="vLeads" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="5" height="8" rx="1.5"/></svg>Leads</div>
     <div class="nd"></div>
     <div class="ni" data-v="vGestao" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Gestão de Leads</div>
@@ -1345,6 +1387,19 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
           <div class="cc-fl"><label>Link de acesso ao painel</label><input id="ccFLink" value="https://julia-ia-nine.vercel.app"/><small class="cc-hint">É este link + login + senha que o cliente recebe</small></div>
         </div>
 
+        <div class="cc-sec">VENDEDORES DE PLANTÃO · R$ 97/MÊS CADA</div>
+        <div id="ccVendList"><small class="cc-hint">Salve a conta primeiro — depois volte em Editar para adicionar vendedores.</small></div>
+        <div class="cc-gr" style="grid-template-columns:1fr 1fr;margin-top:10px;">
+          <div class="cc-fl"><label>Nome do vendedor</label><input id="vNome" placeholder="Ex.: Carlos Mota"/></div>
+          <div class="cc-fl"><label>E-mail de login</label><input id="vMail" placeholder="carlos@empresa.com.br"/></div>
+        </div>
+        <div class="cc-gr" style="grid-template-columns:1fr auto;align-items:end;">
+          <div class="cc-fl"><label>Senha</label>
+            <div class="cc-pw"><input id="vSenha" placeholder="••••••••"/><button class="ghost" style="padding:8px 12px;white-space:nowrap;" onclick="vGerar()">⚡ Gerar</button></div>
+          </div>
+          <button class="pillbtn" style="margin-bottom:12px;" onclick="ccAddVend()">+ Adicionar vendedor</button>
+        </div>
+
         <div class="cc-fbt">
           <button class="pillbtn" onclick="ccSalvar(false)">Salvar conta</button>
           <button class="pillbtn" style="background:#12b76a;box-shadow:0 8px 18px rgba(18,183,106,.3);" onclick="ccSalvar(true)">💬 Salvar + enviar acesso no WhatsApp</button>
@@ -1352,6 +1407,27 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
         </div>
       </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ VENDEDOR DE PLANTÃO ══ -->
+  <div class="view" id="vPlantao">
+    <div class="pl-lista">
+      <div class="pl-hd"><b id="plTit">Plantão 👋</b><small id="plSub">Conversas direcionadas</small></div>
+      <div class="pl-filtros" id="plFiltros"></div>
+      <div class="pl-busca">🔍 <input id="plBusca" placeholder="Buscar conversa…" oninput="plRender()" style="width:88%;"></div>
+      <div class="pl-convs" id="plConvs"></div>
+    </div>
+    <div class="pl-chat">
+      <div class="pl-chd" id="plChd" style="display:none;">
+        <div class="pl-cav" id="plAv" style="width:36px;height:36px;">?</div>
+        <div><b id="plNome">—</b><small id="plStatus">—</small></div>
+        <div class="acts2" id="plActs"></div>
+      </div>
+      <div class="pl-msgs" id="plMsgs">
+        <div class="vazio" style="height:100%;"><span class="ic">🎧</span><b>Plantão</b><small>Escolha uma conversa na lista ao lado.</small></div>
+      </div>
+      <div id="plFoot"></div>
     </div>
   </div>
 
@@ -1506,11 +1582,13 @@ function ccNovo(){ccEdit=-1;document.getElementById('ccFTit').textContent='Nova 
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value='';
   document.getElementById('ccFLink').value='https://julia-ia-nine.vercel.app';
   document.getElementById('ccFPlano').value='Start';document.getElementById('ccFSeats').value=0;document.getElementById('ccFSt').value='ativa';
-  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';}
+  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';
+  ccVendsCarregar(null);}
 function ccEditar(i){ccEdit=i;var c=CC[i];document.getElementById('ccFTit').textContent='Editar — '+c.emp;
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value=c[k]||'';
   document.getElementById('ccFPlano').value=c.plano;document.getElementById('ccFSeats').value=c.seats;document.getElementById('ccFSt').value=c.st;
-  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';}
+  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';
+  ccVendsCarregar(CC[i].id);}
 function ccVoltar(){document.getElementById('ccForm').style.display='none';document.getElementById('ccLista').style.display='flex';}
 function ccSalvar(enviar){
   var emp=document.getElementById('ccFEmp').value.trim(),resp=document.getElementById('ccFResp').value.trim();
@@ -1881,7 +1959,7 @@ function bootPainel(){
   try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
   EH_ADMIN=ADMIN_EMAILS.indexOf(email)>-1;
   if(EH_ADMIN){
-    carregarLeadsReais();dbCarregar();ccCarregar();jCarregar();
+    carregarLeadsReais();dbCarregar();ccCarregar();jCarregar();plCarregar();
     return;
   }
   var niAdm=document.querySelector('.ni[data-v="vClientes"]');
@@ -1912,7 +1990,7 @@ function bootCliente(email){
       console.warn('nenhuma conta encontrada para '+email+' — carregando vazio');
       CONTA_ID='00000000-0000-0000-0000-000000000000';
     }
-    carregarLeadsReais();dbCarregar();jCarregar();
+    carregarLeadsReais();dbCarregar();jCarregar();plCarregar();
   })
   .catch(function(e){console.warn('falha ao identificar a conta',e);carregarLeadsReais();dbCarregar();jCarregar();});
 }
@@ -1935,23 +2013,223 @@ function pintarPlanoCliente(plano){
   }).catch(function(){});
 }
 function modoVendedor(u){
-  CONTA_ID=u.conta_id; VENDEDOR_ID=u.id;
+  CONTA_ID=u.conta_id; VENDEDOR_ID=u.id; PL.nomeMe=u.nome||'Vendedor';
   window.PF_OVERRIDE=[String(u.nome||'Vendedor').split(' ')[0],String(u.nome||'').split(' ').slice(1).join(' ')];
   if(typeof perfilPintar==='function')perfilPintar();
   var ur=document.querySelector('.ur');
   if(ur)ur.innerHTML='Vendedor de Plantão · <span style="color:#a855f7;font-weight:700;">Editar perfil</span>';
   document.querySelectorAll('.ni').forEach(function(ni){
-    var v=ni.dataset.v;
-    if(v!=='vConversas'&&v!=='vAjuda')ni.style.display='none';
+    if(ni.dataset.v!=='vPlantao')ni.style.display='none';
   });
   document.querySelectorAll('.ngrp').forEach(function(g){g.style.display='none';});
   var cta=document.querySelector('.scta'); if(cta)cta.style.display='none';
-  carregarLeadsReais();
-  var niConv=document.querySelector('.ni[data-v="vConversas"]');
-  if(niConv)go(niConv);
+  var ni=document.getElementById('niPlantao'); if(ni){ni.style.display='';go(ni);}
+  plCarregar();
   console.log('modo Vendedor de Plantão: '+u.nome);
 }
 bootPainel();
+/* ── PLANTÃO (WhatsApp) ── */
+var PL={leads:[],vends:[],sel:-1,filtro:'todos',meu:null,nomeMe:''};
+function plCarregar(){
+  var qs='?select=*&order=created_at.desc&limit=200';
+  if(CONTA_ID)qs+='&conta_id=eq.'+CONTA_ID;
+  if(VENDEDOR_ID)qs+='&assumido_por=eq.'+VENDEDOR_ID;
+  var pLeads=fetch(SUPA_URL+'/rest/v1/leads'+qs,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
+  var qv='?select=id,nome,email&papel=eq.vendedor'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'');
+  var pVends=fetch(SUPA_URL+'/rest/v1/usuarios'+qv,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
+  Promise.all([pLeads,pVends]).then(function(res){
+    PL.leads=res[0]; PL.vends=res[1];
+    var ni=document.getElementById('niPlantao');
+    if(ni&&(EH_ADMIN||VENDEDOR_ID||PL.vends.length>0))ni.style.display='';
+    plRender();
+  });
+}
+function plVendNome(id){var v=PL.vends.filter(function(x){return x.id===id;})[0];return v?v.nome:'vendedor';}
+function plTag(l){
+  if(VENDEDOR_ID){return l.pausado?'<span class="pl-tag eu">✋ VOCÊ ATENDENDO</span>':'<span class="pl-tag novo">● NOVO PRA VOCÊ</span>';}
+  if(!l.assumido_por)return '<span class="pl-tag jul">🤖 COM A JULIA</span>';
+  return '<span class="pl-tag outro">COM '+ehtml(plVendNome(l.assumido_por)).toUpperCase()+'</span>';
+}
+function plRender(){
+  var f=document.getElementById('plFiltros');
+  if(f){
+    if(VENDEDOR_ID){f.innerHTML='';}
+    else{
+      var h='<span class="fp'+(PL.filtro==='todos'?' on':'')+'" onclick="PL.filtro=\'todos\';plRender()">Todos</span>'
+           +'<span class="fp'+(PL.filtro==='julia'?' on':'')+'" onclick="PL.filtro=\'julia\';plRender()">Com a Julia</span>';
+      PL.vends.forEach(function(v){h+='<span class="fp'+(PL.filtro===v.id?' on':'')+'" onclick="PL.filtro=\''+v.id+'\';plRender()">'+ehtml(v.nome.split(' ')[0])+'</span>';});
+      f.innerHTML=h;
+    }
+  }
+  var tit=document.getElementById('plTit'), sub=document.getElementById('plSub');
+  if(tit)tit.textContent=VENDEDOR_ID?('Meu plantão 👋'):'Plantão da equipe';
+  if(sub)sub.textContent=VENDEDOR_ID?'Conversas direcionadas pra você':(PL.vends.length+' vendedor(es) · direcione e acompanhe');
+  var box=document.getElementById('plConvs'); if(!box)return;
+  var q=(document.getElementById('plBusca').value||'').toLowerCase();
+  var ls=PL.leads.filter(function(l){
+    if(q&&String(l.nome||'').toLowerCase().indexOf(q)<0)return false;
+    if(VENDEDOR_ID)return true;
+    if(PL.filtro==='julia')return !l.assumido_por;
+    if(PL.filtro!=='todos')return l.assumido_por===PL.filtro;
+    return true;
+  });
+  if(!ls.length){
+    box.innerHTML='<div class="vazio"><span class="ic">💤</span><small>'+(VENDEDOR_ID?'Nenhum atendimento direcionado pra você ainda — o gestor envia por aqui.':'Nenhuma conversa neste filtro.')+'</small></div>';
+    return;
+  }
+  box.innerHTML=ls.map(function(l){
+    var ix=PL.leads.indexOf(l);
+    return '<div class="pl-cv'+(ix===PL.sel?' on':'')+'" onclick="plAbrir('+ix+')"><div class="pl-cav">'+iniciais(l.nome||'?')+'</div>'
+      +'<div class="tx"><div class="nm">'+ehtml(l.nome||'Sem nome')+' <small>'+supaTempo(l.updated_at||l.created_at)+'</small></div>'
+      +'<div class="pv2">'+ehtml(l.interesse||l.telefone||'')+'</div>'+plTag(l)+'</div></div>';
+  }).join('');
+}
+function plAbrir(ix){
+  PL.sel=ix; plRender();
+  var l=PL.leads[ix]; if(!l)return;
+  document.getElementById('plChd').style.display='flex';
+  document.getElementById('plAv').textContent=iniciais(l.nome||'?');
+  document.getElementById('plNome').textContent=l.nome||'Sem nome';
+  var st=document.getElementById('plStatus');
+  if(VENDEDOR_ID)st.innerHTML=l.pausado?'<span style="color:#c731df;">✋ você está atendendo · Julia pausada</span>':'direcionado pra você · assuma para responder';
+  else st.textContent=l.assumido_por?('com '+plVendNome(l.assumido_por)):'com a Julia';
+  /* ações do topo */
+  var acts=document.getElementById('plActs'), h='';
+  if(!VENDEDOR_ID){
+    if(PL.vends.length){
+      h+='<select id="plDirSel"><option value="">→ Direcionar para…</option>'+PL.vends.map(function(v){return '<option value="'+v.id+'">'+ehtml(v.nome)+'</option>';}).join('')+'</select>';
+      h+='<button class="pl-dev" onclick="plDirecionar()">Enviar</button>';
+    }
+    if(l.assumido_por)h+='<button class="pl-dev" onclick="plDevolver()">↩ Devolver pra Julia</button>';
+  }else{
+    h+='<button class="pl-dev" onclick="plDevolver()">↩ Devolver pra Julia</button>';
+  }
+  acts.innerHTML=h;
+  /* histórico */
+  var ms=document.getElementById('plMsgs');
+  ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando…</b></div>';
+  var tel=String(l.telefone||'').replace(/\D/g,'');
+  fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.asc&limit=200&telefone=like.*'+tel.slice(-8),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(msgs){
+    var h='',dia='';
+    msgs.forEach(function(m){
+      var d=m.criado_em?new Date(m.criado_em):null;
+      if(d){var dl=d.toLocaleDateString('pt-BR');if(dl!==dia){dia=dl;h+='<div class="dia">'+dl+'</div>';}}
+      var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
+      var p=String(m.papel||'').toLowerCase();
+      if(p==='vendedor'){h+='<div class="m eu2"><span class="et2">'+ehtml((m.nome||'VENDEDOR').toUpperCase())+'</span>'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+' ✓✓</div></div>';}
+      else{
+        var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
+        h+='<div class="m '+(cli?'cli':'ju')+'">'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+      }
+    });
+    if(!h)h='<div class="vazio" style="height:100%;"><span class="ic">💬</span><small>Sem mensagens ainda — o histórico enche quando o WhatsApp religar.</small></div>';
+    ms.innerHTML=h; ms.scrollTop=999999;
+  });
+  /* rodapé */
+  plFoot(l);
+}
+function plFoot(l){
+  var f=document.getElementById('plFoot');
+  if(VENDEDOR_ID&&!l.pausado){
+    f.innerHTML='<div class="pl-assumir"><p>A Julia está segurando a conversa. Quando você assumir, ela pausa e <b>o cliente fala com você</b> — pelo mesmo WhatsApp.</p><button onclick="plAssumir()">▶ Assumir atendimento</button></div>';
+  }else if(VENDEDOR_ID){
+    f.innerHTML='<div class="pl-comp"><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()">➤</button></div>';
+  }else{
+    f.innerHTML='';
+  }
+}
+function plPatch(l,body,ok){
+  fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);Object.keys(body).forEach(function(k){l[k]=body[k];});if(ok)ok();plRender();})
+  .catch(function(e){alert('Não consegui salvar ('+e.message+').');});
+}
+function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPatch(l,{pausado:true},function(){plAbrir(PL.sel);});}
+function plDevolver(){var l=PL.leads[PL.sel];if(!l)return;plPatch(l,{pausado:false,assumido_por:null},function(){plAbrir(PL.sel);});}
+function plDirecionar(){
+  var l=PL.leads[PL.sel];if(!l)return;
+  var sel=document.getElementById('plDirSel');
+  if(!sel||!sel.value){alert('Escolha o vendedor.');return;}
+  plPatch(l,{assumido_por:sel.value,pausado:false},function(){plAbrir(PL.sel);});
+}
+function plEnviar(){
+  var l=PL.leads[PL.sel];if(!l)return;
+  var i=document.getElementById('plIn'),t=i.value.trim();if(!t)return;
+  fetch(SUPA_URL+'/rest/v1/conversas',{method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({telefone:l.telefone,nome:PL.nomeMe||'Vendedor',mensagem:t,papel:'vendedor'})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    var ms=document.getElementById('plMsgs'),d=new Date();
+    ms.insertAdjacentHTML('beforeend','<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(t)+'<div class="mt">'+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ✓✓</div></div>');
+    ms.scrollTop=999999; i.value='';
+  })
+  .catch(function(e){alert('Não consegui enviar ('+e.message+'). O envio real pro WhatsApp entra com o n8n.');});
+}
+/* ── VENDEDORES NO CADASTRO DO CLIENTE ── */
+function vGerar(){
+  var ch='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#',s='';
+  for(var i=0;i<10;i++)s+=ch[Math.floor(Math.random()*ch.length)];
+  document.getElementById('vSenha').value=s;
+}
+function ccVendsCarregar(contaId){
+  var box=document.getElementById('ccVendList'); if(!box)return;
+  if(!contaId){box.innerHTML='<small class="cc-hint">Salve a conta primeiro — depois volte em Editar para adicionar vendedores.</small>';return;}
+  box.innerHTML='<small class="cc-hint">Carregando…</small>';
+  fetch(SUPA_URL+'/rest/v1/usuarios?select=id,nome,email&papel=eq.vendedor&conta_id=eq.'+contaId,
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(vs){
+    if(!vs.length){box.innerHTML='<small class="cc-hint">Nenhum vendedor ainda — adicione abaixo. A aba Plantão aparece pro cliente no 1º vendedor.</small>';return;}
+    box.innerHTML=vs.map(function(v){
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:11px;padding:10px 14px;margin-bottom:8px;font-size:12px;">'
+        +'<div><b style="font-family:Sora;">'+ehtml(v.nome)+'</b> <small style="color:var(--sub);">· '+ehtml(v.email)+'</small></div>'
+        +'<div><span class="cc-st at">● ATIVO</span> <button class="cc-ac-rm" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:700;font-family:Sora;color:#b42318;" onclick="ccRevVend(\''+v.id+'\',\''+contaId+'\')">Revogar</button></div></div>';
+    }).join('');
+  });
+}
+function ccAddVend(){
+  var contaId=(ccEdit>=0&&CC[ccEdit])?CC[ccEdit].id:null;
+  if(!contaId){alert('Salve a conta primeiro, depois volte em Editar para adicionar vendedores.');return;}
+  var nome=document.getElementById('vNome').value.trim(),
+      mail=document.getElementById('vMail').value.trim(),
+      senha=document.getElementById('vSenha').value.trim();
+  if(!nome||!mail||!senha){alert('Preencha nome, e-mail e senha (use ⚡ Gerar).');return;}
+  var token='';
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.token)token=s.token;}catch(e){}
+  if(!token){alert('Entre com seu login de administrador (Auth) para criar acessos.');return;}
+  fetch(SUPA_URL+'/functions/v1/criar-usuario',{method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({email:mail,senha:senha,nome:nome,conta_id:contaId})})
+  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
+  .then(function(x){
+    if(!x.ok)throw new Error(x.j.erro||'erro ao criar login');
+    /* marcar como vendedor */
+    return fetch(SUPA_URL+'/rest/v1/usuarios?email=eq.'+encodeURIComponent(mail)+'&conta_id=eq.'+contaId,
+      {method:'PATCH',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+       body:JSON.stringify({papel:'vendedor'})});
+  })
+  .then(function(r){
+    if(r&&!r.ok)throw new Error('login criado, mas falhou marcar como vendedor');
+    document.getElementById('vNome').value='';document.getElementById('vMail').value='';document.getElementById('vSenha').value='';
+    ccVendsCarregar(contaId);
+    var c=CC[ccEdit];
+    if(c&&c.zapDono&&confirm('Vendedor criado ✓ Enviar o acesso no WhatsApp do dono agora?')){
+      var msg='Acesso de Vendedor de Plantão criado! 🎧\n\n👤 '+nome+'\n🔗 '+c.link+'\n📧 Login: '+mail+'\n🔑 Senha: '+senha;
+      window.open('https://wa.me/'+String(c.zapDono).replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+    }else{alert('Vendedor criado ✓ — login: '+mail);}
+  })
+  .catch(function(e){alert('Falhou: '+e.message);});
+}
+function ccRevVend(id,contaId){
+  if(!confirm('Revogar este acesso? O vendedor não verá mais o plantão.'))return;
+  fetch(SUPA_URL+'/rest/v1/usuarios?id=eq.'+id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);ccVendsCarregar(contaId);})
+  .catch(function(e){alert('Não consegui revogar ('+e.message+').');});
+}
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
