@@ -725,6 +725,9 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 #bootVeil .bv-sp{width:26px;height:26px;border:3px solid rgba(255,255,255,.12);border-top-color:#a855f7;border-radius:50%;animation:bvspin .8s linear infinite;}
 #bootVeil small{color:#8f88a8;font-size:11px;font-family:'Sora';font-weight:600;letter-spacing:.6px;}
 @keyframes bvspin{to{transform:rotate(360deg);}}
+.pl-sel{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:11.5px;font-family:'Sora';font-weight:700;background:#fff;color:var(--ink);max-width:100%;cursor:pointer;outline:none;}
+.pl-sel:focus{border-color:#a855f7;}
+.pl-filtros{flex-direction:column;align-items:stretch;}
 </style>
 </head>
 <body>
@@ -2106,7 +2109,7 @@ function modoVendedor(u){
 })();
 bootPainel();
 /* ── PLANTÃO (WhatsApp) ── */
-var PL={leads:[],vends:[],sel:-1,filtro:'todos',meu:null,nomeMe:''};
+var PL={leads:[],vends:[],sel:-1,filtro:'todos',fConta:'todas',contas:[],meu:null,nomeMe:''};
 function plCarregar(){
   var qs='?select=*&order=created_at.desc&limit=200';
   if(CONTA_ID)qs+='&conta_id=eq.'+CONTA_ID;
@@ -2114,8 +2117,11 @@ function plCarregar(){
   var pLeads=fetch(SUPA_URL+'/rest/v1/leads'+qs,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
   var qv='?select=id,nome,email&papel=eq.vendedor'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'');
   var pVends=fetch(SUPA_URL+'/rest/v1/usuarios'+qv,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
-  Promise.all([pLeads,pVends]).then(function(res){
-    PL.leads=res[0]; PL.vends=res[1];
+  var pContas=EH_ADMIN
+    ? fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];})
+    : Promise.resolve([]);
+  Promise.all([pLeads,pVends,pContas]).then(function(res){
+    PL.leads=res[0]; PL.vends=res[1]; PL.contas=res[2]||[];
     var ni=document.getElementById('niPlantao');
     if(ni&&(EH_ADMIN||VENDEDOR_ID||PL.vends.length>0))ni.style.display='';
     plRender();plPlacar();
@@ -2159,20 +2165,31 @@ function plRender(){
   if(f){
     if(VENDEDOR_ID){f.innerHTML='';}
     else{
-      var h='<span class="fp'+(PL.filtro==='todos'?' on':'')+'" onclick="PL.filtro=\'todos\';plRender()">Todos</span>'
-           +'<span class="fp'+(PL.filtro==='julia'?' on':'')+'" onclick="PL.filtro=\'julia\';plRender()">Com a Julia</span>';
-      PL.vends.forEach(function(v){h+='<span class="fp'+(PL.filtro===v.id?' on':'')+'" onclick="PL.filtro=\''+v.id+'\';plRender()">'+ehtml(v.nome.split(' ')[0])+'</span>';});
+      var h='';
+      if(EH_ADMIN&&PL.contas.length){
+        h+='<select class="pl-sel" onchange="PL.fConta=this.value;PL.filtro=\'todos\';plRender();">';
+        h+='<option value="todas"'+(PL.fConta==='todas'?' selected':'')+'>\ud83c\udfe2 Todas as empresas</option>';
+        PL.contas.forEach(function(c){h+='<option value="'+c.id+'"'+(PL.fConta===c.id?' selected':'')+'>'+ehtml(c.empresa)+'</option>';});
+        h+='</select>';
+      }
+      var vends=PL.vends.filter(function(v){return PL.fConta==='todas'||v.conta_id===PL.fConta;});
+      h+='<select class="pl-sel" onchange="PL.filtro=this.value;plRender();">';
+      h+='<option value="todos"'+(PL.filtro==='todos'?' selected':'')+'>\ud83d\udc65 Todos os atendimentos</option>';
+      h+='<option value="julia"'+(PL.filtro==='julia'?' selected':'')+'>\ud83e\udd16 Com a Julia</option>';
+      vends.forEach(function(v){h+='<option value="'+v.id+'"'+(PL.filtro===v.id?' selected':'')+'>\ud83c\udfa7 '+ehtml(v.nome)+'</option>';});
+      h+='</select>';
       f.innerHTML=h;
     }
   }
   var tit=document.getElementById('plTit'), sub=document.getElementById('plSub');
   if(tit)tit.textContent=VENDEDOR_ID?('Meu plantão 👋'):'Plantão da equipe';
-  if(sub)sub.textContent=VENDEDOR_ID?'Conversas direcionadas pra você':(PL.vends.length+' vendedor(es) · direcione e acompanhe');
+  if(sub){var vv=PL.vends.filter(function(v){return PL.fConta==='todas'||v.conta_id===PL.fConta;}).length;sub.textContent=VENDEDOR_ID?'Conversas direcionadas pra você':(vv+' vendedor(es) no filtro · direcione e acompanhe');}
   var box=document.getElementById('plConvs'); if(!box)return;
   var q=(document.getElementById('plBusca').value||'').toLowerCase();
   var ls=PL.leads.filter(function(l){
     if(q&&String(l.nome||'').toLowerCase().indexOf(q)<0)return false;
     if(VENDEDOR_ID)return true;
+    if(EH_ADMIN&&PL.fConta!=='todas'&&l.conta_id!==PL.fConta)return false;
     if(PL.filtro==='julia')return !l.assumido_por;
     if(PL.filtro!=='todos')return l.assumido_por===PL.filtro;
     return true;
