@@ -703,6 +703,20 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .cc-vrow .vb.d{background:#161129;color:#fff;}
 .cc-vrow .vb.o{background:#fff;border:1.5px solid #161129;color:#161129;}
 .cc-vrow .vb.r{background:#fff;border:1.5px solid #fecdca;color:#b42318;}
+/* ── PLACAR DO PLANTÃO ── */
+#vPlantao{flex-direction:column;}
+.pl-corpo{display:flex;flex:1;min-height:0;}
+.plz{background:linear-gradient(120deg,#161129,#241a40);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.plz-av{width:42px;height:42px;border-radius:12px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:13px;flex-shrink:0;}
+.plz-oi b{font-family:'Sora';font-size:14.5px;display:block;}
+.plz-oi small{font-size:10.5px;color:#8f88a8;}
+.plz-fogo{background:rgba(232,67,147,.14);border:1px solid rgba(232,67,147,.3);border-radius:99px;padding:7px 14px;font-size:11px;font-family:'Sora';font-weight:700;}
+.plz-stats{display:flex;gap:10px;margin-left:auto;}
+.plz-s{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 14px;text-align:center;min-width:88px;}
+.plz-s b{font-family:'Sora';font-size:18px;display:block;}
+.plz-s small{font-size:8.5px;letter-spacing:.8px;font-family:'Sora';font-weight:700;color:#8f88a8;}
+.plz-s.hl b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.plz-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit;}
 </style>
 </head>
 <body>
@@ -1413,6 +1427,18 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 
   <!-- ══ VENDEDOR DE PLANTÃO ══ -->
   <div class="view" id="vPlantao">
+    <div class="plz" id="plzBar" style="display:none;">
+      <div class="plz-av" id="plzAv" onclick="perfilAbrir()" style="cursor:pointer;" title="Trocar foto">?</div>
+      <div class="plz-oi"><b id="plzOi">Bom dia! ☀️</b><small id="plzData">plantão ativo</small></div>
+      <span class="plz-fogo" id="plzFogo">☀️ pronto pro primeiro atendimento</span>
+      <div class="plz-stats">
+        <div class="plz-s hl"><b id="plzHoje">0</b><small>PRA VOCÊ HOJE</small></div>
+        <div class="plz-s"><b id="plzAtend">0</b><small>ATENDENDO</small></div>
+        <div class="plz-s"><b id="plzTotal">0</b><small>NO PLANTÃO</small></div>
+        <div class="plz-s"><b id="plzVisita">0</b><small>VISITA MARCADA</small></div>
+      </div>
+    </div>
+    <div class="pl-corpo">
     <div class="pl-lista">
       <div class="pl-hd"><b id="plTit">Plantão 👋</b><small id="plSub">Conversas direcionadas</small></div>
       <div class="pl-filtros" id="plFiltros"></div>
@@ -1429,6 +1455,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
         <div class="vazio" style="height:100%;"><span class="ic">🎧</span><b>Plantão</b><small>Escolha uma conversa na lista ao lado.</small></div>
       </div>
       <div id="plFoot"></div>
+    </div>
     </div>
   </div>
 
@@ -1793,7 +1820,7 @@ function pintarReal(){
   var hf=document.querySelectorAll('#vInicio .hf');
   if(hf.length>=3){
     function sethf(el,num,pct,txt){
-      var N=el.querySelector('.gn'),C=el.querySelector('.c'),F=el.querySelector('.fl');
+      var N=el.querySelector('.n'),C=el.querySelector('.c'),F=el.querySelector('.fl');
       if(N)N.textContent=num; if(C)C.innerHTML='<b>'+pct+'%</b> '+txt; if(F)F.style.width=Math.max(2,pct)+'%';
     }
     sethf(hf[0],gn,100,'do período');
@@ -1828,7 +1855,7 @@ function pintarReal(){
     prio.forEach(function(l){
       var tr=document.createElement('tr');
       tr.onclick=function(){goTo('vConversas');};
-      tr.innerHTML='<td><div class="who"><div class="wav">'+iniciais(l.gn)+'</div>'+ehtml(l.gn)+'</div></td><td>'+ehtml(l.i)+'</td><td><span class="pl pq">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1]+'</span></td><td>'+l.u+'</td>';
+      tr.innerHTML='<td><div class="who"><div class="wav">'+iniciais(l.n)+'</div>'+ehtml(l.n)+'</div></td><td>'+ehtml(l.i)+'</td><td><span class="pl pq">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1]+'</span></td><td>'+l.u+'</td>';
       pt.appendChild(tr);
     });
   }
@@ -1926,8 +1953,8 @@ function perfilPintar(){
   var d=perfilDados(), foto=null;
   try{foto=localStorage.getItem('perfil_foto');}catch(e){}
   var ini=(d.nome[0]||'')+(d.sobre[0]||'');
-  var top=document.getElementById('pfTopAv'), md=document.getElementById('pfAv');
-  [top,md].forEach(function(el){if(!el)return;el.innerHTML=foto?'<img src="'+foto+'">':ini.toUpperCase();});
+  var top=document.getElementById('pfTopAv'), md=document.getElementById('pfAv'), plz=document.getElementById('plzAv');
+  [top,md,plz].forEach(function(el){if(!el)return;el.innerHTML=foto?'<img src="'+foto+'">':ini.toUpperCase();});
   var tn=document.getElementById('pfTopNome'); if(tn)tn.textContent=d.nome+' '+d.sobre;
   var n=document.getElementById('pfNome'), s=document.getElementById('pfSobre');
   if(n)n.value=d.nome; if(s)s.value=d.sobre;
@@ -2072,8 +2099,34 @@ function plCarregar(){
     PL.leads=res[0]; PL.vends=res[1];
     var ni=document.getElementById('niPlantao');
     if(ni&&(EH_ADMIN||VENDEDOR_ID||PL.vends.length>0))ni.style.display='';
-    plRender();
+    plRender();plPlacar();
   });
+}
+function plPlacar(){
+  if(!VENDEDOR_ID)return;
+  var bar=document.getElementById('plzBar'); if(!bar)return;
+  bar.style.display='flex';
+  if(typeof perfilPintar==='function')perfilPintar();
+  var h=new Date().getHours();
+  var oi=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite');
+  var nome=String(PL.nomeMe||'').split(' ')[0]||'Plantão';
+  document.getElementById('plzOi').textContent=oi+', '+nome+'! '+(h<18?'☀️':'🌙');
+  var dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  var d=new Date();
+  document.getElementById('plzData').textContent=dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' · plantão ativo';
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var novosHoje=PL.leads.filter(function(l){var t=new Date(l.updated_at||l.created_at);return t>=hoje;}).length;
+  var atendendo=PL.leads.filter(function(l){return l.pausado;}).length;
+  var visitas=PL.leads.filter(function(l){return String(l.etapa||'')==='agendamento';}).length;
+  document.getElementById('plzHoje').textContent=novosHoje;
+  document.getElementById('plzAtend').textContent=atendendo;
+  document.getElementById('plzTotal').textContent=PL.leads.length;
+  document.getElementById('plzVisita').textContent=visitas;
+  var fogo=document.getElementById('plzFogo');
+  if(atendendo>0)fogo.textContent='🔥 '+atendendo+' atendimento'+(atendendo>1?'s':'')+' rolando agora';
+  else if(novosHoje>0)fogo.textContent='⚡ '+novosHoje+' novo'+(novosHoje>1?'s':'')+' esperando você';
+  else fogo.textContent='☀️ pronto pro primeiro atendimento';
 }
 function plVendNome(id){var v=PL.vends.filter(function(x){return x.id===id;})[0];return v?v.nome:'vendedor';}
 function plTag(l){
@@ -2176,7 +2229,7 @@ function plPatch(l,body,ok){
   fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
     body:JSON.stringify(body)})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);Object.keys(body).forEach(function(k){l[k]=body[k];});if(ok)ok();plRender();})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);Object.keys(body).forEach(function(k){l[k]=body[k];});if(ok)ok();plRender();plPlacar();})
   .catch(function(e){alert('Não consegui salvar ('+e.message+').');});
 }
 function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPatch(l,{pausado:true},function(){plAbrir(PL.sel);});}
