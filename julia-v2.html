@@ -1354,7 +1354,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     <div id="ccForm" style="display:none;">
       <div class="cc-scroll">
       <div class="cc-form">
-        <h2 id="ccFTit">Nova conta de cliente</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><h2 id="ccFTit" style="margin-bottom:0;">Nova conta de cliente</h2><button class="ghost" onclick="ccVoltar()">&#8592; Voltar</button></div>
 
         <div class="cc-sec">DADOS DA EMPRESA</div>
         <div class="cc-gr">
@@ -1389,7 +1389,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 
         <div class="cc-sec">VENDEDORES DE PLANTÃO · R$ 97/MÊS CADA</div>
         <div id="ccVendList"><small class="cc-hint">Salve a conta primeiro — depois volte em Editar para adicionar vendedores.</small></div>
-        <div class="cc-gr" style="grid-template-columns:1fr 1fr;margin-top:10px;">
+        <div id="ccVendForm" style="display:none;"><div class="cc-gr" style="grid-template-columns:1fr 1fr;margin-top:10px;">
           <div class="cc-fl"><label>Nome do vendedor</label><input id="vNome" placeholder="Ex.: Carlos Mota"/></div>
           <div class="cc-fl"><label>E-mail de login</label><input id="vMail" placeholder="carlos@empresa.com.br"/></div>
         </div>
@@ -1398,7 +1398,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
             <div class="cc-pw"><input id="vSenha" placeholder="••••••••"/><button class="ghost" style="padding:8px 12px;white-space:nowrap;" onclick="vGerar()">⚡ Gerar</button></div>
           </div>
           <button class="pillbtn" style="margin-bottom:12px;" onclick="ccAddVend()">+ Adicionar vendedor</button>
-        </div>
+        </div></div>
 
         <div class="cc-fbt">
           <button class="pillbtn" onclick="ccSalvar(false)">Salvar conta</button>
@@ -1616,14 +1616,19 @@ function ccSalvar(enviar){
       plano:(CC_PLANOS[s.plano]?s.plano:'Start'),seats:s.acessos_extras||0,st:s.status||'ativa'};
     var novaConta=(ccEdit<0);
     if(ccEdit<0)CC.push(o);else CC[ccEdit]=o;
-    ccVoltar();ccRender();
+    ccRender();
+    if(!novaConta)ccVoltar();
     function enviarZap(){
       if(!enviar)return;
       if(!o.zapDono){alert('Conta salva! Mas sem o WhatsApp do dono não dá pra enviar o acesso.');return;}
       window.open(ccWa(o),'_blank');
     }
     if(novaConta){
-      criarLoginCliente(o).then(function(msg){if(msg)alert(msg);enviarZap();});
+      criarLoginCliente(o).then(function(msg){
+        if(msg)alert(msg+'\n\nA conta reabriu em modo edicao: role ate VENDEDORES DE PLANTAO para adicionar acessos.');
+        ccEditar(CC.indexOf(o));
+        enviarZap();
+      });
     }else{enviarZap();}
   })
   .catch(function(e){alert('Não consegui salvar a conta ('+e.message+').');});
@@ -2177,6 +2182,7 @@ function vGerar(){
 }
 function ccVendsCarregar(contaId){
   var box=document.getElementById('ccVendList'); if(!box)return;
+  var vf=document.getElementById('ccVendForm'); if(vf)vf.style.display=contaId?'block':'none';
   if(!contaId){box.innerHTML='<small class="cc-hint">Salve a conta primeiro — depois volte em Editar para adicionar vendedores.</small>';return;}
   box.innerHTML='<small class="cc-hint">Carregando…</small>';
   fetch(SUPA_URL+'/rest/v1/usuarios?select=id,nome,email&papel=eq.vendedor&conta_id=eq.'+contaId,
