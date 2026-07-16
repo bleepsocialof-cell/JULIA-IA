@@ -721,12 +721,10 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     </div>
     <div class="card hot">
       <div class="h3">Prioridades de agora</div><div class="hsub">Leads que merecem a atenção do seu time</div>
-      <table>
+      <table id="prioTab">
         <tr><th>Lead</th><th>Interesse</th><th>Situação</th><th>Última interação</th></tr>
-        <tr onclick="goTo('vConversas')"><td><div class="who"><div class="wav">JP</div>João Pereira</div></td><td>Apto até R$ 350 mil · Boa Viagem</td><td><span class="pl ph">Quente</span></td><td>há 4 min</td></tr>
-        <tr onclick="goTo('vConversas')"><td><div class="who"><div class="wav">ER</div>Elza Ramos</div></td><td>Casa 3 quartos · Casa Forte</td><td><span class="pl pa">Visita agendada</span></td><td>há 12 min</td></tr>
-        <tr onclick="goTo('vConversas')"><td><div class="who"><div class="wav">CM</div>Cesar Moreno</div></td><td>Terreno · Aldeia</td><td><span class="pl pq">Qualificado</span></td><td>há 31 min</td></tr>
       </table>
+      <div class="vazio" id="prioVazio" style="padding:24px;"><span class="ic">✨</span><small>Os leads prioritários aparecem aqui quando a Julia começar a atender.</small></div>
     </div>
   </div>
 
@@ -1234,9 +1232,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       <div class="cf-card">
         <h3>Notificações</h3>
         <div class="sb">Escolha o que você quer ser avisado</div>
-        <div class="cf-row"><div><b>Novo lead recebido</b><small>Avisa quando a Julia captar um novo lead</small></div><input type="checkbox" class="sw" checked/></div>
         <div class="cf-row"><div><b>Reunião confirmada</b><small>Avisa quando um cliente agendar reunião</small></div><input type="checkbox" class="sw" checked/></div>
-        <div class="cf-row"><div><b>Lead qualificado</b><small>Avisa quando um lead atingir a qualificação</small></div><input type="checkbox" class="sw" checked/></div>
         <div class="cf-row"><div><b>Resumo diário</b><small>Um resumo das conversas e leads do dia</small></div><input type="checkbox" class="sw"/></div>
         <div class="cf-fl" style="margin:12px 0 0;"><label>Onde receber</label>
           <select id="cfCanal"><option>WhatsApp do responsável (a Julia avisa você)</option><option>E-mail</option><option>WhatsApp + E-mail</option></select>
@@ -1252,7 +1248,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
           <small class="cc-hint">Fora do horário, a Julia avisa que responde no próximo expediente e guarda o lead (configurado no fluxo)</small>
         </div>
         <div class="cf-fl"><label>Fuso horário</label>
-          <select id="cfFuso"><option>Recife / Brasília (UTC-3)</option><option>Manaus (UTC-4)</option><option>Fernando de Noronha (UTC-2)</option><option>Rio Branco (UTC-5)</option></select>
+          <select id="cfFuso"><option>Recife / Brasília (UTC-3)</option></select>
         </div>
         <div class="cf-row" style="border-bottom:none;padding-bottom:0;"><div><b>Pausar a Julia</b><small>Quando ligado, a Julia para de responder automaticamente</small></div><input type="checkbox" class="sw" id="cfPausa" onchange="cfPausar(this)"/></div>
       </div>
@@ -1472,6 +1468,12 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
           <p>Adicionado na hora à sua conta. Não expira enquanto o plano estiver ativo.</p>
           <button class="pc-btn g" onclick="alert('Pacote +200 conversas — entra com o gateway de pagamento')">Comprar agora</button>
         </div>
+      </div>
+
+      <div class="pc-sec">Pagamentos</div>
+      <div class="pc-sub">Boletos, Pix e cartão — suas prestações e comprovantes</div>
+      <div class="pc-det" id="pcFaturas">
+        <div class="rw"><span style="width:100%;text-align:center;padding:10px 0;">Nenhuma fatura ainda — quando o pagamento for ativado, seus boletos e links Pix aparecem aqui para pagar e acompanhar.</span></div>
       </div>
 
       <div class="pc-sec">Detalhes da cobrança</div>
@@ -1740,7 +1742,7 @@ function supaTempo(ts){
   return 'há '+Math.floor(d/1440)+' dias';
 }
 function carregarLeadsReais(){
-  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),
+  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'')+(VENDEDOR_ID?('&assumido_por=eq.'+VENDEDOR_ID):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1828,6 +1830,39 @@ function pintarReal(){
     acs[0].textContent=GL.filter(function(l){return l.e==='qualificacao';}).length+' leads qualificados';
     acs[1].textContent=GL.filter(function(l){return l.e==='agendamento';}).length+' visitas agendadas';
     acs[2].textContent=GL.filter(function(l){return l.e==='documentacao';}).length+' documentações em andamento';
+  }
+  /* — Prioridades do Início — */
+  var pt=document.getElementById('prioTab'), pv=document.getElementById('prioVazio');
+  if(pt){
+    pt.querySelectorAll('tr:not(:first-child)').forEach(function(tr){tr.remove();});
+    var prio=GL.filter(function(l){return l.e!=='descartado'&&l.e!=='crm';}).slice(0,5);
+    if(pv)pv.style.display=prio.length?'none':'flex';
+    prio.forEach(function(l){
+      var tr=document.createElement('tr');
+      tr.onclick=function(){goTo('vConversas');};
+      tr.innerHTML='<td><div class="who"><div class="wav">'+iniciais(l.n)+'</div>'+ehtml(l.n)+'</div></td><td>'+ehtml(l.i)+'</td><td><span class="pl pq">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1]+'</span></td><td>'+l.u+'</td>';
+      pt.appendChild(tr);
+    });
+  }
+  /* — Relatórios 100% reais (mata os números fabricados) — */
+  var rs=document.querySelector('#vRelatorios .r-scroll');
+  if(rs){
+    var q2=GL.filter(function(l){return l.e==='qualificacao';}).length;
+    var ag=GL.filter(function(l){return l.e==='agendamento';}).length;
+    var cr=GL.filter(function(l){return l.e==='crm';}).length;
+    function linha(nome,qtd){return '<div class="rw" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line2);font-size:12.5px;"><span style="color:var(--mut);">'+nome+'</span><b>'+qtd+'</b></div>';}
+    rs.innerHTML=
+      '<div class="pc-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">'
+      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">LEADS</small><div class="pc-price">'+n+'</div></div>'
+      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">QUALIFICADOS</small><div class="pc-price">'+q2+'</div></div>'
+      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">AGENDAMENTOS</small><div class="pc-price">'+ag+'</div></div>'
+      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">ENVIADOS AO CRM</small><div class="pc-price">'+cr+'</div></div>'
+      +'</div>'
+      +'<div class="cf-card"><h3>Funil do período</h3><div class="sb">Contagem real por etapa</div>'
+      +ETAPAS.map(function(e){return linha(e[1],GL.filter(function(l){return l.e===e[0];}).length);}).join('')
+      +'</div>'
+      +(n===0?'<div class="vazio"><span class="ic">📊</span><b>Sem dados ainda</b><small>Os relatórios completos (gráficos, canais, horários de pico) enchem quando a Julia começar a atender pelo WhatsApp.</small></div>'
+             :'<div class="cf-card" style="margin-top:14px;"><div class="sb" style="margin:0;">Gráficos por dia, canais e horários de pico entram junto com o histórico do n8n.</div></div>');
   }
   /* — Kanban real — */
   var kb=document.querySelector('.kb');
@@ -1950,19 +1985,29 @@ function criarLoginCliente(o){
 /* ── BOOT MULTI-TENANT: quem entrou decide o que carrega ── */
 var ADMIN_EMAILS=['jul.ia@bleesocial.com.br','admin@julia.com'];
 var CONTA_ID=null, EH_ADMIN=false;
+var VENDEDOR_ID=null;
 function bootPainel(){
   var email='';
   try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
   EH_ADMIN=ADMIN_EMAILS.indexOf(email)>-1;
   if(EH_ADMIN){
-    carregarLeadsReais();dbCarregar();ccCarregar();
+    carregarLeadsReais();dbCarregar();ccCarregar();jCarregar();
     return;
   }
-  /* cliente: esconder área ADMIN */
   var niAdm=document.querySelector('.ni[data-v="vClientes"]');
   if(niAdm)niAdm.style.display='none';
-  /* descobrir a conta do cliente pelo e-mail de login */
-  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa,responsavel&email_login=eq.'+encodeURIComponent(email),
+  fetch(SUPA_URL+'/rest/v1/usuarios?select=id,conta_id,papel,nome&email=eq.'+encodeURIComponent(email),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(us){
+    var u=us[0];
+    if(u&&String(u.papel).toLowerCase()==='vendedor'){modoVendedor(u);return;}
+    bootCliente(email);
+  })
+  .catch(function(){bootCliente(email);});
+}
+function bootCliente(email){
+  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa,responsavel,plano&email_login=eq.'+encodeURIComponent(email),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1971,14 +2016,61 @@ function bootPainel(){
       var partes=String(rows[0].responsavel||rows[0].empresa||'Cliente').split(' ');
       window.PF_OVERRIDE=[partes[0],partes.slice(1).join(' ')||''];
       if(typeof perfilPintar==='function')perfilPintar();
+      pintarPlanoCliente(rows[0].plano||'Start');
       console.log('conta do cliente: '+rows[0].empresa+' ('+CONTA_ID+')');
     }else{
       console.warn('nenhuma conta encontrada para '+email+' — carregando vazio');
       CONTA_ID='00000000-0000-0000-0000-000000000000';
     }
-    carregarLeadsReais();dbCarregar();
+    carregarLeadsReais();dbCarregar();jCarregar();
   })
-  .catch(function(e){console.warn('falha ao identificar a conta',e);carregarLeadsReais();dbCarregar();});
+  .catch(function(e){console.warn('falha ao identificar a conta',e);carregarLeadsReais();dbCarregar();jCarregar();});
+}
+var COMERCIAL_ZAP='5581999331884';
+function pintarPlanoCliente(plano){
+  var precos={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
+  var hn=document.getElementById('pcHeroNome'), hp=document.getElementById('pcHeroPreco');
+  if(hn)hn.textContent=plano;
+  if(hp)hp.textContent=(precos[plano]||'')+(plano==='Customizado'?'':'/mês');
+  document.querySelectorAll('#vPlano .pc-card').forEach(function(card){
+    var h3=card.querySelector('h3'); if(!h3)return;
+    var nome=h3.textContent.trim(), tag=card.querySelector('.pc-tag'), bt=card.querySelector('.pc-btn');
+    card.classList.remove('cur');
+    if(nome===plano){
+      card.classList.add('cur');
+      if(tag){tag.textContent='SEU PLANO';tag.className='pc-tag a';}
+      if(bt){bt.textContent='Plano atual';bt.className='pc-btn soft';bt.onclick=null;}
+    }else if(bt){
+      bt.onclick=function(){window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent('Olá! Quero mudar meu plano da Jul.ia para o '+nome+'. Pode me passar as condições?'),'_blank');};
+    }
+  });
+  window.pcSeatBuy=function(){
+    window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent('Olá! Quero contratar '+pcSeats+' acesso(s) de Vendedor de Plantão ('+pcFmt(pcSeats*97)+'/mês) na minha conta Jul.ia. Como faço o pagamento?'),'_blank');
+  };
+  document.querySelectorAll('#vPlano .pc-sec').forEach(function(sec){
+    if(sec.textContent.indexOf('conversas extras')>-1){
+      sec.style.display='none';
+      var nx=sec.nextElementSibling; if(nx&&nx.classList.contains('pc-sub')){nx.style.display='none';nx=nx.nextElementSibling;}
+      if(nx&&nx.classList.contains('pc-add'))nx.style.display='none';
+    }
+  });
+}
+function modoVendedor(u){
+  CONTA_ID=u.conta_id; VENDEDOR_ID=u.id;
+  window.PF_OVERRIDE=[String(u.nome||'Vendedor').split(' ')[0],String(u.nome||'').split(' ').slice(1).join(' ')];
+  if(typeof perfilPintar==='function')perfilPintar();
+  var ur=document.querySelector('.ur');
+  if(ur)ur.innerHTML='Vendedor de Plantão · <span style="color:#a855f7;font-weight:700;">Editar perfil</span>';
+  document.querySelectorAll('.ni').forEach(function(ni){
+    var v=ni.dataset.v;
+    if(v!=='vConversas'&&v!=='vAjuda')ni.style.display='none';
+  });
+  document.querySelectorAll('.ngrp').forEach(function(g){g.style.display='none';});
+  var cta=document.querySelector('.scta'); if(cta)cta.style.display='none';
+  carregarLeadsReais();
+  var niConv=document.querySelector('.ni[data-v="vConversas"]');
+  if(niConv)go(niConv);
+  console.log('modo Vendedor de Plantão: '+u.nome);
 }
 bootPainel();
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
@@ -2255,7 +2347,7 @@ function jVar(v){
 }
 var JC_ID=null;
 function jCarregar(){
-  fetch(SUPA_URL+'/rest/v1/julia_config?select=*&limit=1',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  fetch(SUPA_URL+'/rest/v1/julia_config?select=*&limit=1'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
     if(!rows.length){console.warn('julia_config vazia');return;}
@@ -2270,14 +2362,14 @@ function jCarregar(){
     console.log('julia_config carregada do Supabase');
   }).catch(function(e){console.warn('julia_config indisponível',e);});
 }
-jCarregar();
 function jSalvar(){
   var body={prompt_completo:document.getElementById('jTa').value,
             tom_voz:document.getElementById('jTom').value.split(' — ')[0],
             objetivo:document.getElementById('jObj').value,
             updated_at:new Date().toISOString()};
-  var url=SUPA_URL+'/rest/v1/julia_config'+(JC_ID?('?id=eq.'+JC_ID):'?limit=1');
-  fetch(url,{method:'PATCH',
+  if(!JC_ID)body.conta_id=CONTA_ID;
+  var url=SUPA_URL+'/rest/v1/julia_config'+(JC_ID?('?id=eq.'+JC_ID):'');
+  fetch(url,{method:JC_ID?'PATCH':'POST',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},
     body:JSON.stringify(body)})
   .then(function(r){
@@ -2304,8 +2396,7 @@ function jTestar(){
 jConta();
 
 /* ══ INTEGRAÇÕES ══ */
-var NK=[{nome:'Site institucional',key:'jul_live_'+Math.random().toString(36).slice(2,18),criada:'19/06/2026'},
-        {nome:'Zapier · automações',key:'jul_live_'+Math.random().toString(36).slice(2,18),criada:'02/07/2026'}];
+var NK=[];
 function nkRender(){
   var b=document.getElementById('nkBody');b.innerHTML='';
   NK.forEach(function(k,i){
