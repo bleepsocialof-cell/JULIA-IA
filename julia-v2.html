@@ -2115,7 +2115,7 @@ function plCarregar(){
   if(CONTA_ID)qs+='&conta_id=eq.'+CONTA_ID;
   if(VENDEDOR_ID)qs+='&assumido_por=eq.'+VENDEDOR_ID;
   var pLeads=fetch(SUPA_URL+'/rest/v1/leads'+qs,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
-  var qv='?select=id,nome,email&papel=eq.vendedor'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'');
+  var qv='?select=id,nome,email,conta_id&papel=eq.vendedor'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'');
   var pVends=fetch(SUPA_URL+'/rest/v1/usuarios'+qv,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];});
   var pContas=EH_ADMIN
     ? fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];})
