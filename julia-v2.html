@@ -695,6 +695,14 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .pl-comp .send2{width:42px;height:42px;border-radius:50%;background:var(--grad);color:#fff;border:none;font-size:15px;flex-shrink:0;}
 #ccForm{flex-direction:column;flex:1;min-height:0;}
 #ccForm .cc-scroll{flex:1;overflow:auto;min-height:0;padding-bottom:24px;}
+/* ── NAVY PREMIUM: Contas de Clientes ── */
+.cc-sec{background:#161129!important;border-color:#161129!important;color:#cfcadd!important;letter-spacing:1.6px!important;}
+.cc-ac button.pr{border-color:#161129;color:#161129;}
+.cc-vrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:#faf9fd;border-radius:12px;padding:11px 14px;margin-bottom:8px;font-size:12px;}
+.cc-vrow .vb{border:none;border-radius:8px;padding:6px 11px;font-family:'Sora';font-weight:700;font-size:10px;cursor:pointer;}
+.cc-vrow .vb.d{background:#161129;color:#fff;}
+.cc-vrow .vb.o{background:#fff;border:1.5px solid #161129;color:#161129;}
+.cc-vrow .vb.r{background:#fff;border:1.5px solid #fecdca;color:#b42318;}
 </style>
 </head>
 <body>
@@ -1325,7 +1333,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   <div class="view" id="vClientes">
     <div class="g-top">
       <div><h1>Contas de Clientes<span class="cc-admin">⬥ SÓ VOCÊ VÊ</span></h1><p>Clientes da plataforma Jul.ia — cada conta tem painel, número e Julia próprios</p></div>
-      <button class="pillbtn" onclick="ccNovo()">+ Nova conta</button>
+      <button class="pa-grad" onclick="ccNovo()">+ Nova conta</button>
     </div>
 
     <div id="ccLista" style="display:flex;flex-direction:column;flex:1;min-height:0;">
@@ -2200,11 +2208,34 @@ function ccVendsCarregar(contaId){
   .then(function(vs){
     if(!vs.length){box.innerHTML='<small class="cc-hint">Nenhum vendedor ainda — adicione abaixo. A aba Plantão aparece pro cliente no 1º vendedor.</small>';return;}
     box.innerHTML=vs.map(function(v){
-      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:11px;padding:10px 14px;margin-bottom:8px;font-size:12px;">'
+      return '<div class="cc-vrow">'
         +'<div><b style="font-family:Sora;">'+ehtml(v.nome)+'</b> <small style="color:var(--sub);">· '+ehtml(v.email)+'</small></div>'
-        +'<div><span class="cc-st at">● ATIVO</span> <button class="cc-ac-rm" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:700;font-family:Sora;color:#b42318;" onclick="ccRevVend(\''+v.id+'\',\''+contaId+'\')">Revogar</button></div></div>';
+        +'<div style="display:flex;gap:6px;align-items:center;"><span class="cc-st at">● ATIVO</span>'
+        +'<button class="vb d" onclick="ccVendAcesso(\''+v.id+'\',\''+contaId+'\')">📤 Acesso</button>'
+        +'<button class="vb o" onclick="ccVendRenomear(\''+v.id+'\',\''+contaId+'\')">✏️ Renomear</button>'
+        +'<button class="vb r" onclick="ccRevVend(\''+v.id+'\',\''+contaId+'\')">Revogar</button></div></div>';
     }).join('');
   });
+}
+function ccVendAcesso(id,contaId){
+  fetch(SUPA_URL+'/rest/v1/usuarios?id=eq.'+id+'&select=nome,email,senha_provisoria',
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(vs){
+    var v=vs[0]; if(!v){alert('Vendedor não encontrado.');return;}
+    var c=CC[ccEdit]||{};
+    var msg='Acesso de Vendedor de Plantão 🎧\n\n👤 '+v.nome+'\n🔗 '+(c.link||'https://julia-ia-nine.vercel.app')+'\n📧 Login: '+v.email+'\n🔑 Senha: '+(v.senha_provisoria||'(defina uma nova — senha não registrada)');
+    if(c.zapDono){window.open('https://wa.me/'+String(c.zapDono).replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');}
+    else{navigator.clipboard&&navigator.clipboard.writeText(msg);alert('Sem WhatsApp do dono na conta — credenciais copiadas:\n\n'+msg);}
+  });
+}
+function ccVendRenomear(id,contaId){
+  var novo=prompt('Novo nome do vendedor:'); if(!novo)return;
+  fetch(SUPA_URL+'/rest/v1/usuarios?id=eq.'+id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({nome:novo.trim()})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);ccVendsCarregar(contaId);})
+  .catch(function(e){alert('Falhou: '+e.message);});
 }
 function ccAddVend(){
   var contaId=(ccEdit>=0&&CC[ccEdit])?CC[ccEdit].id:null;
@@ -2229,7 +2260,7 @@ function ccAddVend(){
     /* marcar como vendedor */
     return fetch(SUPA_URL+'/rest/v1/usuarios?email=eq.'+encodeURIComponent(mail)+'&conta_id=eq.'+contaId,
       {method:'PATCH',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-       body:JSON.stringify({papel:'vendedor'})});
+       body:JSON.stringify({papel:'vendedor',senha_provisoria:senha})});
   })
   .then(function(r){
     if(r&&!r.ok)throw new Error('login criado, mas falhou marcar como vendedor');
