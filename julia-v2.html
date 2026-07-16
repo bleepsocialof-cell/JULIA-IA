@@ -693,6 +693,8 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .pl-comp{background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center;}
 .pl-comp input{flex:1;border:1px solid var(--line);border-radius:99px;padding:11px 16px;font-size:12.5px;outline:none;font-family:'Inter';}
 .pl-comp .send2{width:42px;height:42px;border-radius:50%;background:var(--grad);color:#fff;border:none;font-size:15px;flex-shrink:0;}
+#ccForm{flex-direction:column;flex:1;min-height:0;}
+#ccForm .cc-scroll{flex:1;overflow:auto;min-height:0;padding-bottom:24px;}
 </style>
 </head>
 <body>
@@ -704,8 +706,8 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     <small style="display:block;font-size:9px;color:rgba(255,255,255,.38);margin-top:6px;letter-spacing:.4px;">PLATAFORMA DE VENDAS</small>
   </div>
   <nav class="nav">
-    <div class="ni" data-v="vInicio" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</div>
-    <div class="ni on" data-v="vConversas" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversas<span class="bd">20</span></div>
+    <div class="ni on" data-v="vInicio" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</div>
+    <div class="ni" data-v="vConversas" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversas<span class="bd">20</span></div>
     <div class="ni" data-v="vPlantao" id="niPlantao" style="display:none;" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Plantão</div>
     <div class="ni" data-v="vLeads" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="5" height="8" rx="1.5"/></svg>Leads</div>
     <div class="nd"></div>
@@ -735,10 +737,10 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   </div>
 
   <!-- ══ INÍCIO ══ -->
-  <div class="view" id="vInicio">
+  <div class="view on" id="vInicio">
     <div class="i-top">
       <div><h1 id="saud">Boa noite 👋</h1><p>Acompanhe a operação da Julia em tempo real</p></div>
-      <div class="i-mes" id="mes">Julho, 2026 ▾</div>
+      <select class="i-mes" id="mesSel" onchange="PERIODO=this.value;pintarReal();" style="cursor:pointer;border:1px solid var(--line);outline:none;font-family:Sora;font-weight:700;"><option value="este" id="opEste">Este mes</option><option value="passado">Mes passado</option><option value="90">Ultimos 90 dias</option><option value="ano" id="opAno">Este ano</option><option value="tudo" selected>Periodo inteiro</option></select>
     </div>
     <div class="hero"><div class="hglow"></div>
       <div class="hh">
@@ -786,7 +788,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   </div>
 
   <!-- ══ CONVERSAS ══ -->
-  <div class="view on" id="vConversas">
+  <div class="view" id="vConversas">
     <div class="cl">
       <div class="clh"><h2>Conversas</h2><span class="cnt">20 contatos</span></div>
       <div class="busca"><input placeholder="Buscar por nome ou número"/></div>
@@ -804,7 +806,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       <div class="cch">
         <div class="cav c1">JP</div>
         <div><div class="nm">João Pereira</div><div class="st"><span class="p"></span>Julia respondendo automaticamente</div></div>
-        <div class="acts"><button class="ghost" onclick="alert('Transferir para um corretor — entra com os Acessos de Equipe (R$ 97/mês cada)')">Transferir</button><button class="pillbtn" id="btnAssumir" style="padding:9px 16px;" onclick="assumir()">Assumir conversa</button></div>
+        <div class="acts"><button class="ghost" onclick="transferirMenu()">Transferir</button><button class="pillbtn" id="btnAssumir" style="padding:9px 16px;" onclick="assumir()">Assumir conversa</button></div>
       </div>
       <div class="msgs">
         <div class="dia">HOJE</div>
@@ -1582,12 +1584,12 @@ function ccNovo(){ccEdit=-1;document.getElementById('ccFTit').textContent='Nova 
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value='';
   document.getElementById('ccFLink').value='https://julia-ia-nine.vercel.app';
   document.getElementById('ccFPlano').value='Start';document.getElementById('ccFSeats').value=0;document.getElementById('ccFSt').value='ativa';
-  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';
+  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='flex';
   ccVendsCarregar(null);}
 function ccEditar(i){ccEdit=i;var c=CC[i];document.getElementById('ccFTit').textContent='Editar — '+c.emp;
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value=c[k]||'';
   document.getElementById('ccFPlano').value=c.plano;document.getElementById('ccFSeats').value=c.seats;document.getElementById('ccFSt').value=c.st;
-  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='block';
+  document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='flex';
   ccVendsCarregar(CC[i].id);}
 function ccVoltar(){document.getElementById('ccForm').style.display='none';document.getElementById('ccLista').style.display='flex';}
 function ccSalvar(enviar){
@@ -1727,7 +1729,7 @@ function carregarLeadsReais(){
              : (status.indexOf('descart')>-1||status.indexOf('nao')>-1||status.indexOf('não')>-1) ? 'nq'
              : 'pendente';
       var et=['chegou','conversa','qualificacao','documentacao','agendamento','crm'].indexOf(etapa)>-1?etapa:(st==='crm'?'crm':st==='qualificado'?'qualificacao':st==='nq'?'descartado':'chegou');
-      GL.push({n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',st:st,e:et,
+      GL.push({id:r.id,cr:r.created_at,n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',st:st,e:et,
                sc:(typeof r.score==='number'?r.score:0),
                u:supaTempo(r.updated_at||r.created_at),cor:['c1','c2','c3',''][ix%4]});
     });
@@ -1744,6 +1746,16 @@ function carregarLeadsReais(){
 /* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
 function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
+var PERIODO='tudo';
+function perOk(l){
+  if(PERIODO==='tudo'||!l.cr)return PERIODO==='tudo'?true:false;
+  var d=new Date(l.cr), a=new Date();
+  if(PERIODO==='este')return d.getMonth()===a.getMonth()&&d.getFullYear()===a.getFullYear();
+  if(PERIODO==='passado'){var p=new Date(a.getFullYear(),a.getMonth()-1,1);return d.getMonth()===p.getMonth()&&d.getFullYear()===p.getFullYear();}
+  if(PERIODO==='90')return (a-d)/86400000<=90;
+  if(PERIODO==='ano')return d.getFullYear()===a.getFullYear();
+  return true;
+}
 var ETAPAS=[['chegou','Novo lead','#7c3aed'],['conversa','Em conversa','#a855f7'],['qualificacao','Qualificação','#10b981'],['documentacao','Documentação','#0ea5e9'],['agendamento','Agendamento','#f59e0b'],['crm','Enviado ao CRM','#14b8a6'],['descartado','Descartado','#94a3b8']];
 function pintarReal(){
   var n=GL.length;
@@ -1773,68 +1785,69 @@ function pintarReal(){
     document.querySelectorAll('.lp .kv b').forEach(function(b){b.textContent='—';});
     document.querySelectorAll('.jorn .et').forEach(function(e){e.classList.remove('done','now');});
   }
+  var G=GL.filter(perOk), gn=G.length;
   /* — Início: hero funil — */
-  var q=GL.filter(function(l){return l.e==='qualificacao'||l.e==='crm';}).length;
+  var q=G.filter(function(l){return l.e==='qualificacao'||l.e==='crm';}).length;
   var hf=document.querySelectorAll('#vInicio .hf');
   if(hf.length>=3){
     function sethf(el,num,pct,txt){
-      var N=el.querySelector('.n'),C=el.querySelector('.c'),F=el.querySelector('.fl');
+      var N=el.querySelector('.gn'),C=el.querySelector('.c'),F=el.querySelector('.fl');
       if(N)N.textContent=num; if(C)C.innerHTML='<b>'+pct+'%</b> '+txt; if(F)F.style.width=Math.max(2,pct)+'%';
     }
-    sethf(hf[0],n,100,'do período');
-    sethf(hf[1],n,n?100:0,'de aproveitamento');
-    sethf(hf[2],q,n?Math.round(q/n*100):0,'de conversão');
+    sethf(hf[0],gn,100,'do período');
+    sethf(hf[1],gn,gn?100:0,'de aproveitamento');
+    sethf(hf[2],q,gn?Math.round(q/gn*100):0,'de conversão');
   }
   /* — Início: funil de hoje por etapa — */
   var mfs=document.querySelectorAll('#vInicio .mf');
   ETAPAS.slice(0,6).forEach(function(e,ix){
     if(!mfs[ix])return;
-    var c=GL.filter(function(l){return l.e===e[0];}).length;
+    var c=G.filter(function(l){return l.e===e[0];}).length;
     var B=mfs[ix].querySelector('b'),F=mfs[ix].querySelector('.fl');
-    if(B)B.textContent=c; if(F)F.style.width=(n?Math.max(2,Math.round(c/n*100)):0)+'%';
+    if(B)B.textContent=c; if(F)F.style.width=(gn?Math.max(2,Math.round(c/gn*100)):0)+'%';
   });
   /* — Início: canais e prioridades (sem origem no banco ainda) — */
   document.querySelectorAll('#vInicio .cn').forEach(function(cn){
     var B=cn.querySelector('b'),F=cn.querySelector('.fl');
-    if(B)B.textContent=n?'—':'0'; if(F)F.style.width='0%';
+    if(B)B.textContent=gn?'—':'0'; if(F)F.style.width='0%';
   });
   var acs=document.querySelectorAll('#vInicio .ac b');
   if(acs.length>=3){
-    acs[0].textContent=GL.filter(function(l){return l.e==='qualificacao';}).length+' leads qualificados';
-    acs[1].textContent=GL.filter(function(l){return l.e==='agendamento';}).length+' visitas agendadas';
-    acs[2].textContent=GL.filter(function(l){return l.e==='documentacao';}).length+' documentações em andamento';
+    acs[0].textContent=G.filter(function(l){return l.e==='qualificacao';}).length+' leads qualificados';
+    acs[1].textContent=G.filter(function(l){return l.e==='agendamento';}).length+' visitas agendadas';
+    acs[2].textContent=G.filter(function(l){return l.e==='documentacao';}).length+' documentações em andamento';
   }
   /* — Prioridades do Início — */
   var pt=document.getElementById('prioTab'), pv=document.getElementById('prioVazio');
   if(pt){
     pt.querySelectorAll('tr:not(:first-child)').forEach(function(tr){tr.remove();});
-    var prio=GL.filter(function(l){return l.e!=='descartado'&&l.e!=='crm';}).slice(0,5);
+    var prio=G.filter(function(l){return l.e!=='descartado'&&l.e!=='crm';}).slice(0,5);
     if(pv)pv.style.display=prio.length?'none':'flex';
     prio.forEach(function(l){
       var tr=document.createElement('tr');
       tr.onclick=function(){goTo('vConversas');};
-      tr.innerHTML='<td><div class="who"><div class="wav">'+iniciais(l.n)+'</div>'+ehtml(l.n)+'</div></td><td>'+ehtml(l.i)+'</td><td><span class="pl pq">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1]+'</span></td><td>'+l.u+'</td>';
+      tr.innerHTML='<td><div class="who"><div class="wav">'+iniciais(l.gn)+'</div>'+ehtml(l.gn)+'</div></td><td>'+ehtml(l.i)+'</td><td><span class="pl pq">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1]+'</span></td><td>'+l.u+'</td>';
       pt.appendChild(tr);
     });
   }
   /* — Relatórios 100% reais (mata os números fabricados) — */
   var rs=document.querySelector('#vRelatorios .r-scroll');
   if(rs){
-    var q2=GL.filter(function(l){return l.e==='qualificacao';}).length;
-    var ag=GL.filter(function(l){return l.e==='agendamento';}).length;
-    var cr=GL.filter(function(l){return l.e==='crm';}).length;
+    var q2=G.filter(function(l){return l.e==='qualificacao';}).length;
+    var ag=G.filter(function(l){return l.e==='agendamento';}).length;
+    var cr=G.filter(function(l){return l.e==='crm';}).length;
     function linha(nome,qtd){return '<div class="rw" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line2);font-size:12.5px;"><span style="color:var(--mut);">'+nome+'</span><b>'+qtd+'</b></div>';}
     rs.innerHTML=
       '<div class="pc-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">'
-      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">LEADS</small><div class="pc-price">'+n+'</div></div>'
+      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">LEADS</small><div class="pc-price">'+gn+'</div></div>'
       +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">QUALIFICADOS</small><div class="pc-price">'+q2+'</div></div>'
       +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">AGENDAMENTOS</small><div class="pc-price">'+ag+'</div></div>'
       +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">ENVIADOS AO CRM</small><div class="pc-price">'+cr+'</div></div>'
       +'</div>'
       +'<div class="cf-card"><h3>Funil do período</h3><div class="sb">Contagem real por etapa</div>'
-      +ETAPAS.map(function(e){return linha(e[1],GL.filter(function(l){return l.e===e[0];}).length);}).join('')
+      +ETAPAS.map(function(e){return linha(e[1],G.filter(function(l){return l.e===e[0];}).length);}).join('')
       +'</div>'
-      +(n===0?'<div class="vazio"><span class="ic">📊</span><b>Sem dados ainda</b><small>Os relatórios completos (gráficos, canais, horários de pico) enchem quando a Julia começar a atender pelo WhatsApp.</small></div>'
+      +(gn===0?'<div class="vazio"><span class="ic">📊</span><b>Sem dados ainda</b><small>Os relatórios completos (gráficos, canais, horários de pico) enchem quando a Julia começar a atender pelo WhatsApp.</small></div>'
              :'<div class="cf-card" style="margin-top:14px;"><div class="sb" style="margin:0;">Gráficos por dia, canais e horários de pico entram junto com o histórico do n8n.</div></div>');
   }
   /* — Kanban real — */
@@ -1850,6 +1863,7 @@ function pintarReal(){
   }
 }
 function convAbrir(i,el){
+  window.CONV_SEL=i;
   if(el){document.querySelectorAll('.cit').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
   var l=GL[i]; if(!l)return;
   var nm=document.querySelector('.cch .nm'); if(nm)nm.textContent=l.n;
@@ -2236,12 +2250,55 @@ function ccRevVend(id,contaId){
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);ccVendsCarregar(contaId);})
   .catch(function(e){alert('Não consegui revogar ('+e.message+').');});
 }
+/* ── TRANSFERIR: vendedor de plantao ou CRM ── */
+function transferirMenu(){
+  var l=GL[window.CONV_SEL];
+  if(!l){alert('Selecione uma conversa primeiro.');return;}
+  var ov=document.createElement('div'); ov.className='pf-ov on';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var vends=(PL&&PL.vends)?PL.vends:[];
+  var h='<div class="pf-md" style="max-width:360px;"><h2>Transferir '+ehtml(l.n)+'</h2>';
+  if(vends.length){
+    h+='<div class="cc-sec" style="margin-top:0;">VENDEDORES DE PLANTÃO</div>';
+    vends.forEach(function(v){h+='<button class="pillbtn" style="width:100%;margin-bottom:8px;" onclick="transferirPara(this,\''+v.id+'\')">🎧 '+ehtml(v.nome)+'</button>';});
+  }else{
+    h+='<div class="cc-hint" style="display:block;margin-bottom:12px;">Sem vendedores de plantão nesta conta — contrate acessos em Plano e Cobrança.</div>';
+  }
+  h+='<div class="cc-sec">OU</div>';
+  h+='<button class="pa-dark" style="margin-bottom:10px;" onclick="transferirCRM(this)">✈ Enviar ao CRM (o dono distribui de lá)</button>';
+  h+='<div class="pf-bts"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Cancelar</button></div></div>';
+  ov.innerHTML=h; document.body.appendChild(ov);
+}
+function transferirPara(btn,vid){
+  var l=GL[window.CONV_SEL]; if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
+  fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({assumido_por:vid,pausado:false})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    btn.closest('.pf-ov').remove();
+    alert('Atendimento direcionado ✓ — vai aparecer no plantão do vendedor.');
+    carregarLeadsReais(); if(typeof plCarregar==='function')plCarregar();})
+  .catch(function(e){alert('Falhou: '+e.message);});
+}
+function transferirCRM(btn){
+  var l=GL[window.CONV_SEL]; if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
+  fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({crm_enviado:true,etapa:'crm'})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    btn.closest('.pf-ov').remove();
+    alert('Lead enviado ao CRM ✓');
+    carregarLeadsReais();})
+  .catch(function(e){alert('Falhou: '+e.message);});
+}
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
   document.getElementById('saud').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+' 👋';
   var m=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var d=new Date(); document.getElementById('mes').textContent=m[d.getMonth()]+', '+d.getFullYear()+' ▾';
+  var d=new Date();
+  var oe=document.getElementById('opEste'); if(oe)oe.textContent=m[d.getMonth()]+', '+d.getFullYear();
+  var oa=document.getElementById('opAno'); if(oa)oa.textContent='Ano de '+d.getFullYear();
 })();
 
 /* ══ GESTÃO DE LEADS ══ */
