@@ -1395,7 +1395,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 
         <div class="cc-fbt">
           <button class="pa-grad" onclick="ccSalvar(false)">Salvar conta</button>
-          <button class="pa-dark" style="width:auto;padding:11px 18px;" onclick="ccSalvar(true)">&#128172; Salvar + enviar acesso no WhatsApp</button>
+          <button class="pa-dark" id="ccBtnZap" style="width:auto;padding:11px 18px;" onclick="ccSalvar(true)">💬 Salvar + enviar acesso do DONO no WhatsApp</button>
           <button class="ghost" onclick="ccVoltar()">Cancelar</button>
         </div>
       </div>
@@ -1572,12 +1572,14 @@ function ccGerar(){
 }
 function ccCampos(){return{emp:'ccFEmp',cnpj:'ccFCnpj',resp:'ccFResp',zapDono:'ccFZapDono',zap:'ccFZap',mail:'ccFMail',senha:'ccFSenha',link:'ccFLink'};}
 function ccNovo(){ccEdit=-1;document.getElementById('ccFTit').textContent='Nova conta de cliente';
+  var bz=document.getElementById('ccBtnZap'); if(bz)bz.style.display='';
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value='';
   document.getElementById('ccFLink').value='https://julia-ia-nine.vercel.app';
   document.getElementById('ccFPlano').value='Start';document.getElementById('ccFSeats').value=0;document.getElementById('ccFSt').value='ativa';
   document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='flex';
   ccVendsCarregar(null);}
 function ccEditar(i){ccEdit=i;var c=CC[i];document.getElementById('ccFTit').textContent='Editar — '+c.emp;
+  var bz=document.getElementById('ccBtnZap'); if(bz)bz.style.display='none';
   var f=ccCampos();for(var k in f)document.getElementById(f[k]).value=c[k]||'';
   document.getElementById('ccFPlano').value=c.plano;document.getElementById('ccFSeats').value=c.seats;document.getElementById('ccFSt').value=c.st;
   document.getElementById('ccLista').style.display='none';document.getElementById('ccForm').style.display='flex';
