@@ -637,6 +637,21 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .pf-fl input[disabled]{background:#f7f5fb;color:var(--mut);cursor:not-allowed;}
 .pf-lock{font-size:10.5px;color:var(--sub);line-height:1.5;margin:-4px 0 14px;}
 .pf-bts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+/* ── PLANO NAVY EXECUTIVO ── */
+.pa-hero{background:linear-gradient(120deg,#161129,#1d1533);border-radius:16px;padding:20px 24px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;box-shadow:0 14px 30px rgba(15,11,34,.25);}
+.pa-hero small{font-size:9.5px;letter-spacing:1.6px;font-family:'Sora';font-weight:700;color:#8f88a8;}
+.pa-hero h2{font-family:'Sora';font-size:24px;font-weight:800;letter-spacing:-.5px;margin:2px 0 4px;}
+.pa-hero .pv{font-size:12.5px;color:#cfcadd;}
+.pa-grad{background:var(--grad);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-family:'Sora';font-weight:700;font-size:12px;box-shadow:0 8px 18px rgba(168,85,247,.3);white-space:nowrap;}
+.pa-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
+.pa-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+.pa-card h3{font-family:'Sora';font-size:13px;font-weight:800;margin-bottom:4px;}
+.pa-card p{font-size:11.5px;color:var(--sub);margin-bottom:12px;line-height:1.55;}
+.pa-dark{background:#161129;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-family:'Sora';font-weight:700;font-size:11.5px;width:100%;}
+.pa-fats{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.pa-fat{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 18px;font-size:12.5px;border-bottom:1px solid var(--line2);}
+.pa-fat:last-child{border-bottom:none;}
+.pa-fat b{font-family:'Sora';}
 </style>
 </head>
 <body>
@@ -1340,152 +1355,44 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     </div>
   </div>
 
-  <!-- ══ PLANO E COBRANÇA ══ -->
+  <!-- ══ PLANO E COBRANÇA (Navy Executivo) ══ -->
   <div class="view" id="vPlano">
     <div class="r-top">
-      <div><h1>Plano e Cobrança</h1><p>Gerencie seu plano, acessos de equipe e detalhes da cobrança</p></div>
-      <button class="ghost" onclick="alert('Histórico de faturas — entra com o gateway de pagamento')">🧾 Faturas</button>
+      <div><h1>Plano e Cobrança</h1><p>Seu plano, acessos e pagamentos</p></div>
     </div>
     <div class="pc-scroll">
 
-      <div class="pc-hero">
-        <div><small>SEU PLANO ATUAL</small><h2 id="pcHeroNome">Start</h2><div class="pv" id="pcHeroPreco">R$ 1.347/mês</div></div>
-        <div class="at"><i></i>Ativo</div>
-      </div>
-
-      <div class="pc-sec">Escolha seu plano</div>
-      <div class="pc-cycle" id="pcCycle">
-        <span class="fp on" data-c="mensal" onclick="pcCiclo(this)">Mensal</span>
-        <span class="fp" data-c="trimestral" onclick="pcCiclo(this)">Trimestral</span>
-        <span class="fp" data-c="anual" onclick="pcCiclo(this)">Anual</span>
-        <em class="mb" style="font-style:normal">ANUAL = MELHOR PREÇO</em>
-      </div>
-
-      <div class="pc-grid">
-        <div class="pc-card cur">
-          <span class="pc-tag a">SEU PLANO</span>
-          <h3>Start</h3>
-          <div class="pc-price" id="pcP0">R$ 1.347<small>/mês</small></div>
-          <div class="pc-cob pcCob"></div>
-          <div class="pc-fx">
-            <div>1 número de WhatsApp</div>
-            <div>Julia respondendo 24h</div>
-            <div>Painel de conversas e leads</div>
-            <div>Qualificação automática de leads</div>
-            <div>Suporte por e-mail</div>
-          </div>
-          <button class="pc-btn soft">Plano atual</button>
-        </div>
-
-        <div class="pc-card">
-          <span class="pc-tag b">MAIS POPULAR</span>
-          <h3>Plus</h3>
-          <div class="pc-price" id="pcP1">R$ 1.647<small>/mês</small></div>
-          <div class="pc-cob pcCob"></div>
-          <div class="pc-fx">
-            <div>Tudo do Start</div>
-            <div>Integração com CRM</div>
-            <div>Agendamento de reuniões</div>
-            <div>Relatórios de leads</div>
-            <div>Suporte prioritário</div>
-          </div>
-          <button class="pc-btn g" onclick="alert('Upgrade para Plus — entra com o gateway de pagamento')">Fazer upgrade</button>
-        </div>
-
-        <div class="pc-card">
-          <span class="pc-tag c">COMPLETO</span>
-          <h3>Pro</h3>
-          <div class="pc-price" id="pcP2">R$ 1.997<small>/mês</small></div>
-          <div class="pc-cob pcCob"></div>
-          <div class="pc-fx">
-            <div>Tudo do Plus</div>
-            <div>Múltiplos números</div>
-            <div>Atendimento dedicado</div>
-            <div>Consultoria mensal</div>
-            <div>Prioridade máxima no suporte</div>
-          </div>
-          <button class="pc-btn g" onclick="alert('Upgrade para Pro — entra com o gateway de pagamento')">Fazer upgrade</button>
-        </div>
-
-        <div class="pc-card">
-          <span class="pc-tag d">SOB MEDIDA</span>
-          <h3>Customizado</h3>
-          <div class="pc-price" style="font-size:19px;">Sob consulta</div>
-          <div class="pc-cob"></div>
-          <div class="pc-fx">
-            <div>Solução montada com você</div>
-            <div>Volume e recursos sob demanda</div>
-            <div>Integrações específicas</div>
-            <div>Condições negociadas</div>
-            <div>Atendimento exclusivo</div>
-          </div>
-          <button class="pc-btn line" onclick="alert('Fale com a Jul.ia — proposta customizada')">Falar com a Jul.ia</button>
-        </div>
-      </div>
-
-      <div class="pc-sec">Acessos de equipe</div>
-      <div class="pc-sub">Coloque seus corretores dentro da plataforma para assumir conversas da Julia</div>
-      <div class="pc-seat">
+      <div class="pa-hero">
         <div>
-          <span class="st">POR USUÁRIO · RECORRENTE</span>
-          <h3>Cada acesso = 1 corretor atendendo por dentro do painel</h3>
-          <p>Cada acesso é um <b>login e senha próprios</b> para 1 corretor, com <b>visão restrita</b> — ele não vê tudo que o dono vê. O dono define <b>quais leads</b> aquele corretor pode assumir; no lead liberado, ele clica em <b>Assumir</b>, a Julia pausa só naquele contato e ele conversa pelo painel — <b>mesmo número de WhatsApp</b>, sem chip extra. Devolve pra Julia com 1 clique.</p>
-          <span class="hint">Gestão de usuários (criar login, permissões, leads liberados) terá uma aba própria — em breve. Valores em definição.</span>
+          <small>SEU PLANO ATUAL</small>
+          <h2 id="paNome">Start · Mensal</h2>
+          <div class="pv" id="paInfo">R$ 1.347/mês · <b style="color:#4ade80;">em dia</b></div>
         </div>
-        <div class="pc-buy">
-          <div class="lb">QUANTOS ACESSOS?</div>
-          <div class="pc-step">
-            <button onclick="pcSeat(-1)">−</button>
-            <b id="pcSeatQ">1</b>
-            <button onclick="pcSeat(1)">+</button>
-          </div>
-          <div class="tot">Total: <b id="pcSeatT">R$ 97/mês</b></div>
-          <button class="pc-btn g" onclick="pcSeatBuy()">Adicionar acessos</button>
+        <button class="pa-grad" onclick="paComercial('upgrade')">Fazer upgrade ↗</button>
+      </div>
+
+      <div class="pa-grid">
+        <div class="pa-card">
+          <h3>Acessos de equipe</h3>
+          <p>Vendedores de Plantão atendendo por dentro do painel, com login próprio e visão restrita. <b>R$ 97/mês por acesso</b> — o comercial libera após o pagamento.</p>
+          <button class="pa-dark" onclick="paComercial('acessos')">💬 Contratar acessos</button>
+        </div>
+        <div class="pa-card">
+          <h3>Mudar de plano</h3>
+          <p>Plus (R$ 1.647/mês) · Pro (R$ 1.997/mês) · Customizado sob consulta. Fale com o comercial e a mudança entra na hora.</p>
+          <button class="pa-dark" onclick="paComercial('upgrade')">💬 Falar com o comercial</button>
         </div>
       </div>
 
-      <div class="pc-sec">Comprar conversas extras</div>
-      <div class="pc-sub">Chegou no limite do seu plano? Adicione pacotes de conversas sem precisar fazer upgrade.</div>
-      <div class="pc-add">
-        <div class="pc-pk">
-          <span class="pt">PACOTE AVULSO</span>
-          <h4>+50 <span>conversas</span></h4>
-          <div class="pp">R$ 67 <small>único</small></div>
-          <p>Adicionado na hora à sua conta. Não expira enquanto o plano estiver ativo.</p>
-          <button class="pc-btn g" onclick="alert('Pacote +50 conversas — entra com o gateway de pagamento')">Comprar agora</button>
-        </div>
-        <div class="pc-pk">
-          <span class="pt">PACOTE AVULSO</span>
-          <h4>+100 <span>conversas</span></h4>
-          <div class="pp">R$ 117 <small>único</small></div>
-          <p>Adicionado na hora à sua conta. Não expira enquanto o plano estiver ativo.</p>
-          <button class="pc-btn g" onclick="alert('Pacote +100 conversas — entra com o gateway de pagamento')">Comprar agora</button>
-        </div>
-        <div class="pc-pk">
-          <span class="pt">PACOTE AVULSO</span>
-          <h4>+200 <span>conversas</span></h4>
-          <div class="pp">R$ 197 <small>único</small></div>
-          <p>Adicionado na hora à sua conta. Não expira enquanto o plano estiver ativo.</p>
-          <button class="pc-btn g" onclick="alert('Pacote +200 conversas — entra com o gateway de pagamento')">Comprar agora</button>
-        </div>
-      </div>
-
-      <div class="pc-sec">Pagamentos</div>
+      <div class="pc-sec">PAGAMENTOS</div>
       <div class="pc-sub">Boletos, Pix e cartão — suas prestações e comprovantes</div>
-      <div class="pc-det" id="pcFaturas">
-        <div class="rw"><span style="width:100%;text-align:center;padding:10px 0;">Nenhuma fatura ainda — quando o pagamento for ativado, seus boletos e links Pix aparecem aqui para pagar e acompanhar.</span></div>
-      </div>
-
-      <div class="pc-sec">Detalhes da cobrança</div>
-      <div class="pc-det">
-        <div class="rw"><span>Forma de pagamento</span><b>Cartão e Pix</b></div>
-        <div class="rw"><span>Próxima cobrança</span><b>13/08/2026</b></div>
-        <div class="rw"><span>Ciclo</span><b id="pcDetCiclo">Mensal</b></div>
-        <div class="rw"><span>Status</span><b class="ok">Em dia</b></div>
+      <div class="pa-fats" id="pcFaturas">
+        <div class="pa-fat"><span style="width:100%;text-align:center;color:var(--sub);padding:8px 0;">Nenhuma fatura ainda — quando o pagamento for ativado, seus boletos e links Pix aparecem aqui para pagar e acompanhar.</span></div>
       </div>
 
     </div>
   </div>
+
 </div>
 
 <div class="pf-ov" id="pfModal" onclick="if(event.target===this)perfilFechar()">
@@ -1523,30 +1430,13 @@ function goTo(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===id));
 }
 /* ── PLANO E COBRANÇA ── */
-var PC_PRECOS={ /* ajuste os valores aqui */
-  mensal:    {v:[1347,1647,1997], cob:'',                    lb:'Mensal'},
-  trimestral:{v:[1247,1547,1897], cob:'cobrado a cada 3 meses', lb:'Trimestral'},
-  anual:     {v:[1147,1397,1697], cob:'cobrado anualmente',  lb:'Anual'}
-};
-function pcFmt(n){return 'R$ '+n.toLocaleString('pt-BR');}
-function pcCiclo(el){
-  document.querySelectorAll('#pcCycle span').forEach(function(s){s.classList.remove('on');});
-  el.classList.add('on');
-  var c=PC_PRECOS[el.dataset.c];
-  ['pcP0','pcP1','pcP2'].forEach(function(id,i){
-    document.getElementById(id).innerHTML=pcFmt(c.v[i])+'<small>/mês</small>';
-  });
-  document.querySelectorAll('.pcCob').forEach(function(e){e.textContent=c.cob;});
-  document.getElementById('pcDetCiclo').textContent=c.lb;
-  document.getElementById('pcHeroPreco').textContent=pcFmt(c.v[0])+'/mês';
+var PA_PRECOS={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
+function paComercial(tipo){
+  var msg=tipo==='acessos'
+    ?'Olá! Quero contratar acessos de Vendedor de Plantão (R$ 97/mês cada) na minha conta Jul.ia. Como faço o pagamento?'
+    :'Olá! Quero mudar o plano da minha conta Jul.ia. Pode me passar as condições?';
+  window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent(msg),'_blank');
 }
-var pcSeats=1;
-function pcSeat(d){
-  pcSeats=Math.min(50,Math.max(1,pcSeats+d));
-  document.getElementById('pcSeatQ').textContent=pcSeats;
-  document.getElementById('pcSeatT').textContent=pcFmt(pcSeats*97)+'/mês';
-}
-function pcSeatBuy(){alert(pcSeats+' acesso(s) de equipe — '+pcFmt(pcSeats*97)+'/mês. Entra com o gateway de pagamento.');}
 /* ── CONTAS DE CLIENTES (ADMIN) ── */
 var CC_PLANOS={Start:1347,Plus:1647,Pro:1997,Customizado:2997};
 var CC=[];
@@ -2028,32 +1918,21 @@ function bootCliente(email){
 }
 var COMERCIAL_ZAP='5581999331884';
 function pintarPlanoCliente(plano){
-  var precos={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
-  var hn=document.getElementById('pcHeroNome'), hp=document.getElementById('pcHeroPreco');
+  var hn=document.getElementById('paNome'), hi=document.getElementById('paInfo');
   if(hn)hn.textContent=plano;
-  if(hp)hp.textContent=(precos[plano]||'')+(plano==='Customizado'?'':'/mês');
-  document.querySelectorAll('#vPlano .pc-card').forEach(function(card){
-    var h3=card.querySelector('h3'); if(!h3)return;
-    var nome=h3.textContent.trim(), tag=card.querySelector('.pc-tag'), bt=card.querySelector('.pc-btn');
-    card.classList.remove('cur');
-    if(nome===plano){
-      card.classList.add('cur');
-      if(tag){tag.textContent='SEU PLANO';tag.className='pc-tag a';}
-      if(bt){bt.textContent='Plano atual';bt.className='pc-btn soft';bt.onclick=null;}
-    }else if(bt){
-      bt.onclick=function(){window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent('Olá! Quero mudar meu plano da Jul.ia para o '+nome+'. Pode me passar as condições?'),'_blank');};
-    }
-  });
-  window.pcSeatBuy=function(){
-    window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent('Olá! Quero contratar '+pcSeats+' acesso(s) de Vendedor de Plantão ('+pcFmt(pcSeats*97)+'/mês) na minha conta Jul.ia. Como faço o pagamento?'),'_blank');
-  };
-  document.querySelectorAll('#vPlano .pc-sec').forEach(function(sec){
-    if(sec.textContent.indexOf('conversas extras')>-1){
-      sec.style.display='none';
-      var nx=sec.nextElementSibling; if(nx&&nx.classList.contains('pc-sub')){nx.style.display='none';nx=nx.nextElementSibling;}
-      if(nx&&nx.classList.contains('pc-add'))nx.style.display='none';
-    }
-  });
+  if(hi)hi.innerHTML=(PA_PRECOS[plano]||'')+(plano==='Customizado'?'':'/mês');
+  /* ciclo, próxima cobrança e status vêm da assinatura */
+  fetch(SUPA_URL+'/rest/v1/assinaturas?select=ciclo,proxima_cobranca,status&conta_id=eq.'+CONTA_ID,
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){
+    var a=rows[0]; if(!a)return;
+    var ciclo=(a.ciclo||'mensal'); ciclo=ciclo.charAt(0).toUpperCase()+ciclo.slice(1);
+    if(hn)hn.textContent=plano+' · '+ciclo;
+    var prox=a.proxima_cobranca?(' · próxima cobrança '+new Date(a.proxima_cobranca+'T12:00:00').toLocaleDateString('pt-BR')):'';
+    var st=(a.status==='atrasada')?'<b style="color:#f87171;">atrasada</b>':'<b style="color:#4ade80;">em dia</b>';
+    if(hi)hi.innerHTML=(PA_PRECOS[plano]||'')+(plano==='Customizado'?'':'/mês')+prox+' · '+st;
+  }).catch(function(){});
 }
 function modoVendedor(u){
   CONTA_ID=u.conta_id; VENDEDOR_ID=u.id;
