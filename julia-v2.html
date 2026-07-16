@@ -753,7 +753,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
     <div class="hero"><div class="hglow"></div>
       <div class="hh">
         <div><div class="heb">Taxa de conversão do mês</div>
-          <div class="hkpi"><span class="pct">25%</span><span class="kt">dos leads recebidos viraram clientes prontos <span class="up">↑ 5 pts vs mês anterior</span></span></div></div>
+          <div class="hkpi"><span class="pct" id="hkPct">0%</span><span class="kt" id="hkTxt">dos leads recebidos viraram clientes prontos <span class="up">no período selecionado</span></span></div></div>
         <div class="hselo">Julia ativa · atendimento humanizado 24h</div>
       </div>
       <div class="hfunil">
@@ -1595,7 +1595,7 @@ function ccEditar(i){ccEdit=i;var c=CC[i];document.getElementById('ccFTit').text
 function ccVoltar(){document.getElementById('ccForm').style.display='none';document.getElementById('ccLista').style.display='flex';}
 function ccSalvar(enviar){
   var emp=document.getElementById('ccFEmp').value.trim(),resp=document.getElementById('ccFResp').value.trim();
-  var mail=document.getElementById('ccFMail').value.trim(),senha=document.getElementById('ccFSenha').value.trim();
+  var mail=document.getElementById('ccFMail').value.trim().toLowerCase(),senha=document.getElementById('ccFSenha').value.trim();
   if(!emp||!resp){alert('Empresa e Responsável são obrigatórios');return;}
   if(!mail||!senha){alert('E-mail de login e Senha são obrigatórios — use ⚡ Gerar se quiser');return;}
   var payload={empresa:emp,responsavel:resp,email_login:mail,senha_provisoria:senha,
@@ -1789,6 +1789,7 @@ function pintarReal(){
   var G=GL.filter(perOk), gn=G.length;
   /* — Início: hero funil — */
   var q=G.filter(function(l){return l.e==='qualificacao'||l.e==='crm';}).length;
+  var hkp=document.getElementById('hkPct'); if(hkp)hkp.textContent=(gn?Math.round(q/gn*100):0)+'%';
   var hf=document.querySelectorAll('#vInicio .hf');
   if(hf.length>=3){
     function sethf(el,num,pct,txt){
@@ -1986,7 +1987,7 @@ function bootPainel(){
   }
   var niAdm=document.querySelector('.ni[data-v="vClientes"]');
   if(niAdm)niAdm.style.display='none';
-  fetch(SUPA_URL+'/rest/v1/usuarios?select=id,conta_id,papel,nome&email=eq.'+encodeURIComponent(email),
+  fetch(SUPA_URL+'/rest/v1/usuarios?select=id,conta_id,papel,nome&email=ilike.'+encodeURIComponent(email),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.ok?r.json():[];})
   .then(function(us){
@@ -1997,7 +1998,7 @@ function bootPainel(){
   .catch(function(){bootCliente(email);});
 }
 function bootCliente(email){
-  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa,responsavel,plano&email_login=eq.'+encodeURIComponent(email),
+  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa,responsavel,plano&email_login=ilike.'+encodeURIComponent(email),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -2049,6 +2050,14 @@ function modoVendedor(u){
   plCarregar();
   console.log('modo Vendedor de Plantão: '+u.nome);
 }
+(function(){
+  function blindar(nome){
+    var f=window[nome]; if(typeof f!=='function')return;
+    window[nome]=function(){try{return f.apply(this,arguments);}catch(e){console.error('['+nome+']',e);}};
+  }
+  ['pintarReal','plRender','plAbrir','gRender','convAbrir','bootPainel','bootCliente','modoVendedor','ccRender','dbRender','jCarregar','pintarPlanoCliente'].forEach(blindar);
+  window.addEventListener('error',function(e){console.error('[painel]',e.message,e.filename,e.lineno);});
+})();
 bootPainel();
 /* ── PLANTÃO (WhatsApp) ── */
 var PL={leads:[],vends:[],sel:-1,filtro:'todos',meu:null,nomeMe:''};
@@ -2241,7 +2250,7 @@ function ccAddVend(){
   var contaId=(ccEdit>=0&&CC[ccEdit])?CC[ccEdit].id:null;
   if(!contaId){alert('Salve a conta primeiro, depois volte em Editar para adicionar vendedores.');return;}
   var nome=document.getElementById('vNome').value.trim(),
-      mail=document.getElementById('vMail').value.trim(),
+      mail=document.getElementById('vMail').value.trim().toLowerCase(),
       senha=document.getElementById('vSenha').value.trim();
   if(!nome||!mail||!senha){alert('Preencha nome, e-mail e senha (use ⚡ Gerar).');return;}
   var token='';
