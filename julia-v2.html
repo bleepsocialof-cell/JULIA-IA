@@ -1391,20 +1391,11 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 
         <div class="cc-sec">VENDEDORES DE PLANTÃO · R$ 97/MÊS CADA</div>
         <div id="ccVendList"><small class="cc-hint">Salve a conta primeiro — depois volte em Editar para adicionar vendedores.</small></div>
-        <div id="ccVendForm" style="display:none;"><div class="cc-gr" style="grid-template-columns:1fr 1fr;margin-top:10px;">
-          <div class="cc-fl"><label>Nome do vendedor</label><input id="vNome" placeholder="Ex.: Carlos Mota"/></div>
-          <div class="cc-fl"><label>E-mail de login</label><input id="vMail" placeholder="carlos@empresa.com.br"/></div>
-        </div>
-        <div class="cc-gr" style="grid-template-columns:1fr auto;align-items:end;">
-          <div class="cc-fl"><label>Senha</label>
-            <div class="cc-pw"><input id="vSenha" placeholder="••••••••"/><button class="ghost" style="padding:8px 12px;white-space:nowrap;" onclick="vGerar()">⚡ Gerar</button></div>
-          </div>
-          <button class="pillbtn" style="margin-bottom:12px;" onclick="ccAddVend()">+ Adicionar vendedor</button>
-        </div></div>
+        <div id="ccVendForm" style="display:none;"><div class="cc-gr" style="margin-top:10px;"><div class="cc-fl"><label>Nome do vendedor</label><input id="vNome" placeholder="Ex.: Carlos Mota"/></div><div class="cc-fl"><label>E-mail de login</label><input id="vMail" placeholder="carlos@empresa.com.br"/></div></div><div class="cc-gr" style="grid-template-columns:1fr;"><div class="cc-fl"><label>Senha</label><div class="cc-pw"><input id="vSenha" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"/><button class="ghost" style="padding:8px 12px;white-space:nowrap;" onclick="vGerar()">&#9889; Gerar</button></div></div></div><button class="pa-dark" style="margin-top:2px;" onclick="ccAddVend()">+ Adicionar vendedor de plant&#227;o</button></div>
 
         <div class="cc-fbt">
-          <button class="pillbtn" onclick="ccSalvar(false)">Salvar conta</button>
-          <button class="pillbtn" style="background:#12b76a;box-shadow:0 8px 18px rgba(18,183,106,.3);" onclick="ccSalvar(true)">💬 Salvar + enviar acesso no WhatsApp</button>
+          <button class="pa-grad" onclick="ccSalvar(false)">Salvar conta</button>
+          <button class="pa-dark" style="width:auto;padding:11px 18px;" onclick="ccSalvar(true)">&#128172; Salvar + enviar acesso no WhatsApp</button>
           <button class="ghost" onclick="ccVoltar()">Cancelar</button>
         </div>
       </div>
@@ -1965,7 +1956,9 @@ function criarLoginCliente(o){
   .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
   .then(function(x){
     if(x.ok)return 'Conta salva e LOGIN do cliente criado ✓ ('+o.mail+')';
-    return 'Conta salva ✓ — mas o login falhou: '+(x.j.erro||'erro desconhecido');
+    var m=x.j.erro||x.j.msg||x.j.message||'erro desconhecido';
+    if(String(m).toLowerCase().indexOf('jwt')>-1)m='sessão expirada — saia e entre de novo';
+    return 'Conta salva ✓ — mas o login falhou: '+m;
   })
   .catch(function(e){return 'Conta salva ✓ — mas o login falhou: '+e.message;});
 }
@@ -2226,7 +2219,11 @@ function ccAddVend(){
     body:JSON.stringify({email:mail,senha:senha,nome:nome,conta_id:contaId})})
   .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});})
   .then(function(x){
-    if(!x.ok)throw new Error(x.j.erro||'erro ao criar login');
+    if(!x.ok){
+      var m=x.j.erro||x.j.msg||x.j.message||'erro ao criar login';
+      if(String(m).toLowerCase().indexOf('jwt')>-1||String(m).indexOf('401')>-1)m='Sua sessão de administrador expirou — clique em Sair, entre de novo e tente outra vez.';
+      throw new Error(m);
+    }
     /* marcar como vendedor */
     return fetch(SUPA_URL+'/rest/v1/usuarios?email=eq.'+encodeURIComponent(mail)+'&conta_id=eq.'+contaId,
       {method:'PATCH',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
