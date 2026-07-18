@@ -129,7 +129,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .filtros{display:flex;gap:6px;padding:2px 14px 12px;border-bottom:1px solid var(--line2);}
 .fp{font-size:10.5px;font-weight:600;color:#6b6580;border:1px solid var(--line);padding:4px 11px;border-radius:99px;cursor:pointer;background:#fff;}
 .fp.on{background:#17141f;color:#fff;border-color:#17141f;}
-.cits{flex:1;overflow:auto;}
+.cits{flex:1;overflow:auto;padding-bottom:90px;}
 .cit{display:flex;gap:10px;padding:12px 15px;border-bottom:1px solid var(--line2);cursor:pointer;}
 .cit:hover{background:#faf9fd;}
 .cit.on{background:linear-gradient(90deg,#f6f2ff,#fff);border-left:3px solid #7c3aed;padding-left:12px;}
@@ -2067,6 +2067,8 @@ function convAbrir(i,el,silent){
     if(!silent)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando histórico…</b></div>';
     var tel=String(l.t||'').replace(/\D/g,'');
     window.CONV_TEL=tel;
+    var noFim=!silent||(ms.scrollHeight-ms.scrollTop-ms.clientHeight<80);
+    var posAntes=ms.scrollTop;
     fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.desc&limit=200&telefone=like.*'+tel.slice(-8)+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
       {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -2092,7 +2094,7 @@ function convAbrir(i,el,silent){
         else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       });
       ms.innerHTML=h;
-      ms.scrollTop=999999;
+      if(noFim)ms.scrollTop=999999; else ms.scrollTop=posAntes;
     })
     .catch(function(e){
       ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">⚠️</span><b>Não consegui carregar o histórico</b><small>'+ehtml(e.message)+'</small></div>';
