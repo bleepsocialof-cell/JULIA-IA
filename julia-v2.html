@@ -1019,11 +1019,11 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
         </div>
         <div class="j-pane on" id="jpPrompt">
           <div class="j-bar">
-            <span class="j-cont" id="jCont">0 / 5000 caracteres</span>
+            <span class="j-cont" id="jCont">0 / 8000 caracteres</span>
             <button class="gbtn" onclick="jExemplo()">Carregar exemplo</button>
             <button class="gbtn" onclick="if(confirm('Limpar o prompt?')){jTa.value='';jConta();}">Limpar</button>
           </div>
-          <textarea class="j-ta" id="jTa" maxlength="5000" placeholder="Descreva quem é a Julia, como ela fala e as regras do atendimento…" oninput="jConta()"></textarea>
+          <textarea class="j-ta" id="jTa" maxlength="8000" placeholder="Descreva quem é a Julia, como ela fala e as regras do atendimento…" oninput="jConta()"></textarea>
         </div>
         <div class="j-pane" id="jpVars">
           <div class="hsub" style="margin-bottom:12px;">Clique para inserir no prompt — a Julia substitui pelos dados reais na conversa.</div>
@@ -2019,8 +2019,10 @@ function convAbrir(i,el,silent){
         var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
         var p=String(m.papel||'').toLowerCase();
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
+        var vend=(p.indexOf('vend')>-1);
         var au=cli?'<div style="font-size:8px;font-weight:700;font-family:\'Sora\';letter-spacing:1.2px;color:var(--sub);margin-bottom:3px;">'+ehtml(String(l.n||'CLIENTE').toUpperCase())+'</div>':'';
-        h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+        if(vend){h+='<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+' <span class="tk2">✓✓</span></div></div>';}
+        else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       });
       ms.innerHTML=h;
       ms.scrollTop=999999;
@@ -2115,15 +2117,15 @@ function montarSeletorConta(){
   fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.ok?r.json():[];})
   .then(function(cs){
-    var clh=document.querySelector('.clh'); if(!clh)return;
+    var alvo=document.querySelector('.status'); if(!alvo)return;
     var sel=document.createElement('select');
-    sel.style.cssText='margin:8px 0 0;width:100%;padding:7px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:12px;font-weight:600;color:#4c3d6b;background:#faf9ff;';
+    sel.style.cssText='margin-left:12px;padding:6px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:12px;font-weight:700;color:#4c3d6b;background:#faf9ff;vertical-align:middle;';
     var h='<option value="00000000-0000-0000-0000-000000000000">\ud83c\udfe2 Jul.ia (admin)</option>';
     cs.forEach(function(c){h+='<option value="'+c.id+'">'+ehtml(c.empresa||c.id)+'</option>';});
     sel.innerHTML=h;
     sel.value=window.CONTA_VIEW||'';
     sel.onchange=function(){try{localStorage.setItem('conta_view',this.value);}catch(e){}location.reload();};
-    clh.appendChild(sel);
+    alvo.insertAdjacentElement('afterend',sel);
   }).catch(function(e){console.warn('seletor contas falhou',e);});
 }
 function bootPainel(){
@@ -2623,7 +2625,7 @@ function dbTipoVal(){
 }
 var DB=[];
 function dbCarregar(){
-  fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
     DB=rows.map(function(p){
@@ -2789,7 +2791,7 @@ function jTab(el){
 }
 function jConta(){
   var n=jTa.value.length;
-  document.getElementById('jCont').textContent=n+' / 5000 caracteres';
+  document.getElementById('jCont').textContent=n+' / 8000 caracteres';
   document.getElementById('jTam').textContent=n+' caracteres';
 }
 function jExemplo(){jTa.value=J_EX;jConta();}
@@ -2800,13 +2802,14 @@ function jVar(v){
 }
 var JC_ID=null;
 function jCarregar(){
-  fetch(SUPA_URL+'/rest/v1/julia_config?select=*&limit=1'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  fetch(SUPA_URL+'/rest/v1/julia_config?select=*&limit=1'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
     if(!rows.length){console.warn('julia_config vazia');return;}
     var c=rows[0]; JC_ID=c.id;
     var ta=document.getElementById('jTa');
-    if(ta&&c.prompt_completo){ta.value=c.prompt_completo;if(typeof jConta==='function')jConta();}
+    var ptx=c.instrucoes||c.prompt_completo||'';
+    if(ta&&ptx){ta.value=ptx;if(typeof jConta==='function')jConta();}
     if(c.tom_voz){var t=document.getElementById('jTom');
       for(var i=0;i<t.options.length;i++)if(t.options[i].text.toLowerCase().indexOf(String(c.tom_voz).toLowerCase())>-1)t.selectedIndex=i;}
     if(c.objetivo){var o=document.getElementById('jObj');
@@ -2816,7 +2819,7 @@ function jCarregar(){
   }).catch(function(e){console.warn('julia_config indisponível',e);});
 }
 function jSalvar(){
-  var body={prompt_completo:document.getElementById('jTa').value,
+  var body={instrucoes:document.getElementById('jTa').value,
             tom_voz:document.getElementById('jTom').value.split(' — ')[0],
             objetivo:document.getElementById('jObj').value,
             updated_at:new Date().toISOString()};
