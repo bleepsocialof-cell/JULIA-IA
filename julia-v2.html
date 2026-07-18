@@ -1751,9 +1751,15 @@ function qualificarLead(){
 /* ── SUPABASE · LEADS REAIS ── */
 var SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
 var SUPA_KEY='sb_publishable_zgWKIwXALOWRbac_13-DWg_ruoyaNkg';
+function supaData(ts){
+  if(!ts)return null;
+  var s=String(ts);
+  if(!/Z$|[+-]\d{2}:?\d{2}$/.test(s)) s=s.replace(' ','T')+'Z';
+  return new Date(s);
+}
 function supaTempo(ts){
   if(!ts)return '—';
-  var d=(Date.now()-new Date(ts).getTime())/60000;
+  var d=(Date.now()-supaData(ts).getTime())/60000;
   if(d<1)return 'agora';
   if(d<60)return 'há '+Math.floor(d)+' min';
   if(d<1440)return 'há '+Math.floor(d/60)+'h';
@@ -1814,6 +1820,7 @@ function carregarConversasReais(){
     GL.sort(function(a,b){return new Date(b.cr||0)-new Date(a.cr||0);});
     pintarReal();
     var cnt=document.querySelector('.clh .cnt'); if(cnt)cnt.textContent=GL.length+' contatos';
+    var bd2=document.querySelector('.ni[data-v="vConversas"] .bd'); if(bd2)bd2.textContent=GL.length;
     var sf=document.querySelector('.sfoot b'); if(sf)sf.textContent=GL.length;
     console.log('Conversas reais — '+ordem.length+' contatos na tabela conversas');
   })
@@ -1975,7 +1982,7 @@ function convAbrir(i,el,silent){
       }
       var h='', dia='';
       msgs.forEach(function(m){
-        var d=m.criado_em?new Date(m.criado_em):null;
+        var d=m.criado_em?supaData(m.criado_em):null;
         if(d){
           var dl=d.toLocaleDateString('pt-BR');
           if(dl!==dia){dia=dl;h+='<div class="dia">'+dl+'</div>';}
