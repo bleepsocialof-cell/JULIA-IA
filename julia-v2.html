@@ -746,6 +746,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   <nav class="nav">
     <div class="ni on" data-v="vInicio" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início</div>
     <div class="ni" data-v="vConversas" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversas<span class="bd">20</span></div>
+    <div class="ni" data-v="vDisparos" onclick="go(this);dispRender();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>Disparos</div>
     <div class="ni" data-v="vPlantao" id="niPlantao" style="display:none;" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Plantão</div>
     <div class="ni" data-v="vLeads" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="5" height="8" rx="1.5"/></svg>Leads</div>
     <div class="nd"></div>
@@ -883,7 +884,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       </div>
       <div class="sect">Informações</div>
       <div class="kv"><span>Interesse</span><b>Apto · Boa Viagem</b></div>
-      <div class="kv"><span>Potencial</span><b>R$ 350 mil</b></div>
+      <div class="kv"><span>Origem</span><b>WhatsApp</b></div>
       <div class="kv"><span>Última msg</span><b>há 2 min</b></div>
       <div class="lcta">
         <button class="a1" onclick="assumir()">Assumir conversa</button>
@@ -1073,6 +1074,27 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
   </div>
 
   <!-- ══ RELATÓRIOS ══ -->
+  <div class="view" id="vDisparos">
+    <div class="i-top"><div><h1>Disparos de Reativação</h1><p>Reacenda leads antigos com um disparo em massa — respondeu, vira conversa</p></div></div>
+    <div class="card" style="padding:20px 22px;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:700;color:#4c3d6b;">Parados há pelo menos</label>
+        <input id="dspDias" type="number" min="1" value="30" style="width:80px;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"/> 
+        <label style="font-size:12px;font-weight:700;color:#4c3d6b;">dias</label>
+        <button class="pillbtn" onclick="dispRender()">Buscar parados</button>
+        <span id="dspInfo" style="font-size:12px;color:#8a7fa8;margin-left:auto;">—</span>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="dspLista" style="max-height:420px;overflow:auto;"></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid #eee9f6;background:#faf9ff;">
+        <b id="dspSel" style="font-size:13px;">0 selecionados</b>
+        <span id="dspCusto" style="font-size:12px;color:#8a7fa8;">custo estimado R$ 0,00</span>
+        <button class="pillbtn" style="margin-left:auto;opacity:.5;cursor:not-allowed;" title="Workflow de disparo entra na próxima sessão">Disparar reativação</button>
+      </div>
+      <div style="padding:10px 18px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Seleção e custos já são reais: R$ 0,50 por disparo, respondeu vira conversa e conta na franquia.</div>
+    </div>
+  </div>
   <div class="view" id="vRelatorios">
     <div class="r-top">
       <div><h1>Relatórios</h1><p>Raio-X do período — análise completa da operação</p></div>
@@ -1794,7 +1816,7 @@ function carregarLeadsReais(){
              : (status.indexOf('descart')>-1||status.indexOf('nao')>-1||status.indexOf('não')>-1) ? 'nq'
              : 'pendente';
       var et=['chegou','conversa','qualificacao','documentacao','agendamento','crm'].indexOf(etapa)>-1?etapa:(st==='crm'?'crm':st==='qualificado'?'qualificacao':st==='nq'?'descartado':'chegou');
-      GL.push({id:r.id,cr:r.created_at,n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',st:st,e:et,
+      GL.push({id:r.id,cr:r.created_at,n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',origem:r.origem||'',st:st,e:et,
                sc:(typeof r.score==='number'?r.score:0),
                u:supaTempo(r.updated_at||r.created_at),cor:['c1','c2','c3',''][ix%4]});
     });
@@ -1854,6 +1876,45 @@ function carregarConversasReais(){
   })
   .catch(function(e){console.warn('conversas indisponível',e);});
 }
+function origemIcone(o){
+  o=String(o||'').toLowerCase();
+  if(o.indexOf('meta')>-1||o.indexOf('face')>-1||o.indexOf('ctwa')>-1||o.indexOf('ad')>-1)return '<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:4px;background:#1877f2;color:#fff;font-size:9px;font-weight:800;font-family:Sora;">f</span>';
+  if(o.indexOf('insta')>-1)return '<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:4px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);color:#fff;font-size:8px;font-weight:800;">\ud83d\udcf7</span>';
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#25d366;color:#fff;font-size:9px;">\u2713</span>';
+}
+function origemNome(o){
+  o=String(o||'').toLowerCase();
+  if(o.indexOf('meta')>-1||o.indexOf('face')>-1||o.indexOf('ctwa')>-1||o.indexOf('ad')>-1)return 'An\u00fancio Meta';
+  if(o.indexOf('insta')>-1)return 'Instagram';
+  return 'WhatsApp';
+}
+window.DSP_SEL={};
+function dispRender(){
+  var dias=parseInt((document.getElementById('dspDias')||{}).value||'30',10);
+  var corte=Date.now()-dias*86400000;
+  var parados=GL.filter(function(l){var d=l.cr?new Date(l.cr).getTime():0;return d&&d<corte;});
+  var el=document.getElementById('dspLista'); if(!el)return;
+  if(!parados.length){el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado h\u00e1 '+dias+'+ dias</b><small>Todos os contatos tiveram movimento recente.</small></div>';}
+  else{
+    el.innerHTML=parados.map(function(l,ix){
+      var d=Math.floor((Date.now()-new Date(l.cr).getTime())/86400000);
+      var tel=String(l.t||'').replace(/\D/g,'');
+      return '<label style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #f1ecf9;cursor:pointer;">'
+        +'<input type="checkbox" onchange="window.DSP_SEL[\''+tel+'\']=this.checked;dispConta();" '+(window.DSP_SEL[tel]?'checked':'')+'/>'
+        +'<div class="cav '+(l.cor||'')+'">'+iniciais(l.n)+'</div>'
+        +'<div style="flex:1;"><b style="font-size:13px;">'+ehtml(l.n)+'</b> '+origemIcone(l.origem)
+        +'<div style="font-size:11.5px;color:#8a7fa8;">'+ehtml(l.t)+' \u00b7 parado h\u00e1 '+d+' dias</div></div></label>';
+    }).join('');
+  }
+  var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=parados.length+' contato'+(parados.length===1?'':'s')+' parado'+(parados.length===1?'':'s');
+  dispConta();
+}
+function dispConta(){
+  var n=0; for(var k in window.DSP_SEL)if(window.DSP_SEL[k])n++;
+  var s1=document.getElementById('dspSel'), s2=document.getElementById('dspCusto');
+  if(s1)s1.textContent=n+' selecionado'+(n===1?'':'s');
+  if(s2)s2.textContent='custo estimado R$ '+(n*0.5).toFixed(2).replace('.',',');
+}
 /* ── TEMPO REAL: polling leve a cada 10s ── */
 setInterval(function(){
   if(document.hidden)return;
@@ -1889,7 +1950,7 @@ function pintarReal(){
       cits.innerHTML=GL.map(function(l,i){
         return '<div class="cit'+(i===0?' on':'')+'" onclick="convAbrir('+i+',this)"><div class="cav '+l.cor+'">'+iniciais(l.n)+'</div>'
         +'<div class="tx"><div class="nm">'+ehtml(l.n)+' <small>'+l.u+'</small></div><div class="pv">'+ehtml(l.i)+'</div>'
-        +'<div class="mini"><span class="mp e">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1].toUpperCase()+'</span></div></div></div>';
+        +'<div class="mini">'+origemIcone(l.origem)+' <span class="mp e">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1].toUpperCase()+'</span></div></div></div>';
       }).join('');
       var keep=-1;
       if(window.CONV_TEL){GL.forEach(function(l,j){if(String(l.t||'').replace(/\D/g,'').slice(-8)===String(window.CONV_TEL).slice(-8))keep=j;});}
@@ -2037,7 +2098,7 @@ function convAbrir(i,el,silent){
   var sn=document.querySelector('.score .n'); if(sn)sn.innerHTML=l.sc+' <small>/100</small>';
   var sf2=document.querySelector('.score .fl'); if(sf2)sf2.style.width=l.sc+'%';
   var kvs=document.querySelectorAll('.lp .kv b');
-  if(kvs.length>=3){kvs[0].textContent=(l.intr&&l.intr.length?l.intr:'Ainda descobrindo');kvs[1].textContent='—';kvs[2].textContent=l.u;}
+  if(kvs.length>=3){kvs[0].textContent=(l.intr&&l.intr.length?l.intr:'Ainda descobrindo');kvs[1].textContent=origemNome(l.origem);kvs[2].textContent=l.u;}
   var idx=ETAPAS.map(function(e){return e[0];}).indexOf(l.e);
   document.querySelectorAll('.jorn .et').forEach(function(e,ix){
     e.classList.remove('done','now');
