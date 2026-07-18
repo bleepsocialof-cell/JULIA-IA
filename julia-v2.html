@@ -1716,8 +1716,18 @@ function sairJulia(){
   window.location.href='login-julia.html';
 }
 var chatAssumido=false;
+function pausaSet(v){
+  var tel=String(window.CONV_TEL||'').replace(/\D/g,'');
+  if(!tel)return;
+  fetch(SUPA_URL+'/rest/v1/pausas?on_conflict=telefone',{
+    method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+    body:JSON.stringify({telefone:tel,pausada:v,atualizado_em:new Date().toISOString().replace('Z','')})
+  }).catch(function(e){console.warn('pausa falhou',e);});
+}
 function assumir(){
   chatAssumido=!chatAssumido;
+  pausaSet(chatAssumido);
   var st=document.getElementById('stbar'),b=document.getElementById('btnAssumir');
   if(chatAssumido){
     st.innerHTML='<span class="p" style="background:#f59e0b;"></span>Você está no comando — Julia pausada só neste contato';
@@ -1734,6 +1744,11 @@ function enviarMsg(){
   var i=document.getElementById('msgIn'),t=i.value.trim();
   if(!t)return;
   if(!chatAssumido)assumir();
+  var telEnv=String(window.CONV_TEL||'').replace(/\D/g,'');
+  fetch('https://jadsonsantos.app.n8n.cloud/webhook/envio-manual',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({telefone:telEnv,texto:t,conta_id:(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea')})
+  }).catch(function(e){alert('Envio falhou: '+e.message);});
   var m=document.createElement('div');
   m.className='m ju';
   m.innerHTML='<span style="display:block;font-size:8px;font-family:Sora;font-weight:800;letter-spacing:.8px;color:#e84393;margin-bottom:3px;">VOCÊ</span>'+t.replace(/</g,'&lt;')+'<div class="mt">'+horaAgora()+' <span class="tk2">✓✓</span></div>';
@@ -1767,7 +1782,7 @@ function supaTempo(ts){
   return 'há '+Math.floor(d/1440)+' dias';
 }
 function carregarLeadsReais(){
-  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(CONTA_ID?('&conta_id=eq.'+CONTA_ID):'')+(VENDEDOR_ID?('&assumido_por=eq.'+VENDEDOR_ID):''),
+  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):'')+(VENDEDOR_ID?('&assumido_por=eq.'+VENDEDOR_ID):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1807,7 +1822,7 @@ function inferirInteresse(t){
   return v.join(' + ');
 }
 function carregarConversasReais(){
-  fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=600',
+  fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=600'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1985,10 +2000,11 @@ function convAbrir(i,el,silent){
     if(!silent)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando histórico…</b></div>';
     var tel=String(l.t||'').replace(/\D/g,'');
     window.CONV_TEL=tel;
-    fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.asc&limit=200&telefone=like.*'+tel.slice(-8),
+    fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.desc&limit=200&telefone=like.*'+tel.slice(-8)+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
       {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(msgs){
+      msgs.reverse();
       if(!msgs.length){
         ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>'+ehtml(l.n)+'</b><small>Ainda sem mensagens registradas — o histórico enche quando o n8n religar com o 360dialog.</small></div>';
         return;
@@ -2088,17 +2104,35 @@ function criarLoginCliente(o){
 /* ── BOOT MULTI-TENANT: quem entrou decide o que carrega ── */
 var ADMIN_EMAILS=['jul.ia@bleesocial.com.br','admin@julia.com'];
 var CONTA_ID=null, EH_ADMIN=false;
+window.CONTA_VIEW=null;
 var VENDEDOR_ID=null;
 function bootPronto(){
   var v=document.getElementById('bootVeil'); if(!v)return;
   v.classList.add('off'); setTimeout(function(){if(v.parentNode)v.remove();},450);
 }
 setTimeout(bootPronto,3500); /* rede lenta/offline: nunca prende o usuário */
+function montarSeletorConta(){
+  fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(cs){
+    var clh=document.querySelector('.clh'); if(!clh)return;
+    var sel=document.createElement('select');
+    sel.style.cssText='margin:8px 0 0;width:100%;padding:7px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:12px;font-weight:600;color:#4c3d6b;background:#faf9ff;';
+    var h='<option value="00000000-0000-0000-0000-000000000000">\ud83c\udfe2 Jul.ia (admin)</option>';
+    cs.forEach(function(c){h+='<option value="'+c.id+'">'+ehtml(c.empresa||c.id)+'</option>';});
+    sel.innerHTML=h;
+    sel.value=window.CONTA_VIEW||'';
+    sel.onchange=function(){try{localStorage.setItem('conta_view',this.value);}catch(e){}location.reload();};
+    clh.appendChild(sel);
+  }).catch(function(e){console.warn('seletor contas falhou',e);});
+}
 function bootPainel(){
   var email='';
   try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
   EH_ADMIN=ADMIN_EMAILS.indexOf(email)>-1;
   if(EH_ADMIN){
+    try{window.CONTA_VIEW=localStorage.getItem('conta_view')||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}catch(e){window.CONTA_VIEW='96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
+    montarSeletorConta();
     carregarLeadsReais();dbCarregar();ccCarregar();jCarregar();plCarregar();
     return;
   }
@@ -2121,6 +2155,7 @@ function bootCliente(email){
   .then(function(rows){
     if(rows.length){
       CONTA_ID=rows[0].id;
+      window.CONTA_VIEW=CONTA_ID;
       var partes=String(rows[0].responsavel||rows[0].empresa||'Cliente').split(' ');
       window.PF_OVERRIDE=[partes[0],partes.slice(1).join(' ')||''];
       if(typeof perfilPintar==='function')perfilPintar();
@@ -2129,6 +2164,7 @@ function bootCliente(email){
     }else{
       console.warn('nenhuma conta encontrada para '+email+' — carregando vazio');
       CONTA_ID='00000000-0000-0000-0000-000000000000';
+      window.CONTA_VIEW=CONTA_ID;
     }
     carregarLeadsReais();dbCarregar();jCarregar();plCarregar();
   })
@@ -2153,7 +2189,7 @@ function pintarPlanoCliente(plano){
   }).catch(function(){});
 }
 function modoVendedor(u){
-  CONTA_ID=u.conta_id; VENDEDOR_ID=u.id; PL.nomeMe=u.nome||'Vendedor';
+  CONTA_ID=u.conta_id; window.CONTA_VIEW=u.conta_id; VENDEDOR_ID=u.id; PL.nomeMe=u.nome||'Vendedor';
   window.PF_OVERRIDE=[String(u.nome||'Vendedor').split(' ')[0],String(u.nome||'').split(' ').slice(1).join(' ')];
   if(typeof perfilPintar==='function')perfilPintar();
   var ur=document.querySelector('.ur');
