@@ -1796,6 +1796,16 @@ function carregarLeadsReais(){
 }
 /* ── CONVERSAS REAIS: lista nasce da tabela conversas (agrupada por telefone) ── */
 var CV_HASH='';
+function inferirInteresse(t){
+  t=' '+String(t||'').toLowerCase()+' ';
+  var v=[];
+  if(t.indexOf('trafegou')>-1||t.indexOf('curso')>-1) v.push('Curso Trafegou');
+  if(t.indexOf('mentoria')>-1) v.push('Mentoria');
+  if(t.indexOf('social media')>-1||t.indexOf('design')>-1||t.indexOf('branding')>-1) v.push('Design/Social');
+  if(t.indexOf('gestor de tr')>-1||t.indexOf('gestao de tr')>-1||t.indexOf('gestão de tr')>-1) v.push('Gestão de tráfego');
+  if(!v.length&&(t.indexOf('preço')>-1||t.indexOf('preco')>-1||t.indexOf('quanto custa')>-1||t.indexOf('valor')>-1)) v.push('Perguntou preço');
+  return v.join(' + ');
+}
 function carregarConversasReais(){
   fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=600',
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
@@ -1804,8 +1814,10 @@ function carregarConversasReais(){
     var mapa={},ordem=[];
     rows.forEach(function(m){
       var tel=String(m.telefone||'').replace(/\D/g,''); if(!tel)return;
-      if(!mapa[tel]){mapa[tel]={t:m.telefone,n:null,i:m.mensagem||'',u:m.criado_em};ordem.push(tel);}
+      if(!mapa[tel]){mapa[tel]={t:m.telefone,n:null,i:m.mensagem||'',u:m.criado_em,tx:''};ordem.push(tel);}
       if(!mapa[tel].n && m.nome) mapa[tel].n=m.nome;
+      var pcli=String(m.papel||'').toLowerCase();
+      if(pcli.indexOf('cli')>-1||pcli.indexOf('user')>-1||pcli.indexOf('hum')>-1||pcli.indexOf('lead')>-1) mapa[tel].tx+=' '+String(m.mensagem||'').slice(0,300);
     });
     var hash=JSON.stringify(mapa);
     if(hash===CV_HASH)return;
@@ -1814,8 +1826,9 @@ function carregarConversasReais(){
       var c=mapa[tel], t8=tel.slice(-8);
       var ex=null;
       GL.forEach(function(l){if(String(l.t||'').replace(/\D/g,'').slice(-8)===t8)ex=l;});
-      if(ex){ex.i=c.i||ex.i;ex.u=supaTempo(c.u);if(!ex.cr||new Date(c.u)>new Date(ex.cr))ex.cr=c.u;}
-      else GL.push({id:null,cr:c.u,n:c.n||('+'+tel),t:c.t,i:c.i||'—',st:'pendente',e:'conversa',sc:0,u:supaTempo(c.u),cor:['c1','c2','c3',''][GL.length%4]});
+      var intr=inferirInteresse(c.tx);
+      if(ex){ex.i=c.i||ex.i;ex.intr=intr||ex.intr||'';ex.u=supaTempo(c.u);if(!ex.cr||new Date(c.u)>new Date(ex.cr))ex.cr=c.u;}
+      else GL.push({id:null,cr:c.u,n:c.n||('+'+tel),t:c.t,intr:intr||'',i:c.i||'—',st:'pendente',e:'conversa',sc:0,u:supaTempo(c.u),cor:['c1','c2','c3',''][GL.length%4]});
     });
     GL.sort(function(a,b){return new Date(b.cr||0)-new Date(a.cr||0);});
     pintarReal();
@@ -1990,7 +2003,8 @@ function convAbrir(i,el,silent){
         var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
         var p=String(m.papel||'').toLowerCase();
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
-        h+='<div class="m '+(cli?'cli':'ju')+'">'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+        var au=cli?'<div style="font-size:8px;font-weight:700;font-family:\'Sora\';letter-spacing:1.2px;color:var(--sub);margin-bottom:3px;">'+ehtml(String(l.n||'CLIENTE').toUpperCase())+'</div>':'';
+        h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       });
       ms.innerHTML=h;
       ms.scrollTop=999999;
@@ -2005,7 +2019,7 @@ function convAbrir(i,el,silent){
   var sn=document.querySelector('.score .n'); if(sn)sn.innerHTML=l.sc+' <small>/100</small>';
   var sf2=document.querySelector('.score .fl'); if(sf2)sf2.style.width=l.sc+'%';
   var kvs=document.querySelectorAll('.lp .kv b');
-  if(kvs.length>=3){kvs[0].textContent=l.i;kvs[1].textContent='—';kvs[2].textContent=l.u;}
+  if(kvs.length>=3){kvs[0].textContent=(l.intr&&l.intr.length?l.intr:'Ainda descobrindo');kvs[1].textContent='—';kvs[2].textContent=l.u;}
   var idx=ETAPAS.map(function(e){return e[0];}).indexOf(l.e);
   document.querySelectorAll('.jorn .et').forEach(function(e,ix){
     e.classList.remove('done','now');
