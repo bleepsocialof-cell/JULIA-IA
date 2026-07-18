@@ -1784,9 +1784,50 @@ function carregarLeadsReais(){
     var sf=document.querySelector('.sfoot b');
     if(sf)sf.textContent=rows.length;
     console.log('Supabase OK — '+rows.length+' leads reais carregados');
+    carregarConversasReais();
   })
   .catch(function(e){console.warn('Supabase indisponível — mantendo dados de demonstração.',e);});
 }
+/* ── CONVERSAS REAIS: lista nasce da tabela conversas (agrupada por telefone) ── */
+var CV_HASH='';
+function carregarConversasReais(){
+  fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=600',
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    var mapa={},ordem=[];
+    rows.forEach(function(m){
+      var tel=String(m.telefone||'').replace(/\D/g,''); if(!tel)return;
+      if(!mapa[tel]){mapa[tel]={t:m.telefone,n:null,i:m.mensagem||'',u:m.criado_em};ordem.push(tel);}
+      if(!mapa[tel].n && m.nome) mapa[tel].n=m.nome;
+    });
+    var hash=JSON.stringify(mapa);
+    if(hash===CV_HASH)return;
+    CV_HASH=hash;
+    ordem.forEach(function(tel){
+      var c=mapa[tel], t8=tel.slice(-8);
+      var ex=null;
+      GL.forEach(function(l){if(String(l.t||'').replace(/\D/g,'').slice(-8)===t8)ex=l;});
+      if(ex){ex.i=c.i||ex.i;ex.u=supaTempo(c.u);if(!ex.cr||new Date(c.u)>new Date(ex.cr))ex.cr=c.u;}
+      else GL.push({id:null,cr:c.u,n:c.n||('+'+tel),t:c.t,i:c.i||'—',st:'pendente',e:'conversa',sc:0,u:supaTempo(c.u),cor:['c1','c2','c3',''][GL.length%4]});
+    });
+    GL.sort(function(a,b){return new Date(b.cr||0)-new Date(a.cr||0);});
+    pintarReal();
+    var cnt=document.querySelector('.clh .cnt'); if(cnt)cnt.textContent=GL.length+' contatos';
+    var sf=document.querySelector('.sfoot b'); if(sf)sf.textContent=GL.length;
+    console.log('Conversas reais — '+ordem.length+' contatos na tabela conversas');
+  })
+  .catch(function(e){console.warn('conversas indisponível',e);});
+}
+/* ── TEMPO REAL: polling leve a cada 10s ── */
+setInterval(function(){
+  if(document.hidden)return;
+  carregarConversasReais();
+  if(window.CONV_SEL!=null && window.CONV_TEL){
+    var v=document.getElementById('vConversas');
+    if(v && v.offsetParent!==null) convAbrir(window.CONV_SEL,null,true);
+  }
+},10000);
 /* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
 function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
@@ -1815,7 +1856,12 @@ function pintarReal(){
         +'<div class="tx"><div class="nm">'+ehtml(l.n)+' <small>'+l.u+'</small></div><div class="pv">'+ehtml(l.i)+'</div>'
         +'<div class="mini"><span class="mp e">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1].toUpperCase()+'</span></div></div></div>';
       }).join('');
-      convAbrir(0,null);
+      var keep=-1;
+      if(window.CONV_TEL){GL.forEach(function(l,j){if(String(l.t||'').replace(/\D/g,'').slice(-8)===String(window.CONV_TEL).slice(-8))keep=j;});}
+      var idx=keep>-1?keep:0;
+      convAbrir(idx,null,keep>-1);
+      var cits2=document.querySelectorAll('.cit');
+      cits2.forEach(function(c,j){c.classList.toggle('on',j===idx);});
     }
   }
   /* — Conversas: chat vazio — */
@@ -1908,7 +1954,7 @@ function pintarReal(){
     }).join('');
   }
 }
-function convAbrir(i,el){
+function convAbrir(i,el,silent){
   window.CONV_SEL=i;
   if(el){document.querySelectorAll('.cit').forEach(function(c){c.classList.remove('on');});el.classList.add('on');}
   var l=GL[i]; if(!l)return;
@@ -1916,8 +1962,9 @@ function convAbrir(i,el){
   var av=document.querySelector('.cch .cav'); if(av)av.textContent=iniciais(l.n);
   var ms=document.querySelector('.msgs');
   if(ms){
-    ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando histórico…</b></div>';
+    if(!silent)ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>Carregando histórico…</b></div>';
     var tel=String(l.t||'').replace(/\D/g,'');
+    window.CONV_TEL=tel;
     fetch(SUPA_URL+'/rest/v1/conversas?select=*&order=criado_em.asc&limit=200&telefone=like.*'+tel.slice(-8),
       {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
