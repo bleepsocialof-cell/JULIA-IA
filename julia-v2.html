@@ -45,9 +45,9 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .sair:hover{background:rgba(255,255,255,.15);color:#fff;}
 
 /* ═════════ SHELL DIREITO ═════════ */
-.main{display:flex;flex-direction:column;overflow:hidden;}
-.top{height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;flex-shrink:0;}
-.top .status{display:flex;align-items:center;gap:8px;background:#ecfdf3;color:#067647;border-radius:99px;padding:6px 14px;font-size:11.5px;font-weight:600;}
+.main{display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.top{height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;flex-shrink:0;min-width:0;overflow:hidden;}
+.top .status{display:flex;align-items:center;gap:8px;background:#ecfdf3;color:#067647;border-radius:99px;padding:6px 14px;font-size:11.5px;font-weight:600;flex-shrink:0;white-space:nowrap;}
 .top .status .p{width:8px;height:8px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 3px rgba(18,183,106,.18);}
 .top .sp{flex:1;}
 .top .user{display:flex;align-items:center;gap:10px;}
@@ -118,8 +118,9 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 
 /* ═════════ CONVERSAS ═════════ */
 #vConversas{display:none;}
-#vConversas.on{display:grid;grid-template-columns:300px 1fr 288px;height:100%;}
-.cl{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;}
+#vConversas.on{display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr) minmax(230px,288px);height:100%;width:100%;}
+@media(max-width:1120px){#vConversas.on{grid-template-columns:minmax(230px,280px) minmax(0,1fr);}#vConversas.on .lp{display:none;}}
+.cl{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .clh{padding:16px 16px 10px;display:flex;align-items:center;gap:9px;}
 .clh h2{font-family:'Sora';font-size:15px;font-weight:700;}
 .clh .cnt{font-size:10px;font-weight:700;font-family:'Sora';color:#7c3aed;background:#f3eefb;border-radius:8px;padding:3px 9px;}
@@ -176,7 +177,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .comp .qual{background:linear-gradient(135deg,#1a0060,#0d1b8e);border:none;border-radius:10px;padding:9px 15px;font-size:11.5px;font-weight:700;color:#fff;font-family:'Sora';}
 .comp .send{width:40px;height:40px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-size:15px;}
 
-.lp{background:#fff;border-left:1px solid var(--line);overflow:auto;display:flex;flex-direction:column;}
+.lp{background:#fff;border-left:1px solid var(--line);overflow:auto;display:flex;flex-direction:column;min-width:0;}
 .lph{padding:16px 18px 0;display:flex;align-items:center;gap:11px;}
 .lph .nm{font-family:'Sora';font-size:13px;font-weight:700;}
 .lph .ph2{font-size:10.5px;color:var(--mut);}
@@ -2190,7 +2191,7 @@ function montarSeletorConta(){
     if(!cs.length)cs=[{id:'96f67cd6-09c1-43a9-960c-e85cd89a07ea',empresa:'Blee Social'}];
     var alvo=document.querySelector('.status')||document.querySelector('.clh'); if(!alvo)return;
     var sel=document.createElement('select');
-    sel.style.cssText='margin-left:12px;padding:6px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:12px;font-weight:700;color:#4c3d6b;background:#faf9ff;vertical-align:middle;max-width:230px;';
+    sel.style.cssText='margin-left:12px;padding:6px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:12px;font-weight:700;color:#4c3d6b;background:#faf9ff;vertical-align:middle;max-width:230px;min-width:80px;flex:0 1 auto;text-overflow:ellipsis;';
     var h='<option value="00000000-0000-0000-0000-000000000000">\ud83c\udfe2 Jul.ia (admin)</option>';
     cs.forEach(function(c){h+='<option value="'+c.id+'">'+ehtml(c.empresa||c.id)+'</option>';});
     sel.innerHTML=h;
