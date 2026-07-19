@@ -1578,10 +1578,12 @@ function go(el){
   el.classList.add('on');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.getElementById(el.dataset.v).classList.add('on');
+  if(el.dataset.v==='vConversas'&&window.MS_FIM!==false&&typeof msgsFim==='function')msgsFim();
 }
 function goTo(id){
   document.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.v===id));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===id));
+  if(id==='vConversas'&&window.MS_FIM!==false&&typeof msgsFim==='function')msgsFim();
 }
 /* ── PLANO E COBRANÇA ── */
 var PA_PRECOS={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
@@ -1788,7 +1790,7 @@ function enviarMsg(){
   m.className='m ju';
   m.innerHTML='<span style="display:block;font-size:8px;font-family:Sora;font-weight:800;letter-spacing:.8px;color:#e84393;margin-bottom:3px;">VOCÊ</span>'+t.replace(/</g,'&lt;')+'<div class="mt">'+horaAgora()+' <span class="tk2">✓✓</span></div>';
   document.querySelector('.msgs').appendChild(m);
-  document.querySelector('.msgs').scrollTop=99999;
+  msgsFim();
   i.value='';
   i.style.height='40px';
 }
@@ -1797,7 +1799,7 @@ function qualificarLead(){
   m.className='marco';
   m.textContent='✦ LEAD QUALIFICADO MANUALMENTE POR VOCÊ · '+horaAgora();
   document.querySelector('.msgs').appendChild(m);
-  document.querySelector('.msgs').scrollTop=99999;
+  msgsFim();
 }
 /* ── SUPABASE · LEADS REAIS ── */
 var SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
@@ -1857,6 +1859,19 @@ function inferirInteresse(t){
 }
 /* ── NÃO LIDAS + SOM (estilo WhatsApp) ── */
 var CV_F='todas';
+window.MS_FIM=true; /* chat grudado no fim (padrão WhatsApp); vira false se o usuário rolar pra cima */
+function msgsFim(ms){
+  ms=ms||document.querySelector('.msgs'); if(!ms)return;
+  ms.scrollTop=ms.scrollHeight;
+  requestAnimationFrame(function(){ms.scrollTop=ms.scrollHeight;});
+}
+function msgsHook(){
+  var ms=document.querySelector('.msgs'); if(!ms||ms.MS_HK)return; ms.MS_HK=1;
+  ms.addEventListener('scroll',function(){
+    window.MS_FIM=(ms.scrollHeight-ms.scrollTop-ms.clientHeight<80);
+  });
+}
+msgsHook();
 function lidasMap(){try{return JSON.parse(localStorage.getItem('JL_LIDAS')||'{}');}catch(e){return{};}}
 function lidoSet(tel){var m=lidasMap();m[String(tel).replace(/\D/g,'').slice(-8)]=Date.now();localStorage.setItem('JL_LIDAS',JSON.stringify(m));}
 function naoLida(l){
@@ -2211,7 +2226,8 @@ function convAbrir(i,el,silent){
         else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       });
       ms.innerHTML=h;
-      if(noFim)ms.scrollTop=999999; else ms.scrollTop=posAntes;
+      if(noFim||window.MS_FIM!==false){window.MS_FIM=true;msgsFim(ms);}
+      else ms.scrollTop=posAntes;
     })
     .catch(function(e){
       ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">⚠️</span><b>Não consegui carregar o histórico</b><small>'+ehtml(e.message)+'</small></div>';
