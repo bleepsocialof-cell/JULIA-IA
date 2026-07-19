@@ -182,10 +182,18 @@ body.vw-adm .adm-pill{display:block;}
 .stbar .p{width:7px;height:7px;border-radius:50%;background:var(--verde);animation:pp 1.8s infinite;}
 @keyframes pp{50%{opacity:.35;}}
 .comp{display:flex;gap:8px;padding:6px 14px 12px;background:#fff;align-items:flex-end;flex-shrink:0;}
-.comp textarea{flex:1;min-height:40px;max-height:118px;height:40px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:13px;line-height:1.45;font-family:'Inter';outline:none;background:var(--bg);resize:none;overflow-y:auto;}
-.comp .desc{background:transparent;border:1px solid rgba(239,68,68,.4);border-radius:9px;padding:8px 11px;font-size:10.5px;font-weight:600;color:#f87171;}
-.comp .qual{background:linear-gradient(135deg,#1a0060,#0d1b8e);border:none;border-radius:9px;padding:8px 12px;font-size:10.5px;font-weight:700;color:#fff;font-family:'Sora';}
-.comp .send{width:36px;height:36px;border:none;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;flex-shrink:0;}
+.comp textarea{flex:1;min-height:40px;max-height:118px;height:40px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.45;font-family:'Inter';outline:none;background:var(--bg);resize:none;overflow-y:auto;transition:border-color .15s, box-shadow .15s;}
+.comp textarea:focus{border-color:var(--roxo);box-shadow:0 0 0 3px rgba(168,85,247,.12);}
+.comp .icb{width:40px;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#8a7fa8;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;transition:transform .12s,border-color .15s,color .15s;}
+.comp .icb:hover{transform:translateY(-1px);border-color:#c9bfe4;color:#4c3d6b;}
+.comp .icb.q{color:#7c3aed;border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.06);}
+.comp .icb.q:hover{border-color:#7c3aed;}
+.comp .icb svg{width:17px;height:17px;}
+.comp .icb::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#17141f;color:#fff;font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:7px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:6;}
+.comp .icb:hover::after{opacity:1;}
+.comp .send{width:40px;height:40px;border:none;border-radius:12px;background:var(--grad);color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(168,85,247,.35);transition:transform .12s;}
+.comp .send:hover{transform:translateY(-1px);}
+.comp .send svg{width:17px;height:17px;}
 
 .lp{background:#fff;border-left:1px solid var(--line);overflow:auto;display:flex;flex-direction:column;min-width:0;min-height:0;}
 .lph{padding:16px 18px 0;display:flex;align-items:center;gap:11px;}
@@ -703,7 +711,8 @@ body.vw-adm .adm-pill{display:block;}
 .pl-assumir button{background:var(--grad);color:#fff;border:none;border-radius:12px;padding:13px 26px;font-family:'Sora';font-weight:800;font-size:13px;box-shadow:0 10px 22px rgba(168,85,247,.35);}
 .pl-comp{background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center;}
 .pl-comp input{flex:1;border:1px solid var(--line);border-radius:99px;padding:11px 16px;font-size:12.5px;outline:none;font-family:'Inter';}
-.pl-comp .send2{width:42px;height:42px;border-radius:50%;background:var(--grad);color:#fff;border:none;font-size:15px;flex-shrink:0;}
+.pl-comp .send2{width:42px;height:42px;border-radius:50%;background:var(--grad);color:#fff;border:none;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(168,85,247,.35);}
+.pl-comp .send2 svg{width:17px;height:17px;}
 #ccForm{flex-direction:column;flex:1;min-height:0;}
 #ccForm .cc-scroll{flex:1;overflow:auto;min-height:0;padding-bottom:24px;}
 /* ── NAVY PREMIUM: Contas de Clientes ── */
@@ -870,9 +879,9 @@ body.vw-adm .adm-pill{display:block;}
       <div class="stbar" id="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
       <div class="comp">
         <textarea id="msgIn" rows="1" placeholder="Digite uma mensagem…" oninput="msgGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg();}"></textarea>
-        <button class="desc" onclick="if(confirm('Descartar este lead? Ele sai da fila da Julia.'))alert('Lead descartado (demo)')">Descartar</button>
-        <button class="qual" onclick="qualificarLead()">Qualificar ✦</button>
-        <button class="send" onclick="enviarMsg()">➤</button>
+        <button class="icb" data-tip="Descartar lead" onclick="if(confirm('Descartar este lead? Ele sai da fila da Julia.'))alert('Lead descartado (demo)')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        <button class="icb q" data-tip="Qualificar lead ✦" onclick="qualificarLead()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6l-5 3.6 1.9-5.8L4 8.8h6.1z"/></svg></button>
+        <button class="send" data-tip="Enviar" onclick="enviarMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>
     </div>
 
@@ -2568,7 +2577,7 @@ function plFoot(l){
   if(VENDEDOR_ID&&!l.pausado){
     f.innerHTML='<div class="pl-assumir"><p>A Julia está segurando a conversa. Quando você assumir, ela pausa e <b>o cliente fala com você</b> — pelo mesmo WhatsApp.</p><button onclick="plAssumir()">▶ Assumir atendimento</button></div>';
   }else if(VENDEDOR_ID){
-    f.innerHTML='<div class="pl-comp"><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()">➤</button></div>';
+    f.innerHTML='<div class="pl-comp"><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
   }else{
     f.innerHTML='';
   }
