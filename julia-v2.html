@@ -14,13 +14,13 @@
   --verde:#12b76a; --azul:#0ea5e9; --ambar:#f59e0b; --teal:#14b8a6; --verm:#ef4444;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:grid;grid-template-columns:248px 1fr;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:minmax(0,100vh);overflow:hidden;}
 button{font-family:'Inter',sans-serif;cursor:pointer;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-thumb{background:rgba(23,20,31,.16);border-radius:4px;}
 
 /* ═════════ SIDEBAR ═════════ */
-.side{background:linear-gradient(180deg,var(--dark1),var(--dark2));display:flex;flex-direction:column;padding:18px 14px 14px;color:#fff;}
+.side{background:linear-gradient(180deg,var(--dark1),var(--dark2));display:flex;flex-direction:column;padding:18px 14px 14px;color:#fff;min-height:0;overflow:hidden;}
 .logo{display:block;padding:4px 10px 16px;border-bottom:1px solid rgba(255,255,255,.07);}
 .logo .mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:15px;box-shadow:0 8px 18px rgba(168,85,247,.35);}
 .logo b{font-family:'Sora';font-size:18px;font-weight:800;letter-spacing:-.5px;}
@@ -45,7 +45,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .sair:hover{background:rgba(255,255,255,.15);color:#fff;}
 
 /* ═════════ SHELL DIREITO ═════════ */
-.main{display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.main{display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;}
 .top{height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px;flex-shrink:0;min-width:0;overflow:hidden;}
 .top .status{display:flex;align-items:center;gap:8px;background:#ecfdf3;color:#067647;border-radius:99px;padding:6px 14px;font-size:11.5px;font-weight:600;flex-shrink:0;white-space:nowrap;}
 .top .status .p{width:8px;height:8px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 3px rgba(18,183,106,.18);}
@@ -171,11 +171,11 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
 .stbar{display:flex;align-items:center;gap:7px;padding:7px 18px;background:#fff;border-top:1px solid var(--line);font-size:10.5px;color:var(--verde);font-weight:600;flex-shrink:0;}
 .stbar .p{width:7px;height:7px;border-radius:50%;background:var(--verde);animation:pp 1.8s infinite;}
 @keyframes pp{50%{opacity:.35;}}
-.comp{display:flex;gap:9px;padding:0 16px 13px;background:#fff;align-items:center;flex-shrink:0;}
-.comp input{flex:1;height:40px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font-size:13px;font-family:'Inter';outline:none;background:var(--bg);}
-.comp .desc{background:transparent;border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:9px 13px;font-size:11.5px;font-weight:600;color:#f87171;}
-.comp .qual{background:linear-gradient(135deg,#1a0060,#0d1b8e);border:none;border-radius:10px;padding:9px 15px;font-size:11.5px;font-weight:700;color:#fff;font-family:'Sora';}
-.comp .send{width:40px;height:40px;border:none;border-radius:11px;background:var(--grad);color:#fff;font-size:15px;}
+.comp{display:flex;gap:8px;padding:6px 14px 12px;background:#fff;align-items:flex-end;flex-shrink:0;}
+.comp textarea{flex:1;min-height:40px;max-height:118px;height:40px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:13px;line-height:1.45;font-family:'Inter';outline:none;background:var(--bg);resize:none;overflow-y:auto;}
+.comp .desc{background:transparent;border:1px solid rgba(239,68,68,.4);border-radius:9px;padding:8px 11px;font-size:10.5px;font-weight:600;color:#f87171;}
+.comp .qual{background:linear-gradient(135deg,#1a0060,#0d1b8e);border:none;border-radius:9px;padding:8px 12px;font-size:10.5px;font-weight:700;color:#fff;font-family:'Sora';}
+.comp .send{width:36px;height:36px;border:none;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;flex-shrink:0;}
 
 .lp{background:#fff;border-left:1px solid var(--line);overflow:auto;display:flex;flex-direction:column;min-width:0;min-height:0;}
 .lph{padding:16px 18px 0;display:flex;align-items:center;gap:11px;}
@@ -858,7 +858,7 @@ button{font-family:'Inter',sans-serif;cursor:pointer;}
       </div>
       <div class="stbar" id="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
       <div class="comp">
-        <input id="msgIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key==='Enter')enviarMsg()"/>
+        <textarea id="msgIn" rows="1" placeholder="Digite uma mensagem…" oninput="msgGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg();}"></textarea>
         <button class="desc" onclick="if(confirm('Descartar este lead? Ele sai da fila da Julia.'))alert('Lead descartado (demo)')">Descartar</button>
         <button class="qual" onclick="qualificarLead()">Qualificar ✦</button>
         <button class="send" onclick="enviarMsg()">➤</button>
@@ -1739,6 +1739,7 @@ function sairJulia(){
   window.location.href='login-julia.html';
 }
 var chatAssumido=false;
+function msgGrow(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,118)+'px';}
 function pausaSet(v){
   var tel=String(window.CONV_TEL||'').replace(/\D/g,'');
   if(!tel)return;
@@ -1778,6 +1779,7 @@ function enviarMsg(){
   document.querySelector('.msgs').appendChild(m);
   document.querySelector('.msgs').scrollTop=99999;
   i.value='';
+  i.style.height='40px';
 }
 function qualificarLead(){
   var m=document.createElement('div');
