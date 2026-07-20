@@ -1966,7 +1966,7 @@ function carregarConversasReais(){
       GL.forEach(function(l){if(String(l.t||'').replace(/\D/g,'').slice(-8)===t8)ex=l;});
       var intr=inferirInteresse(c.tx);
       if(ex){ex.i=c.i||ex.i;ex.pp=c.pp||'';ex.intr=intr||ex.intr||'';ex.u=supaTempo(c.u);ex.uc=c.uc;ex.nlc=c.nlc||0;if(!ex.cr||new Date(c.u)>new Date(ex.cr))ex.cr=c.u;}
-      else GL.push({id:null,cr:c.u,n:c.n||('+'+tel),t:c.t,intr:intr||'',i:c.i||'—',pp:c.pp||'',st:'pendente',e:'conversa',sc:0,uc:c.uc,nlc:c.nlc||0,u:supaTempo(c.u),cor:['c1','c2','c3',''][GL.length%4]});
+      else GL.push({id:null,cr:c.u,n:c.n||('+'+String(c.t||'').replace(/\D/g,'')),t:c.t,intr:intr||'',i:c.i||'—',pp:c.pp||'',st:'pendente',e:'conversa',sc:0,uc:c.uc,nlc:c.nlc||0,u:supaTempo(c.u),cor:['c1','c2','c3',''][GL.length%4]});
     });
     GL.sort(function(a,b){return new Date(b.cr||0)-new Date(a.cr||0);});
     /* primeira visita: baseline — nada conta como não lida */
