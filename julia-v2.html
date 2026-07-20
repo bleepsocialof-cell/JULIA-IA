@@ -1946,13 +1946,15 @@ function carregarConversasReais(){
     var mapa={},ordem=[];
     rows.forEach(function(m){
       var tel=String(m.telefone||'').replace(/\D/g,''); if(!tel)return;
-      if(!mapa[tel]){mapa[tel]={t:m.telefone,n:null,i:m.mensagem||'',u:m.criado_em,tx:'',uc:null,nlc:0};ordem.push(tel);}
-      if(!mapa[tel].n && m.nome) mapa[tel].n=m.nome;
+      var t8=tel.slice(-8); /* variantes com/sem o 9 extra viram UM contato só */
+      if(!mapa[t8]){mapa[t8]={t:m.telefone,n:null,i:m.mensagem||'',u:m.criado_em,tx:'',uc:null,nlc:0};ordem.push(t8);}
+      if(tel.length>String(mapa[t8].t||'').replace(/\D/g,'').length)mapa[t8].t=m.telefone;
+      if(!mapa[t8].n && m.nome) mapa[t8].n=m.nome;
       var pcli=String(m.papel||'').toLowerCase();
       if(pcli.indexOf('cli')>-1||pcli.indexOf('user')>-1||pcli.indexOf('hum')>-1||pcli.indexOf('lead')>-1){
-        mapa[tel].tx+=' '+String(m.mensagem||'').slice(0,300);
-        if(!mapa[tel].uc)mapa[tel].uc=m.criado_em;
-        if(supaData(m.criado_em).getTime()>(LID[tel.slice(-8)]||0))mapa[tel].nlc++;
+        mapa[t8].tx+=' '+String(m.mensagem||'').slice(0,300);
+        if(!mapa[t8].uc)mapa[t8].uc=m.criado_em;
+        if(supaData(m.criado_em).getTime()>(LID[t8]||0))mapa[t8].nlc++;
       }
     });
     var hash=JSON.stringify(mapa);
