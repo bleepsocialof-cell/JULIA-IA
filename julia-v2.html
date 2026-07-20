@@ -316,7 +316,7 @@ body.vw-adm .adm-pill{display:block;}
 .j-pane.on{display:block;}
 .j-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .j-cont{font-size:10.5px;color:var(--sub);font-family:'Sora';font-weight:700;margin-right:auto;}
-.j-ta{width:100%;min-height:340px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.75;font-family:'Inter';outline:none;background:#fbfafd;color:var(--ink);resize:vertical;}
+.j-ta{width:100%;height:calc(100vh - 340px);min-height:340px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.75;font-family:'Inter';outline:none;background:#fbfafd;color:var(--ink);resize:vertical;}
 .j-ta:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(168,85,247,.12);background:#fff;}
 .j-vars{display:flex;flex-wrap:wrap;gap:8px;}
 .jv{font-size:11.5px;font-weight:700;font-family:'Sora';color:#6d28d9;background:#f3eefb;border:1px solid #e2d3fb;border-radius:99px;padding:7px 14px;cursor:pointer;}
@@ -793,7 +793,7 @@ body.vw-adm .adm-pill{display:block;}
   <div class="top">
     <div class="status"><span class="p"></span>Julia ativa · atendimento humanizado 24h</div>
     <div class="sp"></div>
-    <div class="user" onclick="perfilAbrir()" style="cursor:pointer;" title="Editar perfil"><div class="uav" id="pfTopAv">B</div><div><div class="un" id="pfTopNome">Bleepsocialof S.</div><div class="ur">Administrador · <span style="color:#a855f7;font-weight:700;">Editar perfil</span></div></div></div>
+    <div class="user" onclick="perfilAbrir()" style="cursor:pointer;" title="Editar perfil"><div class="uav" id="pfTopAv">…</div><div><div class="un" id="pfTopNome">Carregando…</div><div class="ur"><span id="pfTopPapel"></span><span style="color:#a855f7;font-weight:700;">Editar perfil</span></div></div></div>
   </div>
 
   <!-- ══ INÍCIO ══ -->
@@ -2256,12 +2256,14 @@ function convAbrir(i,el,silent){
   });
 }
 /* ── MEU PERFIL ── */
-var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'jul.ia@bleesocial.com.br':['Jadson','Santos'],'cliente@julia.com':['Cliente','Demo']};
+var PF_NOMES={'admin@julia.com':['Jadson','Santos'],'jul.ia@bleesocial.com.br':['Jadson','Santos'],'bleepsocialof@gmail.com':['Jadson','e Thais'],'cliente@julia.com':['Cliente','Demo']};
 function perfilDados(){
   var email='';
-  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=s.email;}catch(e){}
-  var nm=(window.PF_OVERRIDE)||PF_NOMES[email]||['Bleepsocialof','S.'];
-  return{email:email,nome:nm[0],sobre:nm[1]};
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
+  var adm=(typeof ADMIN_EMAILS!=='undefined')&&ADMIN_EMAILS.indexOf(email)>-1;
+  var nm=(window.PF_OVERRIDE)||PF_NOMES[email]||[(email.split('@')[0]||'Usuário').replace(/^\w/,function(c){return c.toUpperCase();}),''];
+  var papel=adm?'Administrador':((typeof VENDEDOR_ID!=='undefined'&&VENDEDOR_ID)?'Vendedor':'Cliente');
+  return{email:email,nome:nm[0],sobre:nm[1],papel:papel};
 }
 function perfilPintar(){
   var d=perfilDados(), foto=null;
@@ -2269,7 +2271,8 @@ function perfilPintar(){
   var ini=(d.nome[0]||'')+(d.sobre[0]||'');
   var top=document.getElementById('pfTopAv'), md=document.getElementById('pfAv'), plz=document.getElementById('plzAv');
   [top,md,plz].forEach(function(el){if(!el)return;el.innerHTML=foto?'<img src="'+foto+'">':ini.toUpperCase();});
-  var tn=document.getElementById('pfTopNome'); if(tn)tn.textContent=d.nome+' '+d.sobre;
+  var tn=document.getElementById('pfTopNome'); if(tn)tn.textContent=(d.nome+' '+d.sobre).trim();
+  var pp=document.getElementById('pfTopPapel'); if(pp)pp.textContent=d.papel?d.papel+' · ':'';
   var n=document.getElementById('pfNome'), s=document.getElementById('pfSobre');
   if(n)n.value=d.nome; if(s)s.value=d.sobre;
 }
