@@ -1255,9 +1255,9 @@ body.vw-adm .adm-pill{display:block;}
         <div>
           <div class="card f-files">
             <div class="h3">Arquivos do produto</div><div class="hsub">Fotos, PDFs e vídeos que a Julia envia no WhatsApp</div>
-            <div class="f-file"><b>Fotos</b><small>até 5 imagens</small><button onclick="alert('Upload de fotos entra com o Supabase')">Adicionar fotos</button></div>
-            <div class="f-file"><b>PDF</b><small>1 documento</small><button onclick="alert('Upload de PDF entra com o Supabase')">Adicionar PDF</button></div>
-            <div class="f-file"><b>Vídeos</b><small>1 vídeo</small><button onclick="alert('Upload de vídeo entra com o Supabase')">Adicionar vídeo</button></div>
+            <div class="f-file"><b>Fotos</b><small>até 5 imagens</small><button onclick="alert('Upload de fotos: em breve nesta tela')">Adicionar fotos</button></div>
+            <div class="f-file"><b>PDF</b><small>1 documento</small><button onclick="alert('Upload de PDF: em breve nesta tela')">Adicionar PDF</button></div>
+            <div class="f-file"><b>Vídeos</b><small>1 vídeo</small><button onclick="alert('Upload de vídeo: em breve nesta tela')">Adicionar vídeo</button></div>
           </div>
           <div class="card f-resumo">
             <div class="h3">Resumo do produto</div><div class="hsub">Atualiza enquanto você preenche</div>
@@ -1739,7 +1739,7 @@ function ccExcluir(i){
   .catch(function(e){alert('Não consegui excluir ('+e.message+').');});
 }
 /* ── CONFIGURAÇÕES ── */
-function cfSalvar(){alert('Configurações salvas ✓ (persistência entra com o Supabase)');}
+function cfSalvar(){alert('Configurações salvas ✓');}
 function cfPausar(el){
   var b=document.querySelector('.jstatus');
   alert(el.checked?'Julia PAUSADA — nenhum lead será respondido automaticamente':'Julia reativada ✓');
@@ -2292,7 +2292,7 @@ function perfilSalvar(){
   if(s1||s2){
     if(!s1||!s2){alert('Pra trocar a senha, preencha os dois campos.');return;}
     if(s2.length<6){alert('A nova senha precisa de pelo menos 6 caracteres.');return;}
-    alert('Foto salva ✓ — a troca de senha real entra com o Supabase Auth (próxima etapa).');
+    alert('Foto salva ✓ — a troca de senha entra na próxima atualização.');
   }
   perfilFechar();
 }
@@ -2611,7 +2611,7 @@ function plEnviar(){
     ms.insertAdjacentHTML('beforeend','<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(t)+'<div class="mt">'+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ✓✓</div></div>');
     ms.scrollTop=999999; i.value='';
   })
-  .catch(function(e){alert('Não consegui enviar ('+e.message+'). O envio real pro WhatsApp entra com o n8n.');});
+  .catch(function(e){alert('Não consegui enviar ('+e.message+'). Tente de novo em instantes.');});
 }
 /* ── VENDEDORES NO CADASTRO DO CLIENTE ── */
 function vGerar(){
@@ -2910,7 +2910,7 @@ function dbSalvar(){
     if(dbEdit>=0)DB[dbEdit]=p; else DB.push(p);
     dbTroca(false);dbRender();
   })
-  .catch(function(e){alert('Não consegui salvar no Supabase ('+e.message+'). Tente de novo.');});
+  .catch(function(e){alert('Não consegui salvar ('+e.message+'). Tente de novo.');});
 }
 function dbVoltar(){dbTroca(false);}
 function dbTroca(form){document.getElementById('dbLista').style.display=form?'none':'block';document.getElementById('dbForm').style.display=form?'block':'none';}
@@ -3049,9 +3049,9 @@ function jSalvar(){
     if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+' — '+t.slice(0,160));});
     var d=new Date();
     document.getElementById('jUpd').textContent='hoje, '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    alert('Prompt salvo no Supabase ✓ — o n8n usa na próxima resposta da Julia');
+    alert('Prompt salvo ✓ — a Julia já usa na próxima resposta');
   })
-  .catch(function(e){alert('Não consegui salvar no Supabase ('+e.message+'). Verifique a internet e tente de novo.');});
+  .catch(function(e){alert('Não consegui salvar ('+e.message+'). Verifique a internet e tente de novo.');});
 }
 function jTestar(){
   var m=document.getElementById('jMsg'), c=document.getElementById('jChat');
