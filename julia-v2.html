@@ -1792,7 +1792,7 @@ function enviarMsg(){
   if(!chatAssumido)assumir();
   var telEnv=String(window.CONV_TEL||'').replace(/\D/g,'');
   fetch('https://jadsonsantos.app.n8n.cloud/webhook/envio-manual',{
-    method:'POST',headers:{'Content-Type':'application/json'},
+    method:'POST',headers:{'Content-Type':'application/json','X-Token':'blee-68abf71ef3737bd4b11d0ef1'},
     body:JSON.stringify({telefone:telEnv,texto:t,conta_id:(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea')})
   }).catch(function(e){alert('Envio falhou: '+e.message);});
   var m=document.createElement('div');
