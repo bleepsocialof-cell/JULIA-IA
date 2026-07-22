@@ -1041,11 +1041,11 @@ body.vw-adm .adm-pill{display:block;}
         </div>
         <div class="j-pane on" id="jpPrompt">
           <div class="j-bar">
-            <span class="j-cont" id="jCont">0 / 8000 caracteres</span>
+            <span class="j-cont" id="jCont">0 / 15000 caracteres</span>
             <button class="gbtn" onclick="jExemplo()">Carregar exemplo</button>
             <button class="gbtn" onclick="if(confirm('Limpar o prompt?')){jTa.value='';jConta();}">Limpar</button>
           </div>
-          <textarea class="j-ta" id="jTa" maxlength="8000" placeholder="Descreva quem é a Julia, como ela fala e as regras do atendimento…" oninput="jConta()"></textarea>
+          <textarea class="j-ta" id="jTa" maxlength="15000" placeholder="Descreva quem é a Julia, como ela fala e as regras do atendimento…" oninput="jConta()"></textarea>
         </div>
         <div class="j-pane" id="jpVars">
           <div class="hsub" style="margin-bottom:12px;">Clique para inserir no prompt — a Julia substitui pelos dados reais na conversa.</div>
@@ -3012,7 +3012,7 @@ function jTab(el){
 }
 function jConta(){
   var n=jTa.value.length;
-  document.getElementById('jCont').textContent=n+' / 8000 caracteres';
+  document.getElementById('jCont').textContent=n+' / 15000 caracteres';
   document.getElementById('jTam').textContent=n+' caracteres';
 }
 function jExemplo(){jTa.value=J_EX;jConta();}
