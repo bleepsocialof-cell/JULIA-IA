@@ -2054,6 +2054,14 @@ setInterval(function(){
 },10000);
 /* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
 function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function midiaMeta(t){var m=/^\[MIDIA:(image|video|audio|document)\]\s*(\S+)(?:\s*\|\s*([\s\S]*))?$/.exec(String(t||'').trim());if(!m)return null;return{tipo:m[1],url:m[2],leg:(m[3]||'').trim()};}
+function midiaHtml(t){var x=midiaMeta(t);if(!x)return ehtml(t);var u=ehtml(x.url).replace(/"/g,'&quot;');var leg=x.leg?'<div style="margin-top:5px;">'+ehtml(x.leg)+'</div>':'';
+  if(x.tipo==='image')return '<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" style="max-width:220px;width:100%;border-radius:10px;display:block;" loading="lazy"/></a>'+leg;
+  if(x.tipo==='video')return '<video src="'+u+'" controls preload="metadata" style="max-width:220px;width:100%;border-radius:10px;display:block;background:#000;"></video>'+leg;
+  if(x.tipo==='audio')return '<audio src="'+u+'" controls preload="metadata" style="width:210px;max-width:100%;display:block;"></audio>'+leg;
+  var fn=decodeURIComponent((x.url.split('/').pop()||'documento.pdf').split('?')[0]);
+  return '<a href="'+u+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(0,0,0,.06);padding:9px 11px;border-radius:10px;"><span style="font-size:20px;">📄</span><span style="font-size:11.5px;font-weight:700;word-break:break-all;">'+ehtml(fn)+'</span></a>'+leg;}
+function midiaPrev(t){var x=midiaMeta(t);if(!x)return null;return x.tipo==='image'?'🖼️ Foto':x.tipo==='video'?'🎬 Vídeo':x.tipo==='audio'?'🎧 Áudio':'📄 Documento';}
 function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
 var PERIODO='tudo';
 function perOk(l){
@@ -2089,7 +2097,7 @@ function pintarReal(){
           var pl=String(l.pp||'').toLowerCase();
           var pfx=pl.indexOf('vend')>-1?'Você: ':(pl.indexOf('julia')>-1?'Julia: ':'');
           return '<div class="cit'+(nl?' nl':'')+'" data-i="'+i+'" onclick="convAbrir('+i+',this)"><div class="cav '+l.cor+'">'+iniciais(l.n)+'</div>'
-          +'<div class="tx"><div class="nm">'+ehtml(l.n)+' <small>'+l.u+'</small></div><div class="pv">'+(pfx?'<b style="font-weight:700;color:#6b6580;">'+pfx+'</b>':'')+ehtml(l.i)+'</div>'
+          +'<div class="tx"><div class="nm">'+ehtml(l.n)+' <small>'+l.u+'</small></div><div class="pv">'+(pfx?'<b style="font-weight:700;color:#6b6580;">'+pfx+'</b>':'')+(midiaPrev(l.i)||ehtml(l.i))+'</div>'
           +'<div class="mini">'+origemIcone(l.origem)+' <span class="mp e">'+(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1].toUpperCase()+'</span></div></div>'
           +(nl&&l.nlc?'<span class="cbd">'+(l.nlc>9?'9+':l.nlc)+'</span>':'')+'</div>';
         }).join('');
@@ -2235,8 +2243,8 @@ function convAbrir(i,el,silent){
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
         var vend=(p.indexOf('vend')>-1);
         var au=cli?'<div style="font-size:8px;font-weight:700;font-family:\'Sora\';letter-spacing:1.2px;color:var(--sub);margin-bottom:3px;">'+ehtml(String(l.n||'CLIENTE').toUpperCase())+'</div>':'';
-        if(vend){h+='<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+' <span class="tk2">✓✓</span></div></div>';}
-        else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+        if(vend){h+='<div class="m eu2"><span class="et2">VOCÊ</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+' <span class="tk2">✓✓</span></div></div>';}
+        else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       });
       ms.innerHTML=h;
       if(noFim||window.MS_FIM!==false){window.MS_FIM=true;msgsFim(ms);}
@@ -2567,10 +2575,10 @@ function plAbrir(ix){
       if(d){var dl=d.toLocaleDateString('pt-BR');if(dl!==dia){dia=dl;h+='<div class="dia">'+dl+'</div>';}}
       var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
       var p=String(m.papel||'').toLowerCase();
-      if(p==='vendedor'){h+='<div class="m eu2"><span class="et2">'+ehtml((m.nome||'VENDEDOR').toUpperCase())+'</span>'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+' ✓✓</div></div>';}
+      if(p==='vendedor'){h+='<div class="m eu2"><span class="et2">'+ehtml((m.nome||'VENDEDOR').toUpperCase())+'</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+' ✓✓</div></div>';}
       else{
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
-        h+='<div class="m '+(cli?'cli':'ju')+'">'+ehtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
+        h+='<div class="m '+(cli?'cli':'ju')+'">'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
       }
     });
     if(!h)h='<div class="vazio" style="height:100%;"><span class="ic">💬</span><small>Sem mensagens ainda — o histórico enche quando o WhatsApp religar.</small></div>';
