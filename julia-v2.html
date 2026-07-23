@@ -2073,7 +2073,8 @@ function rtStart(){
     RT_WS=new WebSocket(SUPA_URL.replace('https://','wss://')+'/realtime/v1/websocket?apikey='+SUPA_KEY+'&vsn=1.0.0');
     RT_WS.onopen=function(){
       RT_TRY=0;
-      RT_WS.send(JSON.stringify({topic:'realtime:painel',event:'phx_join',payload:{config:{postgres_changes:[{event:'INSERT',schema:'public',table:'conversas'}]}},ref:String(++RT_REF)}));
+      RT_WS.send(JSON.stringify({topic:'realtime:painel',event:'phx_join',payload:{config:{postgres_changes:[{event:'INSERT',schema:'public',table:'conversas'}]},access_token:SUPA_KEY},ref:String(++RT_REF)}));
+      RT_WS.send(JSON.stringify({topic:'realtime:painel',event:'access_token',payload:{access_token:SUPA_KEY},ref:String(++RT_REF)}));
     };
     RT_WS.onmessage=function(ev){
       try{
