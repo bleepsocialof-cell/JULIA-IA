@@ -929,6 +929,7 @@ body.vw-adm .adm-pill{display:block;}
     </div>
     <div class="g-bar">
       <div class="g-busca"><input id="gBusca" placeholder="Buscar por nome ou telefone" oninput="gRender(1)"/></div>
+      <select id="gPeriodo" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="tudo">Todo período</option><option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option><option value="mes">Este mês</option></select>
       <span class="fp on" data-f="todos" onclick="gFiltro(this)">Todos</span>
       <span class="fp" data-f="pendente" onclick="gFiltro(this)">Pendentes</span>
       <span class="fp" data-f="qualificado" onclick="gFiltro(this)">Qualificados</span>
@@ -2461,9 +2462,10 @@ function verConexao(){
   }).catch(function(e){alert('Não consegui consultar a conexão ('+e.message+').');});
 }
 function glExportar(){
-  if(!GL.length){alert('Sem leads para exportar.');return;}
+  var ls=(typeof gLista==='function')?gLista():GL;
+  if(!ls.length){alert('Nenhum lead no filtro atual para exportar.');return;}
   var cab=['Nome','Telefone','Interesse','Origem','Etapa','Score','Status','Criado em'];
-  var lin=GL.map(function(l){return [l.n,l.t,l.i,l.origem||'',l.e,l.sc,l.st,l.cr||''].map(function(v){v=String(v==null?'':v).replace(/"/g,'""');return '"'+v+'"';}).join(';');});
+  var lin=ls.map(function(l){return [l.n,l.t,l.i,l.origem||'',l.e,l.sc,l.st,l.cr||''].map(function(v){v=String(v==null?'':v).replace(/"/g,'""');return '"'+v+'"';}).join(';');});
   var csv='\uFEFF'+cab.join(';')+'\n'+lin.join('\n');
   var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -2888,8 +2890,15 @@ var gF='todos', gPg=1, gPP=10, gMarc={};
 var GSTT={pendente:['Pendente','pp'],qualificado:['Qualificado','pq'],crm:['No CRM','pc'],nq:['Não qualificado','px']};
 function gLista(){
   var q=(document.getElementById('gBusca').value||'').toLowerCase();
+  var pEl=document.getElementById('gPeriodo'), p=pEl?pEl.value:'tudo';
+  var min=null, agora=new Date();
+  if(p==='hoje')min=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
+  else if(p==='7')min=new Date(Date.now()-7*864e5);
+  else if(p==='30')min=new Date(Date.now()-30*864e5);
+  else if(p==='mes')min=new Date(agora.getFullYear(),agora.getMonth(),1);
   return GL.filter(function(l){
     if(gF!=='todos'&&l.st!==gF)return false;
+    if(min&&(!l.cr||new Date(l.cr)<min))return false;
     if(q&&l.n.toLowerCase().indexOf(q)<0&&l.t.replace(/\D/g,'').indexOf(q.replace(/\D/g,''))<0)return false;
     return true;
   });
