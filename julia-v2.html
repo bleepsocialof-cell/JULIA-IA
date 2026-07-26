@@ -1845,7 +1845,7 @@ function supaTempo(ts){
   return 'há '+Math.floor(d/1440)+' dias';
 }
 function carregarLeadsReais(){
-  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=200'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):'')+(VENDEDOR_ID?('&assumido_por=eq.'+VENDEDOR_ID):''),
+  fetch(SUPA_URL+'/rest/v1/leads?select=*&order=created_at.desc&limit=1000'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):'')+(VENDEDOR_ID?('&assumido_por=eq.'+VENDEDOR_ID):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
@@ -1954,7 +1954,7 @@ function convFiltro(el){
 }
 somPinta();
 function carregarConversasReais(){
-  fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=600'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
+  fetch(SUPA_URL+'/rest/v1/conversas?select=telefone,nome,mensagem,papel,criado_em&order=criado_em.desc&limit=5000'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
