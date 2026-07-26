@@ -929,7 +929,11 @@ body.vw-adm .adm-pill{display:block;}
     </div>
     <div class="g-bar">
       <div class="g-busca"><input id="gBusca" placeholder="Buscar por nome ou telefone" oninput="gRender(1)"/></div>
-      <select id="gPeriodo" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="tudo">Todo período</option><option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select>
+      <select id="gAno" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="">Todos os anos</option></select>
+      <select id="gMes" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
+      <input type="date" id="gDe" class="fp" style="cursor:pointer;" onchange="gRender(1)" title="De (data inicial)"/>
+      <input type="date" id="gAte" class="fp" style="cursor:pointer;" onchange="gRender(1)" title="Até (data final)"/>
+      <span class="fp" style="cursor:pointer;" onclick="gFiltroLimpar()" title="Limpar filtros de data">✕</span>
       <span class="fp on" data-f="todos" onclick="gFiltro(this)">Todos</span>
       <span class="fp" data-f="pendente" onclick="gFiltro(this)">Pendentes</span>
       <span class="fp" data-f="qualificado" onclick="gFiltro(this)">Qualificados</span>
@@ -1862,7 +1866,7 @@ function carregarLeadsReais(){
                sc:(typeof r.score==='number'?r.score:0),
                u:supaTempo(r.updated_at||r.created_at),cor:['c1','c2','c3',''][ix%4]});
     });
-    if(typeof gPeriodoMontar==='function')gPeriodoMontar();
+    if(typeof gAnoMontar==='function')gAnoMontar();
     if(typeof gRender==='function')gRender(1);
     pintarReal();
     var sf=document.querySelector('.sfoot b');
@@ -2891,33 +2895,35 @@ var gF='todos', gPg=1, gPP=10, gMarc={};
 var GSTT={pendente:['Pendente','pp'],qualificado:['Qualificado','pq'],crm:['No CRM','pc'],nq:['Não qualificado','px']};
 function gListaBase(comStatus){
   var q=(document.getElementById('gBusca').value||'').toLowerCase();
-  var pEl=document.getElementById('gPeriodo'), p=pEl?pEl.value:'tudo';
-  var min=null, max=null, agora=new Date();
-  if(p==='hoje')min=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
-  else if(p==='7')min=new Date(Date.now()-7*864e5);
-  else if(p==='30')min=new Date(Date.now()-30*864e5);
-  else if(p.indexOf('m:')===0){var pa=p.slice(2).split('-');min=new Date(+pa[0],+pa[1]-1,1);max=new Date(+pa[0],+pa[1],1);}
+  var ano=+((document.getElementById('gAno')||{}).value||0);
+  var mes=+((document.getElementById('gMes')||{}).value||0);
+  var deV=(document.getElementById('gDe')||{}).value||'', ateV=(document.getElementById('gAte')||{}).value||'';
+  var de=deV?new Date(deV+'T00:00:00'):null, ate=ateV?new Date(ateV+'T23:59:59'):null;
   return GL.filter(function(l){
     if(comStatus&&gF!=='todos'&&l.st!==gF)return false;
-    if(min&&(!l.cr||new Date(l.cr)<min))return false;
-    if(max&&(!l.cr||new Date(l.cr)>=max))return false;
+    if(ano||mes||de||ate){
+      if(!l.cr)return false;
+      var d=new Date(l.cr);
+      if(ano&&d.getFullYear()!==ano)return false;
+      if(mes&&(d.getMonth()+1)!==mes)return false;
+      if(de&&d<de)return false;
+      if(ate&&d>ate)return false;
+    }
     if(q&&l.n.toLowerCase().indexOf(q)<0&&l.t.replace(/\D/g,'').indexOf(q.replace(/\D/g,''))<0)return false;
     return true;
   });
 }
 function gLista(){return gListaBase(true);}
-var MES_NOME=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-function gPeriodoMontar(){
-  var el=document.getElementById('gPeriodo'); if(!el)return;
-  var sel=el.value||'tudo', vistos={}, meses=[];
-  GL.forEach(function(l){if(!l.cr)return;var d=new Date(l.cr),k=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2);
-    if(!vistos[k]){vistos[k]=1;meses.push(k);}});
-  meses.sort().reverse();
-  var h='<option value="tudo">Todo período</option><option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option>';
-  meses.forEach(function(k){var pa=k.split('-');h+='<option value="m:'+k+'">'+MES_NOME[+pa[1]-1]+' '+pa[0]+'</option>';});
-  el.innerHTML=h;
-  el.value=(el.querySelector('option[value="'+sel+'"]'))?sel:'tudo';
+function gAnoMontar(){
+  var el=document.getElementById('gAno'); if(!el)return;
+  var sel=el.value, vistos={}, anos=[];
+  GL.forEach(function(l){if(!l.cr)return;var a=new Date(l.cr).getFullYear();if(!vistos[a]){vistos[a]=1;anos.push(a);}});
+  anos.sort().reverse();
+  var h='<option value="">Todos os anos</option>';
+  anos.forEach(function(a){h+='<option value="'+a+'">'+a+'</option>';});
+  el.innerHTML=h; el.value=(el.querySelector('option[value="'+sel+'"]'))?sel:'';
 }
+function gFiltroLimpar(){['gAno','gMes','gDe','gAte'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});gRender(1);}
 function gRender(pg){
   if(pg)gPg=pg;
   var ls=gLista(), tot=Math.max(1,Math.ceil(ls.length/gPP));
