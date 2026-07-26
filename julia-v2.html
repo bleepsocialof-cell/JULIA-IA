@@ -1369,9 +1369,9 @@ body.vw-adm .adm-pill{display:block;}
       <div class="cf-card">
         <h3>Conta da empresa</h3>
         <div class="sb">Dados que aparecem no seu painel e nas comunicações</div>
-        <div class="cf-fl"><label>Nome da empresa</label><input id="cfEmp" value="Blee Social"/></div>
-        <div class="cf-fl"><label>E-mail de contato</label><input id="cfMail" value="jul.ia@bleesocial.com.br"/></div>
-        <div class="cf-fl" style="margin-bottom:0;"><label>Telefone / WhatsApp</label><input id="cfZap" value="+55 81 99933-1884"/></div>
+        <div class="cf-fl"><label>Nome da empresa</label><input id="cfEmp" placeholder="Nome da empresa"/></div>
+        <div class="cf-fl"><label>E-mail de contato</label><input id="cfMail" placeholder="E-mail de contato"/></div>
+        <div class="cf-fl" style="margin-bottom:0;"><label>Telefone / WhatsApp</label><input id="cfZap" placeholder="+55 81 9 9999-9999"/></div>
       </div>
 
       <div class="cf-card">
@@ -2503,18 +2503,28 @@ function resumoLead(){
     '<div class="pf-bts" style="margin-top:14px;"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Fechar</button></div></div>';
   document.body.appendChild(ov);
 }
+function cfContaId(){return window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
 function cfSalvar(){
-  var box=document.getElementById('vConfig');if(!box){alert('Tela não encontrada.');return;}
-  var dados={};box.querySelectorAll('input[id]').forEach(function(i){dados[i.id]=i.value;});
-  try{localStorage.setItem('julia_cfg',JSON.stringify(dados));alert('Preferências salvas neste navegador ✓');}
-  catch(e){alert('Não consegui salvar ('+e.message+').');}
+  var body={empresa:(document.getElementById('cfEmp').value||'').trim(),
+            email_contato:(document.getElementById('cfMail').value||'').trim(),
+            zap_dono:(document.getElementById('cfZap').value||'').trim()};
+  fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+cfContaId(),{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    alert('Dados da conta salvos ✓ — valem em qualquer navegador.');})
+  .catch(function(e){alert('Não consegui salvar ('+e.message+').');});
 }
-function cfRestaurar(){
-  try{var d=JSON.parse(localStorage.getItem('julia_cfg')||'{}');
-    Object.keys(d).forEach(function(id){var el=document.getElementById(id);if(el)el.value=d[id];});
-  }catch(e){}
+function cfCarregar(){
+  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,email_contato,zap_dono&id=eq.'+cfContaId(),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.json();})
+  .then(function(rows){var c=rows&&rows[0]; if(!c)return;
+    var e1=document.getElementById('cfEmp'),e2=document.getElementById('cfMail'),e3=document.getElementById('cfZap');
+    if(e1)e1.value=c.empresa||''; if(e2)e2.value=c.email_contato||''; if(e3)e3.value=c.zap_dono||'';
+  }).catch(function(e){console.warn('config da conta indisponível',e);});
 }
-setTimeout(cfRestaurar,800);
+setTimeout(cfCarregar,800);
 function pintarPlanoCliente(plano){
   var hn=document.getElementById('paNome'), hi=document.getElementById('paInfo');
   if(hn)hn.textContent=plano;
