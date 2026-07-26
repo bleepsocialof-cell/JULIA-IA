@@ -879,7 +879,7 @@ body.vw-adm .adm-pill{display:block;}
       <div class="stbar" id="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
       <div class="comp">
         <textarea id="msgIn" rows="1" placeholder="Digite uma mensagem…" oninput="msgGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg();}"></textarea>
-        <button class="icb" data-tip="Descartar lead" onclick="if(confirm('Descartar este lead? Ele sai da fila da Julia.'))alert('Lead descartado (demo)')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        <button class="icb" data-tip="Descartar lead" onclick="descartarLead()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
         <button class="icb q" data-tip="Qualificar lead ✦" onclick="qualificarLead()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6l-5 3.6 1.9-5.8L4 8.8h6.1z"/></svg></button>
         <button class="send" data-tip="Enviar" onclick="enviarMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>
@@ -909,7 +909,7 @@ body.vw-adm .adm-pill{display:block;}
       <div class="kv"><span>Última msg</span><b>há 2 min</b></div>
       <div class="lcta">
         <button class="a1" onclick="assumir()">Assumir conversa</button>
-        <button class="a2" onclick="alert('Análise da IA (demo):\n\n• João busca apto até R$ 350 mil perto da praia em Boa Viagem\n• Alta intenção: respondeu rápido e aceitou receber opções\n• Próximo passo: propor visita quinta ou sexta à tarde')">Analisar com IA</button>
+        <button class="a2" onclick="resumoLead()">Resumo do lead</button>
       </div>
     </div>
   </div>
@@ -918,7 +918,7 @@ body.vw-adm .adm-pill{display:block;}
   <div class="view" id="vGestao">
     <div class="g-top">
       <div><h1>Gestão de Leads</h1><p>Acompanhe, qualifique e envie leads para o seu CRM</p></div>
-      <button class="gbtn" onclick="alert('Exportação em breve')">↓ Exportar</button>
+      <button class="gbtn" onclick="glExportar()">↓ Exportar</button>
     </div>
     <div class="g-stats">
       <div class="gs"><div class="l">Total de leads</div><div class="n" id="gsT">0</div></div>
@@ -969,7 +969,7 @@ body.vw-adm .adm-pill{display:block;}
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="#25D366"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.4.6c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1s.7-.8.9-1.1c.2-.3.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.1.1.7-.1 1.3z"/></svg></span><span class="nm3">WhatsApp Business</span><span class="nst ok" id="nsWa">ATIVO</span></div>
           <div class="ds">O canal da Julia. Cliente manda mensagem, ela responde na hora — via API oficial.</div>
-          <button class="nbtn off2" onclick="alert('Conectado via 360dialog · número +55 81 99933-1884')">Ver conexão</button>
+          <button class="nbtn off2" onclick="verConexao()">Ver conexão</button>
         </div>
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="#0668E1"><path d="M6.9 7.5c-2.6 0-4.7 2.7-4.7 5.8 0 2 1 3.4 2.7 3.4 1.2 0 2.1-.6 3.6-2.9l1.2-1.9 1.4 2.3c1.4 2.2 2.4 2.5 3.5 2.5 1.9 0 3.2-1.6 3.2-4 0-3.2-2.1-5.2-4.6-5.2-1.4 0-2.6.7-3.8 2.3-1.1-1.5-2.1-2.3-2.5-2.3zm-.1 2c.4 0 .9.5 1.9 2l-.9 1.5c-1 1.6-1.5 2-2.1 2-.7 0-1.1-.6-1.1-1.6 0-2.2 1.2-3.9 2.2-3.9zm6.4 0c1.4 0 2.6 1.4 2.6 3.4 0 1.2-.5 1.9-1.2 1.9-.6 0-1-.3-2.1-2l-.8-1.3c.6-1.3 1-2 1.5-2z"/></svg></span><span class="nm3">Meta Lead Ads</span><span class="nst off" id="nsMeta">DESCONECTADO</span></div>
@@ -1272,7 +1272,7 @@ body.vw-adm .adm-pill{display:block;}
   <div class="view" id="vLeads">
     <div class="k-top">
       <div><h1>Leads</h1><p>Pipeline em tempo real — leads agrupados por etapa</p></div>
-      <button class="pillbtn" onclick="alert('Pipeline atualizado ✓')">⟳ Atualizar</button>
+      <button class="pillbtn" onclick="carregarLeadsReais();alert('Pipeline recarregado do banco ✓')">⟳ Atualizar</button>
     </div>
     <div class="kb">
       <div class="kcol"><div class="kch"><span class="kd" style="background:#7c3aed"></span><b>Novo lead</b><span class="kn">2</span></div>
@@ -1739,7 +1739,7 @@ function ccExcluir(i){
   .catch(function(e){alert('Não consegui excluir ('+e.message+').');});
 }
 /* ── CONFIGURAÇÕES ── */
-function cfSalvar(){alert('Configurações salvas ✓');}
+
 function cfPausar(el){
   var b=document.querySelector('.jstatus');
   alert(el.checked?'Julia PAUSADA — nenhum lead será respondido automaticamente':'Julia reativada ✓');
@@ -2450,6 +2450,64 @@ function bootCliente(email){
   .catch(function(e){console.warn('falha ao identificar a conta',e);carregarLeadsReais();dbCarregar();jCarregar();});
 }
 var COMERCIAL_ZAP='5581999331884';
+/* ── Leva 1: botoes reais ── */
+function verConexao(){
+  var cid=window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';
+  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,zap_360&id=eq.'+cid,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){var c=rows&&rows[0];
+    if(c&&c.zap_360){alert('Conectado via 360dialog\n\nConta: '+(c.empresa||'')+'\nNúmero: '+c.zap_360);}
+    else{alert('Número do WhatsApp não cadastrado nesta conta.\nPreencha o campo do número 360 em Contas de Clientes.');}
+  }).catch(function(e){alert('Não consegui consultar a conexão ('+e.message+').');});
+}
+function glExportar(){
+  if(!GL.length){alert('Sem leads para exportar.');return;}
+  var cab=['Nome','Telefone','Interesse','Origem','Etapa','Score','Status','Criado em'];
+  var lin=GL.map(function(l){return [l.n,l.t,l.i,l.origem||'',l.e,l.sc,l.st,l.cr||''].map(function(v){v=String(v==null?'':v).replace(/"/g,'""');return '"'+v+'"';}).join(';');});
+  var csv='\uFEFF'+cab.join(';')+'\n'+lin.join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='leads-julia-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+}
+function descartarLead(){
+  var l=GL[window.CONV_SEL];
+  if(!l||!l.id){alert('Selecione uma conversa primeiro.');return;}
+  if(!confirm('Descartar '+l.n+'? Ele sai da fila da Julia.'))return;
+  fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({status:'descartado'})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    alert('Lead descartado ✓');carregarLeadsReais();})
+  .catch(function(e){alert('Não consegui descartar ('+e.message+').');});
+}
+var ETAPA_NOME={chegou:'Chegou',conversa:'Em conversa',qualificacao:'Qualificação',documentacao:'Documentação',agendamento:'Agendamento',crm:'Enviado ao CRM',descartado:'Descartado'};
+function resumoLead(){
+  var l=GL[window.CONV_SEL];
+  if(!l){alert('Selecione uma conversa primeiro.');return;}
+  var tempo='—';
+  if(l.cr){var h=Math.floor((Date.now()-new Date(l.cr).getTime())/36e5);tempo=h<24?(h+'h na base'):(Math.floor(h/24)+' dias na base');}
+  var ov=document.createElement('div');ov.className='pf-ov on';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  function kv(k,v){return '<div class="kv"><span>'+k+'</span><b>'+ehtml(String(v==null||v===''?'—':v))+'</b></div>';}
+  ov.innerHTML='<div class="pf-md" style="max-width:380px;"><h2>Resumo do lead</h2>'+
+    kv('Nome',l.n)+kv('Telefone',l.t)+kv('Interesse',l.i)+kv('Origem',l.origem)+
+    kv('Etapa',ETAPA_NOME[l.e]||l.e)+kv('Score',l.sc+'/100')+kv('Tempo',tempo)+kv('Última atividade',l.u)+
+    '<div class="pf-bts" style="margin-top:14px;"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Fechar</button></div></div>';
+  document.body.appendChild(ov);
+}
+function cfSalvar(){
+  var box=document.getElementById('vConfig');if(!box){alert('Tela não encontrada.');return;}
+  var dados={};box.querySelectorAll('input[id]').forEach(function(i){dados[i.id]=i.value;});
+  try{localStorage.setItem('julia_cfg',JSON.stringify(dados));alert('Preferências salvas neste navegador ✓');}
+  catch(e){alert('Não consegui salvar ('+e.message+').');}
+}
+function cfRestaurar(){
+  try{var d=JSON.parse(localStorage.getItem('julia_cfg')||'{}');
+    Object.keys(d).forEach(function(id){var el=document.getElementById(id);if(el)el.value=d[id];});
+  }catch(e){}
+}
+setTimeout(cfRestaurar,800);
 function pintarPlanoCliente(plano){
   var hn=document.getElementById('paNome'), hi=document.getElementById('paInfo');
   if(hn)hn.textContent=plano;
