@@ -1856,7 +1856,7 @@ function carregarLeadsReais(){
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
-    var OLD={}; GL.forEach(function(o){var k=String(o.t||'').replace(/\D/g,'').slice(-8); if(k)OLD[k]=o;});
+    var OLD={}; GL.forEach(function(o){var k=String(o.t||'').replace(/\D/g,'').slice(-8); if(k&&(o.id||o.um))OLD[k]=o;});
     GL.length=0;
     rows.forEach(function(r,ix){
       var etapa=String(r.etapa||'').toLowerCase(), status=String(r.status||'').toLowerCase();
@@ -1874,7 +1874,7 @@ function carregarLeadsReais(){
         if(o.n&&o.n!=='Sem nome'&&(/^(sem nome)$/i.test(String(L.n).trim())||/^\+?[\d\s()-]+$/.test(String(L.n).trim())))L.n=o.n;}
     });
     var NOV={}; GL.forEach(function(l){NOV[String(l.t||'').replace(/\D/g,'').slice(-8)]=1;});
-    Object.keys(OLD).forEach(function(k){var o=OLD[k]; if(!NOV[k]&&o&&!o.id)GL.push(o);});
+    Object.keys(OLD).forEach(function(k){var o=OLD[k]; if(!NOV[k]&&o&&!o.id&&o.um)GL.push(o);});
     GL.sort(function(a,b){return new Date(b.um||b.cr||0)-new Date(a.um||a.cr||0);});
     if(typeof gAnoMontar==='function')gAnoMontar();
     if(typeof gRender==='function')gRender(1);
