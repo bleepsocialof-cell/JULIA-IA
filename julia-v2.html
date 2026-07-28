@@ -854,7 +854,7 @@ body.vw-adm .adm-pill{display:block;}
     <div class="cl">
       <div class="clh"><h2>Conversas</h2><span class="cnt">20 contatos</span><button class="sino" id="somBtn" onclick="somToggle()" title="Som de notificação"></button></div>
       <div class="busca"><input placeholder="Buscar por nome ou número"/></div>
-      <div class="filtros"><span class="fp on" data-f="todas" onclick="convFiltro(this)">Todas</span><span class="fp" data-f="nl" onclick="convFiltro(this)">Não lidas</span><span class="fp" data-f="q" onclick="convFiltro(this)">Quentes</span></div>
+      <div class="filtros"><span class="fp on" data-f="todas" onclick="convFiltro(this)">Todas</span><span class="fp" data-f="nl" onclick="convFiltro(this)">Não lidas</span><span class="fp" data-f="q" onclick="convFiltro(this)">Quentes</span><span class="fp" data-f="desc" onclick="convFiltro(this)">Descartadas</span></div>
       <div class="cits">
         <div class="cit on"><div class="cav c1">JP<span class="on"></span></div><div class="tx"><div class="nm">João Pereira <small>17:15</small></div><div class="pv">Perto da praia, se possível 🏖️</div><div class="mini"><span class="mp h">QUENTE</span><span class="mp e">QUALIFICAÇÃO</span></div></div><span class="cbd">5</span></div>
         <div class="cit"><div class="cav c2">ER<span class="on"></span></div><div class="tx"><div class="nm">Elza Ramos <small>16:40</small></div><div class="pv">Quinta às 15h tá ótimo!</div><div class="mini"><span class="mp a">VISITA AGENDADA</span></div></div></div>
@@ -1948,17 +1948,19 @@ function somToca(){
   }catch(e){}
 }
 function nlPinta(){
-  var nl=GL.filter(naoLida).length;
+  var nl=GL.filter(function(l){return naoLida(l)&&l.e!=='descartado'&&l.st!=='nq';}).length;
   var bd=document.querySelector('.ni[data-v="vConversas"] .bd');
   if(bd){bd.textContent=nl;bd.style.display=nl?'':'none';}
   var base=document.title.replace(/^\(\d+\)\s*/,'');
   document.title=nl?('('+nl+') '+base):base;
   var fps=document.querySelectorAll('#vConversas .filtros .fp');
-  if(fps.length===3){
-    var q=GL.filter(function(l){return (l.sc||0)>=60;}).length;
-    fps[0].textContent='Todas '+GL.length;
+  if(fps.length===4){
+    var dsc=GL.filter(function(l){return l.e==='descartado'||l.st==='nq';}).length;
+    var q=GL.filter(function(l){return (l.sc||0)>=60&&l.e!=='descartado'&&l.st!=='nq';}).length;
+    fps[0].textContent='Todas '+(GL.length-dsc);
     fps[1].textContent='Não lidas '+nl;
     fps[2].textContent='Quentes '+q;
+    fps[3].textContent='Descartadas '+dsc;
   }
 }
 function convFiltro(el){
@@ -2149,12 +2151,17 @@ function pintarReal(){
     }else{
       var VIS=[];
       GL.forEach(function(l,i){
-        if(CV_F==='nl'&&!naoLida(l))return;
-        if(CV_F==='q'&&(l.sc||0)<60)return;
+        var lDesc=(l.e==='descartado'||l.st==='nq');
+        if(CV_F==='desc'){if(!lDesc)return;}
+        else{
+          if(lDesc)return;
+          if(CV_F==='nl'&&!naoLida(l))return;
+          if(CV_F==='q'&&(l.sc||0)<60)return;
+        }
         VIS.push(i);
       });
       if(!VIS.length){
-        cits.innerHTML='<div class="vazio" style="padding:40px 20px;"><span class="ic">'+(CV_F==='nl'?'✅':'🔥')+'</span><b>'+(CV_F==='nl'?'Tudo lido':'Nenhum lead quente agora')+'</b><small>'+(CV_F==='nl'?'Nenhuma conversa aguardando sua leitura.':'Quando um lead esquentar, ele aparece aqui.')+'</small></div>';
+        cits.innerHTML='<div class="vazio" style="padding:40px 20px;"><span class="ic">'+(CV_F==='nl'?'✅':CV_F==='desc'?'🗑️':'🔥')+'</span><b>'+(CV_F==='nl'?'Tudo lido':CV_F==='desc'?'Nenhuma conversa descartada':'Nenhum lead quente agora')+'</b><small>'+(CV_F==='nl'?'Nenhuma conversa aguardando sua leitura.':CV_F==='desc'?'Quando você descartar um lead, a conversa dele fica guardada aqui.':'Quando um lead esquentar, ele aparece aqui.')+'</small></div>';
       }else{
         cits.innerHTML=VIS.map(function(i){
           var l=GL[i], nl=naoLida(l);
