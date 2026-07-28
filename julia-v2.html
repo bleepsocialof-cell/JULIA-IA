@@ -133,6 +133,14 @@ body.vw-adm .adm-pill{display:block;}
 .filtros{display:flex;gap:6px;padding:2px 14px 12px;border-bottom:1px solid var(--line2);}
 .fp{font-size:10.5px;font-weight:600;color:#6b6580;border:1px solid var(--line);padding:4px 11px;border-radius:99px;cursor:pointer;background:#fff;}
 .fp.on{background:#17141f;color:#fff;border-color:#17141f;}
+#vConversas .filtros{flex-wrap:nowrap;overflow-x:auto;gap:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+#vConversas .filtros::-webkit-scrollbar{display:none;}
+#vConversas .filtros .fp{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:11.5px;padding:6px 13px;border-color:#d9d4e8;}
+#vConversas .filtros .fp.on{background:#7c3aed;border-color:#7c3aed;color:#fff;}
+#vConversas .filtros .fpn{background:#f1eff7;color:#6b6580;border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:700;font-style:normal;}
+#vConversas .filtros .fp.on .fpn{background:rgba(255,255,255,.24);color:#fff;}
+#vConversas .filtros .fp[data-f="q"] .fpn{background:#fdeeea;color:#b3401f;}
+#vConversas .filtros .fp[data-f="q"].on .fpn{background:rgba(255,255,255,.24);color:#fff;}
 .cits{flex:1;overflow:auto;padding-bottom:90px;}
 .cit{display:flex;gap:10px;padding:12px 15px;border-bottom:1px solid var(--line2);cursor:pointer;}
 .cit:hover{background:#faf9fd;}
@@ -854,7 +862,7 @@ body.vw-adm .adm-pill{display:block;}
     <div class="cl">
       <div class="clh"><h2>Conversas</h2><span class="cnt">20 contatos</span><button class="sino" id="somBtn" onclick="somToggle()" title="Som de notificação"></button></div>
       <div class="busca"><input placeholder="Buscar por nome ou número"/></div>
-      <div class="filtros"><span class="fp on" data-f="todas" onclick="convFiltro(this)">Todas</span><span class="fp" data-f="nl" onclick="convFiltro(this)">Não lidas</span><span class="fp" data-f="q" onclick="convFiltro(this)">Quentes</span><span class="fp" data-f="desc" onclick="convFiltro(this)">Descartadas</span></div>
+      <div class="filtros"><span class="fp on" data-f="todas" onclick="convFiltro(this)">Todas <b class="fpn">0</b></span><span class="fp" data-f="nl" onclick="convFiltro(this)">Não lidas <b class="fpn">0</b></span><span class="fp" data-f="q" onclick="convFiltro(this)">Quentes <b class="fpn">0</b></span><span class="fp" data-f="desc" onclick="convFiltro(this)" title="Descartadas"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> <b class="fpn">0</b></span></div>
       <div class="cits">
         <div class="cit on"><div class="cav c1">JP<span class="on"></span></div><div class="tx"><div class="nm">João Pereira <small>17:15</small></div><div class="pv">Perto da praia, se possível 🏖️</div><div class="mini"><span class="mp h">QUENTE</span><span class="mp e">QUALIFICAÇÃO</span></div></div><span class="cbd">5</span></div>
         <div class="cit"><div class="cav c2">ER<span class="on"></span></div><div class="tx"><div class="nm">Elza Ramos <small>16:40</small></div><div class="pv">Quinta às 15h tá ótimo!</div><div class="mini"><span class="mp a">VISITA AGENDADA</span></div></div></div>
@@ -1957,10 +1965,8 @@ function nlPinta(){
   if(fps.length===4){
     var dsc=GL.filter(function(l){return l.e==='descartado'||l.st==='nq';}).length;
     var q=GL.filter(function(l){return (l.sc||0)>=60&&l.e!=='descartado'&&l.st!=='nq';}).length;
-    fps[0].textContent='Todas '+(GL.length-dsc);
-    fps[1].textContent='Não lidas '+nl;
-    fps[2].textContent='Quentes '+q;
-    fps[3].textContent='Descartadas '+dsc;
+    var ns=[GL.length-dsc,nl,q,dsc];
+    fps.forEach(function(f,i){var b=f.querySelector('.fpn');if(b)b.textContent=ns[i];});
   }
 }
 function convFiltro(el){
