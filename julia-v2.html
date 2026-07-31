@@ -2134,6 +2134,28 @@ function midiaHtml(t){var x=midiaMeta(t);if(!x)return ehtml(t);var u=ehtml(x.url
   var fn=decodeURIComponent((x.url.split('/').pop()||'documento.pdf').split('?')[0]);
   return '<a href="'+u+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(0,0,0,.06);padding:9px 11px;border-radius:10px;"><span style="font-size:20px;">📄</span><span style="font-size:11.5px;font-weight:700;word-break:break-all;">'+ehtml(fn)+'</span></a>'+leg;}
 function midiaPrev(t){var x=midiaMeta(t);if(!x)return null;return x.tipo==='image'?'🖼️ Foto':x.tipo==='video'?'🎬 Vídeo':x.tipo==='audio'?'🎧 Áudio':'📄 Documento';}
+function ehLadoJulia(p){p=String(p||'').toLowerCase();return !(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1||p.indexOf('vend')>-1);}
+function fundirAudio(ms){try{
+  var arr=ms.slice(),drop={},PRE=/^\[áudio Julia[^\]]*\]\s*/;
+  function norm(t){return String(t||'').replace(/\s+/g,' ').trim();}
+  for(var i=0;i<arr.length;i++){
+    var a=arr[i];if(!a||!ehLadoJulia(a.papel))continue;
+    var ta=String(a.mensagem||'');if(!PRE.test(ta))continue;
+    var core=norm(ta.replace(PRE,''));if(!core)continue;
+    var da=a.criado_em?new Date(a.criado_em).getTime():0;
+    for(var j=0;j<arr.length;j++){
+      if(j===i||drop[j])continue;
+      var b=arr[j];if(!b||!ehLadoJulia(b.papel))continue;
+      var tb=String(b.mensagem||'');if(PRE.test(tb))continue;
+      if(norm(tb)!==core)continue;
+      var db=b.criado_em?new Date(b.criado_em).getTime():0;
+      if(da&&db&&Math.abs(da-db)>180000)continue;
+      drop[j]=1;break;
+    }
+  }
+  return arr.filter(function(_,k){return !drop[k];});
+}catch(e){return ms;}}
+
 function iniciais(s){return String(s).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'?';}
 var PERIODO='tudo';
 function perOk(l){
@@ -2304,6 +2326,7 @@ function convAbrir(i,el,silent){
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(msgs){
       msgs.reverse();
+      msgs=fundirAudio(msgs);
       if(!msgs.length){
         ms.innerHTML='<div class="vazio" style="height:100%;"><span class="ic">🕓</span><b>'+ehtml(l.n)+'</b><small>Ainda sem mensagens registradas — o histórico enche quando o n8n religar com o 360dialog.</small></div>';
         return;
@@ -2728,6 +2751,7 @@ function plAbrir(ix){
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.ok?r.json():[];})
   .then(function(msgs){
+    msgs=fundirAudio(msgs);
     var h='',dia='';
     msgs.forEach(function(m){
       var d=m.criado_em?new Date(m.criado_em):null;
