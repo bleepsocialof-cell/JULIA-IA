@@ -1377,20 +1377,33 @@ body.vw-adm .adm-pill{display:block;}
     <div class="cf-scroll">
 
       <div class="cf-card">
-        <h3>Conta da empresa</h3>
+        <h3>Conta da empresa <span id="cfPlanoBadge" style="display:none;margin-left:8px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;background:#ede9fe;color:#5b21b6;vertical-align:2px;"></span><span id="cfStatusBadge" style="display:none;margin-left:6px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;background:#dcfce7;color:#166534;vertical-align:2px;"></span></h3>
         <div class="sb">Dados que aparecem no seu painel e nas comunicações</div>
         <div class="cf-fl"><label>Nome da empresa</label><input id="cfEmp" placeholder="Nome da empresa"/></div>
         <div class="cf-fl"><label>E-mail de contato</label><input id="cfMail" placeholder="E-mail de contato"/></div>
-        <div class="cf-fl" style="margin-bottom:0;"><label>Telefone / WhatsApp</label><input id="cfZap" placeholder="+55 81 9 9999-9999"/></div>
+        <div class="cf-fl"><label>Telefone / WhatsApp do responsável</label><input id="cfZap" placeholder="5581999998888 (DDI+DDD+número, só dígitos)"/></div>
+        <div class="cf-fl"><label>CNPJ</label><input id="cfCnpj" placeholder="00.000.000/0000-00"/></div>
+        <div class="cf-fl" style="margin-bottom:0;"><label>Responsável</label><input id="cfResp" placeholder="Nome do responsável"/></div>
+      </div>
+
+      <div class="cf-card">
+        <h3>Canal WhatsApp</h3>
+        <div class="sb">A linha que a Julia usa nesta conta</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+          <div style="background:rgba(124,58,237,.07);border-radius:10px;padding:12px;"><div style="font-size:11px;opacity:.65;margin-bottom:4px;">Número conectado</div><div id="cfCanalNum" style="font-weight:800;">—</div></div>
+          <div style="background:rgba(124,58,237,.07);border-radius:10px;padding:12px;"><div style="font-size:11px;opacity:.65;margin-bottom:4px;">Status</div><div id="cfCanalSt" style="font-weight:800;">—</div></div>
+          <div style="background:rgba(124,58,237,.07);border-radius:10px;padding:12px;"><div style="font-size:11px;opacity:.65;margin-bottom:4px;">Mensagens da Julia no mês</div><div id="cfCanalMsgs" style="font-weight:800;">—</div></div>
+        </div>
       </div>
 
       <div class="cf-card">
         <h3>Notificações</h3>
         <div class="sb">Escolha o que você quer ser avisado</div>
-        <div class="cf-row"><div><b>Reunião confirmada</b><small>Avisa quando um cliente agendar reunião</small></div><input type="checkbox" class="sw" checked/></div>
-        <div class="cf-row"><div><b>Resumo diário</b><small>Um resumo das conversas e leads do dia</small></div><input type="checkbox" class="sw"/></div>
+        <div class="cf-row"><div><b>Reunião ou visita confirmada</b><small>Avisa quando um cliente agendar reunião ou visita</small></div><input type="checkbox" class="sw" id="cfNReu" checked/></div>
+        <div class="cf-row"><div><b>Julia sem saldo ou erro de envio</b><small>Avisa na hora se a Julia parar de conseguir responder</small></div><input type="checkbox" class="sw" id="cfNErr" checked/></div>
+        <div class="cf-row"><div><b>Resumo diário</b><small>Um resumo das conversas e leads do dia</small></div><div style="display:flex;align-items:center;gap:10px;"><select id="cfResHora" style="width:auto;padding:6px 10px;"><option value="7">7h</option><option value="8">8h</option><option value="9">9h</option><option value="12">12h</option><option value="17">17h</option><option value="18">18h</option><option value="19" selected>19h</option><option value="20">20h</option><option value="21">21h</option></select><input type="checkbox" class="sw" id="cfNRes"/></div></div>
         <div class="cf-fl" style="margin:12px 0 0;"><label>Onde receber</label>
-          <select id="cfCanal"><option>WhatsApp do responsável (a Julia avisa você)</option><option>E-mail</option><option>WhatsApp + E-mail</option></select>
+          <select id="cfCanal"><option value="whatsapp">WhatsApp do responsável (a Julia avisa você)</option><option value="email">E-mail</option><option value="ambos">WhatsApp + E-mail</option></select>
           <small class="cc-hint">Os avisos chegam como mensagem da Julia no seu WhatsApp — mesmo canal, zero app extra</small>
         </div>
       </div>
@@ -1399,11 +1412,15 @@ body.vw-adm .adm-pill{display:block;}
         <h3>Atendimento da Julia</h3>
         <div class="sb">Como e quando a Julia atende seus clientes</div>
         <div class="cf-fl"><label>Modo de atendimento</label>
-          <select id="cfModo"><option>24 horas por dia</option><option>Das 8h às 18h</option><option>Das 8h às 20h</option></select>
-          <small class="cc-hint">Fora do horário, a Julia avisa que responde no próximo expediente e guarda o lead (configurado no fluxo)</small>
+          <select id="cfModo"><option value="24h">24 horas por dia</option><option value="8-18">Das 8h às 18h</option><option value="8-20">Das 8h às 20h</option></select>
+          <small class="cc-hint">Fora do horário, a Julia avisa que responde no próximo expediente e guarda o lead</small>
+        </div>
+        <div class="cf-fl"><label>Horário de retomadas</label>
+          <div style="display:flex;align-items:center;gap:8px;"><select id="cfRetIni" style="width:auto;padding:6px 10px;"><option value="6">6h</option><option value="7">7h</option><option value="8" selected>8h</option><option value="9">9h</option><option value="10">10h</option></select><span style="opacity:.6;">até</span><select id="cfRetFim" style="width:auto;padding:6px 10px;"><option value="16">16h</option><option value="17" selected>17h</option><option value="18">18h</option><option value="19">19h</option><option value="20">20h</option><option value="21">21h</option></select></div>
+          <small class="cc-hint">A Julia só manda mensagem de retomada dentro desse intervalo</small>
         </div>
         <div class="cf-fl"><label>Fuso horário</label>
-          <select id="cfFuso"><option>Recife / Brasília (UTC-3)</option></select>
+          <select id="cfFuso"><option value="America/Recife">Recife / Brasília (UTC-3)</option><option value="America/Sao_Paulo">São Paulo (UTC-3)</option><option value="America/Manaus">Manaus (UTC-4)</option><option value="America/Rio_Branco">Rio Branco (UTC-5)</option></select>
         </div>
         <div class="cf-row" style="border-bottom:none;padding-bottom:0;"><div><b>Pausar a Julia</b><small>Quando ligado, a Julia para de responder automaticamente</small></div><input type="checkbox" class="sw" id="cfPausa" onchange="cfPausar(this)"/></div>
       </div>
@@ -2567,23 +2584,66 @@ function resumoLead(){
 }
 function cfContaId(){return window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
 function cfSalvar(){
-  var body={empresa:(document.getElementById('cfEmp').value||'').trim(),
-            email_contato:(document.getElementById('cfMail').value||'').trim(),
-            zap_dono:(document.getElementById('cfZap').value||'').trim()};
+  function g(id){return document.getElementById(id);}
+  var zap=(g('cfZap').value||'').replace(/\D/g,'');
+  if(zap&&zap.length<12){alert('Telefone/WhatsApp incompleto — use DDI+DDD+número, ex.: 5581999998888');return;}
+  var body={empresa:(g('cfEmp').value||'').trim(),
+            email_contato:(g('cfMail').value||'').trim(),
+            zap_dono:zap,
+            cnpj:g('cfCnpj')?(g('cfCnpj').value||'').trim():null,
+            responsavel:g('cfResp')?(g('cfResp').value||'').trim():null,
+            notif_reuniao:!!(g('cfNReu')&&g('cfNReu').checked),
+            notif_erro:!!(g('cfNErr')&&g('cfNErr').checked),
+            notif_resumo:!!(g('cfNRes')&&g('cfNRes').checked),
+            resumo_hora:parseInt((g('cfResHora')&&g('cfResHora').value)||'19',10),
+            notif_canal:(g('cfCanal')&&g('cfCanal').value)||'whatsapp',
+            atende_modo:(g('cfModo')&&g('cfModo').value)||'24h',
+            retomada_ini:parseInt((g('cfRetIni')&&g('cfRetIni').value)||'8',10),
+            retomada_fim:parseInt((g('cfRetFim')&&g('cfRetFim').value)||'17',10),
+            fuso:(g('cfFuso')&&g('cfFuso').value)||'America/Recife'};
+  if(body.responsavel===null)delete body.responsavel;
+  if(body.cnpj===null)delete body.cnpj;
+  if(body.responsavel==='')delete body.responsavel;
   fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+cfContaId(),{method:'PATCH',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
     body:JSON.stringify(body)})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
-    alert('Dados da conta salvos ✓ — valem em qualquer navegador.');})
-  .catch(function(e){alert('Não consegui salvar ('+e.message+').');});
+    alert('Configurações salvas ✓ — valem em qualquer navegador.');})
+  .catch(function(e){alert('Não consegui salvar ('+e.message+'). Rodou o SQL das colunas novas?');});
 }
 function cfCarregar(){
-  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,email_contato,zap_dono&id=eq.'+cfContaId(),
+  function g(id){return document.getElementById(id);}
+  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,email_contato,zap_dono,cnpj,responsavel,zap_360,plano,status,notif_reuniao,notif_erro,notif_resumo,resumo_hora,notif_canal,atende_modo,retomada_ini,retomada_fim,fuso&id=eq.'+cfContaId(),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.json();})
   .then(function(rows){var c=rows&&rows[0]; if(!c)return;
-    var e1=document.getElementById('cfEmp'),e2=document.getElementById('cfMail'),e3=document.getElementById('cfZap');
-    if(e1)e1.value=c.empresa||''; if(e2)e2.value=c.email_contato||''; if(e3)e3.value=c.zap_dono||'';
+    if(g('cfEmp'))g('cfEmp').value=c.empresa||'';
+    if(g('cfMail'))g('cfMail').value=c.email_contato||'';
+    if(g('cfZap'))g('cfZap').value=c.zap_dono||'';
+    if(g('cfCnpj'))g('cfCnpj').value=c.cnpj||'';
+    if(g('cfResp'))g('cfResp').value=c.responsavel||'';
+    if(g('cfNReu'))g('cfNReu').checked=c.notif_reuniao!==false;
+    if(g('cfNErr'))g('cfNErr').checked=c.notif_erro!==false;
+    if(g('cfNRes'))g('cfNRes').checked=!!c.notif_resumo;
+    if(g('cfResHora'))g('cfResHora').value=String(c.resumo_hora==null?19:c.resumo_hora);
+    if(g('cfCanal'))g('cfCanal').value=c.notif_canal||'whatsapp';
+    if(g('cfModo'))g('cfModo').value=c.atende_modo||'24h';
+    if(g('cfRetIni'))g('cfRetIni').value=String(c.retomada_ini==null?8:c.retomada_ini);
+    if(g('cfRetFim'))g('cfRetFim').value=String(c.retomada_fim==null?17:c.retomada_fim);
+    if(g('cfFuso'))g('cfFuso').value=c.fuso||'America/Recife';
+    var pb=g('cfPlanoBadge'),sb=g('cfStatusBadge');
+    if(pb&&c.plano){pb.textContent=c.plano;pb.style.display='inline-block';}
+    if(sb&&c.status){sb.textContent=c.status;sb.style.display='inline-block';
+      if(String(c.status).toLowerCase()!=='ativa'){sb.style.background='#fef9c3';sb.style.color='#854d0e';}}
+    var num=g('cfCanalNum'),st=g('cfCanalSt');
+    if(num)num.textContent=c.zap_360?('+'+String(c.zap_360).replace(/\D/g,'')):'—';
+    if(st){st.textContent=c.zap_360?'✅ Conectado':'— sem número';}
+    var ini=new Date();ini.setDate(1);ini.setHours(0,0,0,0);
+    fetch(SUPA_URL+'/rest/v1/conversas?select=id&papel=eq.julia&conta_id=eq.'+cfContaId()+'&criado_em=gte.'+ini.toISOString(),
+      {method:'HEAD',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,Prefer:'count=exact'}})
+    .then(function(r){var cr=r.headers.get('content-range')||'';var tot=cr.split('/')[1];
+      var m=g('cfCanalMsgs');if(m&&tot&&tot!=='*')m.textContent=Number(tot).toLocaleString('pt-BR');})
+    .catch(function(){});
   }).catch(function(e){console.warn('config da conta indisponível',e);});
 }
 setTimeout(cfCarregar,800);
