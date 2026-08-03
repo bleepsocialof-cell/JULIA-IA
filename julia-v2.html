@@ -2472,7 +2472,7 @@ function montarSeletorConta(){
     cs.forEach(function(c){h+='<option value="'+c.id+'">'+ehtml(c.empresa||c.id)+'</option>';});
     sel.innerHTML=h;
     sel.value=window.CONTA_VIEW||'';
-    sel.onchange=function(){try{localStorage.setItem('conta_view',this.value);}catch(e){}location.reload();};
+    sel.onchange=function(){if(this.value==='00000000-0000-0000-0000-000000000000'){window.location.href='central-julia.html';return;}try{localStorage.setItem('conta_view',this.value);}catch(e){}location.reload();};
     alvo.insertAdjacentElement('afterend',sel);
   }).catch(function(e){console.warn('seletor contas falhou',e);});
 }
@@ -2482,7 +2482,8 @@ function bootPainel(){
   EH_ADMIN=ADMIN_EMAILS.indexOf(email)>-1;
   if(EH_ADMIN){
     try{window.CONTA_VIEW=localStorage.getItem('conta_view')||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}catch(e){window.CONTA_VIEW='96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
-    if(window.CONTA_VIEW==='00000000-0000-0000-0000-000000000000')document.body.classList.add('vw-adm');
+    if(window.CONTA_VIEW==='00000000-0000-0000-0000-000000000000'){window.CONTA_VIEW='96f67cd6-09c1-43a9-960c-e85cd89a07ea';try{localStorage.setItem('conta_view',window.CONTA_VIEW);}catch(e){}}
+    var naAdm=document.querySelector('.ni[data-v="vClientes"]');if(naAdm)naAdm.style.display='none';
     montarSeletorConta();
     carregarLeadsReais();dbCarregar();ccCarregar();jCarregar();plCarregar();
     return;
