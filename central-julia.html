@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Jul.ia · Central Julia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ind:#4f46e5;--ind2:#4338ca;--indbg:#eef2ff;--tx:#0f172a;--tx2:#64748b;--bd:#e2e8f0;--ok:#16a34a;--okbg:#dcfce7;--warn:#b45309;--warnbg:#fef3c7;--bad:#dc2626;--badbg:#fee2e2;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f8fafc;color:var(--tx);display:flex;min-height:100vh;}
+.sb{width:230px;background:#fff;border-right:1px solid var(--bd);padding:20px 14px;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;}
+.logo{display:flex;gap:10px;align-items:center;margin-bottom:26px;padding:0 6px;}
+.logo .lq{width:40px;height:40px;border-radius:12px;background:var(--tx);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;}
+.logo b{font-size:17px;display:block;}
+.logo small{color:var(--ind);font-weight:800;font-size:10px;letter-spacing:.12em;}
+.sec{font-size:10px;letter-spacing:.14em;color:#94a3b8;font-weight:700;margin:4px 6px 8px;}
+.ni{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;color:#475569;cursor:pointer;margin-bottom:2px;}
+.ni svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.ni.on{background:var(--indbg);color:var(--ind);}
+.ni:hover{background:#f1f5f9;}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:8px 6px;border-top:1px solid var(--bd);}
+.me .av{width:36px;height:36px;border-radius:10px;background:var(--indbg);color:var(--ind);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+.me b{font-size:13px;display:block;}
+.me small{font-size:11px;color:var(--tx2);}
+.me .out{margin-left:auto;cursor:pointer;color:var(--tx2);}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;min-width:0;}
+.top{background:#fff;border-bottom:1px solid var(--bd);padding:14px 28px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5;}
+.top h1{font-size:19px;font-weight:800;}
+.grow{flex:1;}
+.btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:10px 16px;}
+.btn.pri{background:var(--ind);color:#fff;}
+.btn.pri:hover{background:var(--ind2);}
+.btn.gh{background:#fff;border:1px solid var(--bd);color:#334155;}
+.btn.gh:hover{background:#f8fafc;}
+.brand{text-align:right;line-height:1.2;}
+.brand b{font-size:15px;}.brand b i{color:var(--ind);font-style:normal;}
+.brand small{font-size:10px;letter-spacing:.12em;color:var(--tx2);font-weight:700;}
+.wrap{padding:24px 28px;display:none;flex-direction:column;gap:18px;}
+.wrap.on{display:flex;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+.kpi{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:18px 20px;}
+.kpi .l{font-size:11px;letter-spacing:.1em;font-weight:700;color:var(--tx2);margin-bottom:8px;}
+.kpi .n{font-size:26px;font-weight:800;}
+.kpi .s{font-size:12px;color:var(--tx2);margin-top:4px;}
+.kpi.risk{border-color:#fcd34d;background:#fffbeb;}
+.kpi.risk .s{color:var(--warn);font-weight:600;}
+.duo{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;}
+@media(max-width:980px){.duo{grid-template-columns:1fr;}}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:18px 20px;}
+.card h3{font-size:15px;font-weight:800;margin-bottom:14px;}
+.chart{display:flex;align-items:flex-end;gap:14px;height:200px;padding:6px 4px 0;}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+.chart .bar{width:70%;max-width:54px;background:#c7d2fe;border-radius:6px 6px 0 0;min-height:4px;}
+.chart .col:last-child .bar{background:var(--ind);}
+.chart .v{font-size:11px;font-weight:700;color:var(--tx2);}
+.chart .m{font-size:12px;color:var(--tx2);}
+.att{display:flex;flex-direction:column;gap:4px;}
+.att .it{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;}
+.att .it:last-child{border-bottom:none;}
+.att .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;}
+.att .ic.w{background:var(--warnbg);color:var(--warn);}
+.att .ic.g{background:var(--okbg);color:var(--ok);}
+.att b{font-size:13px;display:block;}
+.att small{font-size:12px;color:var(--tx2);}
+.att .act{margin-left:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;letter-spacing:.1em;color:var(--tx2);font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd);}
+td{padding:12px 10px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.emp{display:flex;gap:10px;align-items:center;}
+.emp .av{width:38px;height:38px;border-radius:10px;background:var(--indbg);color:var(--ind);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none;}
+.emp b{font-size:13.5px;display:block;}
+.emp small{font-size:12px;color:var(--tx2);}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--indbg);color:var(--ind);}
+.st{display:inline-flex;gap:5px;align-items:center;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;}
+.st.ok{background:var(--okbg);color:#166534;}
+.st.bad{background:var(--warnbg);color:var(--warn);}
+.st.off{background:#f1f5f9;color:#64748b;}
+.lk{color:var(--ind);font-weight:700;font-size:12.5px;cursor:pointer;background:none;border:none;font-family:inherit;}
+.lk.red{color:var(--bad);}
+.hint{font-size:12.5px;color:var(--tx2);}
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+.md{background:#fff;border-radius:16px;padding:22px 24px;width:100%;max-width:520px;max-height:92vh;overflow:auto;}
+.md h2{font-size:17px;font-weight:800;margin-bottom:4px;}
+.md .sub{font-size:12.5px;color:var(--tx2);margin-bottom:16px;}
+.fl{margin-bottom:12px;}
+.fl label{font-size:11px;letter-spacing:.08em;font-weight:700;color:var(--tx2);display:block;margin-bottom:5px;}
+.fl input,.fl select{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;font-family:inherit;font-size:13.5px;color:var(--tx);background:#fff;}
+.fl .row{display:flex;gap:8px;}
+.bts{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.empty{padding:40px 10px;text-align:center;color:var(--tx2);font-size:13.5px;}
+.gate{position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;z-index:99;font-size:14px;color:var(--tx2);}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">Verificando acesso…</div>
+
+<aside class="sb">
+  <div class="logo"><div class="lq">J</div><div><b>Jul.ia</b><small>CENTRAL JULIA</small></div></div>
+  <div class="sec">MATRIZ</div>
+  <div class="ni on" data-v="vGeral" onclick="go(this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Visão geral</div>
+  <div class="ni" data-v="vCli" onclick="go(this)"><svg viewBox="0 0 24 24"><path d="M3 21V8l7-5 7 5v13"/><path d="M13 21v-6h-4v6"/><path d="M21 21H3"/></svg>Clientes</div>
+  <div class="ni" data-v="vFat" onclick="go(this)"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Faturamento</div>
+  <div class="ni" data-v="vMsg" onclick="go(this)"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>Mensagens</div>
+  <div class="me"><div class="av" id="meAv">JS</div><div><b id="meNome">—</b><small>Super Admin</small></div><span class="out" title="Sair" onclick="sair()">⎋</span></div>
+</aside>
+
+<div class="main">
+  <div class="top">
+    <h1 id="topTit">Visão geral</h1>
+    <div class="grow"></div>
+    <button class="btn pri" onclick="novaConta()">+ Nova conta</button>
+    <div class="brand"><b>Jul<i>.ia</i></b><br/><small>CENTRAL JULIA · MATRIZ</small></div>
+  </div>
+
+  <!-- VISÃO GERAL -->
+  <div class="wrap on" id="vGeral">
+    <div class="kpis">
+      <div class="kpi"><div class="l">RECEITA MENSAL (MRR)</div><div class="n" id="kMrr">R$ 0</div><div class="s" id="kMrrS">0 assinaturas</div></div>
+      <div class="kpi"><div class="l">CONTAS ATIVAS</div><div class="n" id="kAtv">0</div><div class="s" id="kAtvS">0 no total</div></div>
+      <div class="kpi"><div class="l">USUÁRIOS NA PLATAFORMA</div><div class="n" id="kUsu">0</div><div class="s" id="kUsuS">0 leads no mês</div></div>
+      <div class="kpi risk"><div class="l">INADIMPLENTES</div><div class="n" id="kIna">0</div><div class="s" id="kInaS">nada em risco</div></div>
+    </div>
+    <div class="duo">
+      <div class="card"><h3>Leads na plataforma por mês</h3><div class="chart" id="chLeads"></div></div>
+      <div class="card"><h3>Precisa da sua atenção</h3><div class="att" id="attLista"></div>
+        <button class="btn pri" style="width:100%;margin-top:14px;" onclick="novaConta()">+ Nova conta</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;margin-bottom:10px;"><h3 style="margin:0;">Clientes</h3><div class="grow"></div><button class="lk" onclick="goId('vCli')">Ver todos</button></div>
+      <div style="overflow-x:auto;"><table><thead><tr><th>CLIENTE</th><th>PLANO</th><th>MENSALIDADE</th><th>USUÁRIOS</th><th>LEADS NO MÊS</th><th>STATUS</th><th></th></tr></thead><tbody id="tbResumo"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="wrap" id="vCli">
+    <div class="card">
+      <div style="overflow-x:auto;"><table><thead><tr><th>CLIENTE</th><th>PLANO</th><th>MENSALIDADE</th><th>USUÁRIOS</th><th>LEADS NO MÊS</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody id="tbCli"></tbody></table></div>
+      <div class="empty" id="cliVazio" style="display:none;">Nenhuma conta ainda — crie a primeira.</div>
+    </div>
+  </div>
+
+  <!-- FATURAMENTO -->
+  <div class="wrap" id="vFat">
+    <div class="kpis">
+      <div class="kpi"><div class="l">PREVISTO PARA O MÊS</div><div class="n" id="fPrev">R$ 0</div><div class="s" id="fPrevS">0 assinaturas</div></div>
+      <div class="kpi"><div class="l">EM DIA</div><div class="n" id="fOk" style="color:var(--ok);">0</div><div class="s">assinaturas</div></div>
+      <div class="kpi risk"><div class="l">EM ABERTO</div><div class="n" id="fAb">R$ 0</div><div class="s" id="fAbS">nada pendente</div></div>
+    </div>
+    <div class="card">
+      <h3>Assinaturas</h3>
+      <div style="overflow-x:auto;"><table><thead><tr><th>CLIENTE</th><th>PLANO</th><th>VALOR</th><th>PRÓXIMA COBRANÇA</th><th>SITUAÇÃO</th><th>AÇÕES</th></tr></thead><tbody id="tbFat"></tbody></table></div>
+      <div class="empty" id="fatVazio" style="display:none;">Nenhuma assinatura registrada.</div>
+      <div class="hint" style="margin-top:12px;">Histórico de faturas mês a mês entra na próxima etapa — por enquanto o controle é pela situação da assinatura.</div>
+    </div>
+  </div>
+
+  <!-- MENSAGENS -->
+  <div class="wrap" id="vMsg">
+    <div class="hint">Todas as mensagens que o sistema envia (credenciais, cobranças, avisos). Sem os fluxos de aviso ligados, elas ficam registradas aqui em <b>modo simulação</b>.</div>
+    <div class="card"><div class="empty" id="msgVazio">Nenhuma mensagem ainda.</div><div class="att" id="msgLista"></div></div>
+  </div>
+</div>
+
+<script>
+var SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
+var SUPA_KEY='sb_publishable_zgWKIwXALOWRbac_13-DWg_ruoyaNkg';
+var ADMIN_EMAILS=['jul.ia@bleesocial.com.br','admin@julia.com'];
+var PRECOS={Start:1347,Plus:1647,Pro:1997};
+var MATRIZ_ID='82f04141-2e25-4fc4-a38e-a0b870d66f98';
+var H={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY};
+var HJ={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+var CONTAS=[],ASSIN=[],NUSU={},NLEAD={},MSGS=[];
+
+function brl(n){return 'R$ '+Math.round(n).toLocaleString('pt-BR');}
+function eh(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ini(s){var p=String(s||'?').trim().split(/\s+/);return ((p[0]||'?')[0]+((p[1]||'')[0]||'')).toUpperCase();}
+function desde(d){if(!d)return '';try{return 'desde '+new Date(d).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});}catch(e){return '';}}
+function precoDe(c){if(c.plano==='Matriz')return 0;return PRECOS[c.plano]||0;}
+function pagante(c){return c.id!==MATRIZ_ID&&c.plano!=='Matriz';}
+
+function go(el){document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});el.classList.add('on');
+  var v=el.getAttribute('data-v');
+  document.querySelectorAll('.wrap').forEach(function(w){w.classList.remove('on');});
+  document.getElementById(v).classList.add('on');
+  document.getElementById('topTit').textContent=el.textContent.trim();}
+function goId(v){var el=document.querySelector('.ni[data-v="'+v+'"]');if(el)go(el);}
+
+function sair(){try{localStorage.removeItem('sessao_julia');}catch(e){}location.href='login-julia.html';}
+
+(function gate(){
+  var email='';
+  try{var s=JSON.parse(localStorage.getItem('sessao_julia')||'null');if(s&&s.email)email=String(s.email).toLowerCase();}catch(e){}
+  if(ADMIN_EMAILS.indexOf(email)<0){location.href='login-julia.html';return;}
+  document.getElementById('gate').style.display='none';
+  var nome=email.split('@')[0].replace(/[._]/g,' ');
+  document.getElementById('meNome').textContent='Jadson Santos';
+  carregar();
+})();
+
+function carregar(){
+  Promise.all([
+    fetch(SUPA_URL+'/rest/v1/contas?select=*&order=criada_em.asc',{headers:H}).then(function(r){return r.ok?r.json():[];}),
+    fetch(SUPA_URL+'/rest/v1/assinaturas?select=*',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
+    fetch(SUPA_URL+'/rest/v1/usuarios?select=conta_id',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
+  ]).then(function(rs){
+    CONTAS=rs[0]||[];ASSIN=rs[1]||[];
+    NUSU={};(rs[2]||[]).forEach(function(u){NUSU[u.conta_id]=(NUSU[u.conta_id]||0)+1;});
+    return leadsMes();
+  }).then(function(){pintarTudo();graficoLeads();}).catch(function(e){console.warn(e);});
+}
+
+function mesIni(){var d=new Date();d.setDate(1);d.setHours(0,0,0,0);return d.toISOString();}
+function leadsMes(){
+  NLEAD={};
+  var ps=CONTAS.map(function(c){
+    return fetch(SUPA_URL+'/rest/v1/leads?select=id&tenant_id=eq.'+c.id+'&created_at=gte.'+mesIni(),
+      {method:'HEAD',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,Prefer:'count=exact'}})
+    .then(function(r){var t=(r.headers.get('content-range')||'').split('/')[1];NLEAD[c.id]=(t&&t!=='*')?Number(t):0;})
+    .catch(function(){NLEAD[c.id]=0;});
+  });
+  return Promise.all(ps);
+}
+
+function assinDe(id){for(var i=0;i<ASSIN.length;i++){if(ASSIN[i].conta_id===id)return ASSIN[i];}return null;}
+function inadimplente(c){var a=assinDe(c.id);return String(c.status||'').toLowerCase()==='inadimplente'||(a&&a.status==='atrasada');}
+
+function pintarTudo(){
+  var pag=CONTAS.filter(pagante);
+  var ativas=pag.filter(function(c){return String(c.status||'ativa').toLowerCase()==='ativa';});
+  var mrr=0;ativas.forEach(function(c){mrr+=precoDe(c);});
+  var inas=pag.filter(inadimplente);
+  var risco=0;inas.forEach(function(c){risco+=precoDe(c);});
+  var usu=0;CONTAS.forEach(function(c){usu+=(NUSU[c.id]||0);});
+  var leads=0;CONTAS.forEach(function(c){leads+=(NLEAD[c.id]||0);});
+
+  document.getElementById('kMrr').textContent=brl(mrr);
+  document.getElementById('kMrrS').textContent=ativas.length+' assinatura'+(ativas.length===1?'':'s');
+  document.getElementById('kAtv').textContent=ativas.length;
+  document.getElementById('kAtvS').textContent=pag.length+' no total';
+  document.getElementById('kUsu').textContent=usu;
+  document.getElementById('kUsuS').textContent=leads+' leads no mês';
+  document.getElementById('kIna').textContent=inas.length;
+  document.getElementById('kInaS').textContent=inas.length?brl(risco)+' em risco':'nada em risco';
+
+  var att='';
+  inas.forEach(function(c){
+    att+='<div class="it"><div class="ic w">⏰</div><div><b>'+eh(c.empresa)+'</b><small>mensalidade de '+brl(precoDe(c))+' em aberto</small></div><button class="lk act" onclick="goId(\'vFat\')">Ver fatura</button></div>';
+  });
+  ativas.forEach(function(c){
+    if(!c.zap_360)att+='<div class="it"><div class="ic w">📵</div><div><b>'+eh(c.empresa)+'</b><small>sem número WhatsApp conectado</small></div><button class="lk act" onclick="verPainel(\''+c.id+'\')">Abrir</button></div>';
+  });
+  if(!att)att='<div class="it"><div class="ic g">✓</div><div><b>Sistema operacional</b><small>todas as contas no ar e em dia</small></div></div>';
+  else att+='<div class="it"><div class="ic g">✓</div><div><b>Sistema operacional</b><small>instâncias no ar</small></div></div>';
+  document.getElementById('attLista').innerHTML=att;
+
+  document.getElementById('tbResumo').innerHTML=linhasCli(pag.slice(0,4),false);
+  document.getElementById('tbCli').innerHTML=linhasCli(pag,true);
+  document.getElementById('cliVazio').style.display=pag.length?'none':'block';
+
+  var prev=mrr;
+  document.getElementById('fPrev').textContent=brl(prev);
+  document.getElementById('fPrevS').textContent=ativas.length+' assinatura'+(ativas.length===1?'':'s');
+  document.getElementById('fOk').textContent=Math.max(ativas.length-inas.length,0);
+  document.getElementById('fAb').textContent=brl(risco);
+  document.getElementById('fAbS').textContent=inas.length?inas.length+' pendente'+(inas.length===1?'':'s'):'nada pendente';
+  document.getElementById('tbFat').innerHTML=linhasFat(pag);
+  document.getElementById('fatVazio').style.display=pag.length?'none':'block';
+}
+
+function linhasCli(lista,acoes){
+  var h='';
+  lista.forEach(function(c){
+    var ina=inadimplente(c);
+    var pausada=String(c.status||'').toLowerCase()!=='ativa'&&!ina;
+    var st=ina?'<span class="st bad">⏰ Inadimplente</span>':(pausada?'<span class="st off">Pausada</span>':'<span class="st ok">✓ Ativa</span>');
+    h+='<tr><td><div class="emp"><div class="av">'+eh(ini(c.empresa))+'</div><div><b>'+eh(c.empresa)+'</b><small>'+eh(c.responsavel||'')+' · '+desde(c.criada_em)+'</small></div></div></td>'
+      +'<td><span class="pill">'+eh(c.plano||'—')+'</span></td>'
+      +'<td><b>'+(precoDe(c)?brl(precoDe(c)):'—')+'</b></td>'
+      +'<td>'+(NUSU[c.id]||0)+'</td>'
+      +'<td>'+(NLEAD[c.id]||0)+'</td>'
+      +'<td>'+st+'</td>';
+    if(acoes){
+      var susp=String(c.status||'').toLowerCase()==='ativa'
+        ?'<button class="lk red" onclick="mudarStatus(\''+c.id+'\',\'pausada\')">Suspender</button>'
+        :'<button class="lk" onclick="mudarStatus(\''+c.id+'\',\'ativa\')">Reativar</button>';
+      h+='<td style="white-space:nowrap;"><button class="lk" onclick="verPainel(\''+c.id+'\')">Ver painel</button> &nbsp; '+susp+'</td>';
+    }else h+='<td><button class="lk" onclick="verPainel(\''+c.id+'\')">Ver painel</button></td>';
+    h+='</tr>';
+  });
+  return h;
+}
+
+function linhasFat(lista){
+  var h='';
+  lista.forEach(function(c){
+    var a=assinDe(c.id),ina=inadimplente(c);
+    var prox=a&&a.proxima_cobranca?new Date(a.proxima_cobranca+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+    var st=ina?'<span class="st bad">Vencida</span>':'<span class="st ok">Em dia</span>';
+    var acts='';
+    if(ina){
+      acts='<button class="lk" onclick="cobrar(\''+c.id+'\')">💬 Cobrar</button> &nbsp; <button class="lk" onclick="marcar(\''+c.id+'\',\'em_dia\')">Marcar paga</button>';
+    }else{
+      acts='<button class="lk red" onclick="marcar(\''+c.id+'\',\'atrasada\')">Marcar atrasada</button>';
+    }
+    h+='<tr><td><div class="emp"><div class="av">'+eh(ini(c.empresa))+'</div><div><b>'+eh(c.empresa)+'</b><small>'+eh(c.plano||'')+'</small></div></div></td>'
+      +'<td><span class="pill">'+eh(c.plano||'—')+'</span></td>'
+      +'<td><b>'+(precoDe(c)?brl(precoDe(c)):'—')+'</b></td>'
+      +'<td>'+prox+'</td><td>'+st+'</td><td style="white-space:nowrap;">'+acts+'</td></tr>';
+  });
+  return h;
+}
+
+function graficoLeads(){
+  var meses=[],agora=new Date();
+  for(var i=5;i>=0;i--){var d=new Date(agora.getFullYear(),agora.getMonth()-i,1);meses.push(d);}
+  var ps=meses.map(function(d,ix){
+    var fim=new Date(d.getFullYear(),d.getMonth()+1,1);
+    return fetch(SUPA_URL+'/rest/v1/leads?select=id&created_at=gte.'+d.toISOString()+'&created_at=lt.'+fim.toISOString(),
+      {method:'HEAD',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,Prefer:'count=exact'}})
+    .then(function(r){var t=(r.headers.get('content-range')||'').split('/')[1];return (t&&t!=='*')?Number(t):0;})
+    .catch(function(){return 0;});
+  });
+  Promise.all(ps).then(function(vals){
+    var max=Math.max.apply(null,vals.concat([1]));
+    var nm=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    var h='';
+    meses.forEach(function(d,ix){
+      var pc=Math.max(Math.round(vals[ix]/max*100),3);
+      h+='<div class="col"><span class="v">'+vals[ix]+'</span><div class="bar" style="height:'+pc+'%;"></div><span class="m">'+nm[d.getMonth()]+'</span></div>';
+    });
+    document.getElementById('chLeads').innerHTML=h;
+  });
+}
+
+function verPainel(id){
+  try{localStorage.setItem('conta_view',id);}catch(e){}
+  window.open('julia-v2.html','_blank');
+}
+
+function mudarStatus(id,novo){
+  var c=CONTAS.find(function(x){return x.id===id;});
+  var nome=c?c.empresa:'a conta';
+  if(!confirm((novo==='pausada'?'Suspender ':'Reativar ')+nome+'?'))return;
+  fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+id,{method:'PATCH',headers:HJ,body:JSON.stringify({status:novo==='pausada'?'pausada':'ativa'})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);registrarMsg((novo==='pausada'?'Conta suspensa: ':'Conta reativada: ')+nome);carregar();})
+  .catch(function(e){alert('Falhou ('+e.message+')');});
+}
+
+function marcar(id,st){
+  var a=assinDe(id);
+  var c=CONTAS.find(function(x){return x.id===id;});
+  var prox=new Date();prox.setMonth(prox.getMonth()+1);
+  var body={status:st};
+  if(st==='em_dia')body.proxima_cobranca=prox.toISOString().slice(0,10);
+  var req=a
+    ?fetch(SUPA_URL+'/rest/v1/assinaturas?conta_id=eq.'+id,{method:'PATCH',headers:HJ,body:JSON.stringify(body)})
+    :fetch(SUPA_URL+'/rest/v1/assinaturas',{method:'POST',headers:HJ,body:JSON.stringify({conta_id:id,ciclo:'mensal',status:st,proxima_cobranca:prox.toISOString().slice(0,10)})});
+  req.then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    registrarMsg((st==='em_dia'?'Pagamento confirmado: ':'Assinatura marcada atrasada: ')+(c?c.empresa:id));carregar();})
+  .catch(function(e){alert('Falhou ('+e.message+')');});
+}
+
+function cobrar(id){
+  var c=CONTAS.find(function(x){return x.id===id;});if(!c)return;
+  var zap=String(c.zap_dono||'').replace(/\D/g,'');
+  if(!zap){alert('Essa conta não tem WhatsApp do responsável cadastrado.');return;}
+  if(zap.length<=11)zap='55'+zap;
+  var txt='Oi, '+(c.responsavel||'tudo bem')+'! Aqui é da Jul.ia 💜 Sua mensalidade de '+brl(precoDe(c))+' está em aberto. Consegue regularizar hoje? Qualquer coisa me chama por aqui!';
+  registrarMsg('Cobrança enviada no WhatsApp: '+c.empresa);
+  window.open('https://wa.me/'+zap+'?text='+encodeURIComponent(txt),'_blank');
+}
+
+function registrarMsg(t){
+  MSGS.unshift({t:t,d:new Date()});
+  var h='';
+  MSGS.slice(0,30).forEach(function(m){
+    h+='<div class="it"><div class="ic g">✉️</div><div><b>'+eh(m.t)+'</b><small>'+m.d.toLocaleString('pt-BR')+' · modo simulação</small></div></div>';
+  });
+  document.getElementById('msgLista').innerHTML=h;
+  document.getElementById('msgVazio').style.display=MSGS.length?'none':'block';
+}
+
+function gerarSenha(){
+  var s='';var ch='abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  for(var i=0;i<8;i++)s+=ch[Math.floor(Math.random()*ch.length)];
+  return 'Ju'+s;
+}
+
+function novaConta(){
+  var ov=document.createElement('div');ov.className='ov';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div class="md">'
+    +'<h2>Nova conta</h2><div class="sub">Cria o cliente, o acesso e a assinatura de uma vez</div>'
+    +'<div class="fl"><label>EMPRESA *</label><input id="ncEmp" placeholder="Ex.: Alisson Santos Imobiliária"/></div>'
+    +'<div class="fl"><label>RESPONSÁVEL *</label><input id="ncResp" placeholder="Nome de quem manda"/></div>'
+    +'<div class="fl"><label>E-MAIL DE ACESSO *</label><input id="ncMail" placeholder="email@cliente.com.br"/></div>'
+    +'<div class="fl"><label>SENHA PROVISÓRIA *</label><div class="row"><input id="ncSenha"/><button class="btn gh" onclick="document.getElementById(\'ncSenha\').value=gerarSenha()">Gerar</button></div></div>'
+    +'<div class="fl"><label>PLANO</label><select id="ncPlano"><option value="Start">Start · R$ 1.347/mês</option><option value="Plus">Plus · R$ 1.647/mês</option><option value="Pro">Pro · R$ 1.997/mês</option><option value="Customizado">Customizado</option></select></div>'
+    +'<div class="fl"><label>NÚMERO WHATSAPP 360 (opcional — dá pra conectar depois)</label><input id="ncZap360" placeholder="5581999330650 · só dígitos"/></div>'
+    +'<div class="fl"><label>WHATSAPP DO RESPONSÁVEL (avisos da Julia)</label><input id="ncZapDono" placeholder="5581999998888 · só dígitos"/></div>'
+    +'<div class="bts"><button class="btn gh" onclick="this.closest(\'.ov\').remove()">Cancelar</button><button class="btn pri" onclick="criarConta(this)">Criar conta</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  document.getElementById('ncSenha').value=gerarSenha();
+}
+
+function criarConta(btn){
+  function v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+  var emp=v('ncEmp'),resp=v('ncResp'),mail=v('ncMail').toLowerCase(),senha=v('ncSenha');
+  if(!emp||!resp||!mail||!senha){alert('Preencha empresa, responsável, e-mail e senha.');return;}
+  var body={empresa:emp,responsavel:resp,email_login:mail,senha_provisoria:senha,email_contato:mail,
+    plano:v('ncPlano')||'Start',status:'ativa',
+    zap_360:v('ncZap360').replace(/\D/g,'')||null,
+    zap_dono:v('ncZapDono').replace(/\D/g,'')||null};
+  btn.disabled=true;btn.textContent='Criando…';
+  fetch(SUPA_URL+'/rest/v1/contas',{method:'POST',headers:Object.assign({Prefer:'return=representation'},HJ),body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){
+    var c=rows[0];
+    var prox=new Date();prox.setMonth(prox.getMonth()+1);
+    return fetch(SUPA_URL+'/rest/v1/assinaturas',{method:'POST',headers:HJ,
+      body:JSON.stringify({conta_id:c.id,ciclo:'mensal',status:'em_dia',proxima_cobranca:prox.toISOString().slice(0,10)})})
+      .catch(function(){}).then(function(){return c;});
+  })
+  .then(function(c){
+    registrarMsg('Conta criada: '+c.empresa+' · acesso '+mail);
+    document.querySelector('.ov').remove();
+    alert('Conta criada ✓\n\nAcesso do cliente:\nE-mail: '+mail+'\nSenha: '+senha+'\nPainel: julia-ia-nine.vercel.app/julia-v2.html\n\nCopia e manda pra ele.');
+    carregar();
+  })
+  .catch(function(e){alert('Não consegui criar ('+e.message+').');btn.disabled=false;btn.textContent='Criar conta';});
+}
+</script>
+</body>
+</html>
