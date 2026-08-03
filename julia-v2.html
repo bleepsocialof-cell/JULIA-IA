@@ -2144,7 +2144,18 @@ setInterval(function(){
 /* ── MODO VERDADE: pinta Conversas, Início e Kanban com os dados reais ── */
 function ehtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
 function midiaMeta(t){var m=/^\[MIDIA:(image|video|audio|document)\]\s*(\S+)(?:\s*\|\s*([\s\S]*))?$/.exec(String(t||'').trim());if(!m)return null;return{tipo:m[1],url:m[2],leg:(m[3]||'').trim()};}
-function midiaHtml(t){var x=midiaMeta(t);if(!x)return ehtml(t);var u=ehtml(x.url).replace(/"/g,'&quot;');var leg=x.leg?'<div style="margin-top:5px;">'+ehtml(x.leg)+'</div>':'';
+function midiaHtml(t){
+  var mA=String(t||'').match(/^\[áudio Julia[^\]]*\]\s*([\s\S]*)$/);
+  if(mA){var core=mA[1]||'';
+    var ond=[7,12,16,10,18,8,14,19,11,15,9,13].map(function(x){return '<span style="display:inline-block;width:3px;height:'+x+'px;border-radius:2px;background:rgba(255,255,255,.85);"></span>';}).join('');
+    return '<div style="display:flex;align-items:center;gap:9px;margin:2px 0 '+(core?'7px':'2px')+';">'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c731df,#7c3aed);color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.28);font-family:Sora,Inter,sans-serif;">Ju</div>'
+      +'<div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.94);color:#7c3aed;display:flex;align-items:center;justify-content:center;font-size:10px;flex:none;padding-left:2px;">\u25b6</div>'
+      +'<div style="display:flex;align-items:center;gap:2px;height:20px;">'+ond+'</div>'
+      +'<span style="font-size:13px;flex:none;">\ud83c\udf99\ufe0f</span></div>'
+      +(core?'<div style="font-size:12px;opacity:.78;font-style:italic;">'+ehtml(core)+'</div>':'');
+  }
+  var x=midiaMeta(t);if(!x)return ehtml(t);var u=ehtml(x.url).replace(/"/g,'&quot;');var leg=x.leg?'<div style="margin-top:5px;">'+ehtml(x.leg)+'</div>':'';
   if(x.tipo==='image')return '<a href="'+u+'" target="_blank" rel="noopener"><img src="'+u+'" style="max-width:220px;width:100%;border-radius:10px;display:block;" loading="lazy"/></a>'+leg;
   if(x.tipo==='video')return '<video src="'+u+'" controls preload="metadata" style="max-width:220px;width:100%;border-radius:10px;display:block;background:#000;"></video>'+leg;
   if(x.tipo==='audio')return '<audio src="'+u+'" controls preload="metadata" style="width:210px;max-width:100%;display:block;"></audio>'+leg;

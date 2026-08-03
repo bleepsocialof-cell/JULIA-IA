@@ -210,7 +210,7 @@ var ADMIN_EMAILS=['jul.ia@bleesocial.com.br','admin@julia.com'];
 var MATRIZ_ID='82f04141-2e25-4fc4-a38e-a0b870d66f98';
 var H={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY};
 var HJ={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
-var CONTAS=[],PLANOS=[],FATU=[],NUSU={},NLEAD={},MSGS=[];
+var CONTAS=[],PLANOS=[],FATU=[],NUSU={},NLEAD={},MSGS=[],USUARIOS=[];
 var MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
 function brl(n){return 'R$ '+Math.round(n).toLocaleString('pt-BR');}
@@ -244,11 +244,11 @@ function carregar(){
   Promise.all([
     fetch(SUPA_URL+'/rest/v1/contas?select=*&order=criada_em.asc',{headers:H}).then(function(r){return r.ok?r.json():[];}),
     fetch(SUPA_URL+'/rest/v1/planos?select=*&order=valor.asc',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
-    fetch(SUPA_URL+'/rest/v1/usuarios?select=conta_id',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
+    fetch(SUPA_URL+'/rest/v1/usuarios?select=id,conta_id,nome,email,papel',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
     fetch(SUPA_URL+'/rest/v1/faturas?select=*&competencia=gte.'+ano+'-01-01&competencia=lte.'+ano+'-12-31',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
   ]).then(function(rs){
     CONTAS=rs[0]||[];PLANOS=rs[1]||[];FATU=rs[3]||[];
-    NUSU={};(rs[2]||[]).forEach(function(u){NUSU[u.conta_id]=(NUSU[u.conta_id]||0)+1;});
+    USUARIOS=rs[2]||[];NUSU={};USUARIOS.forEach(function(u){NUSU[u.conta_id]=(NUSU[u.conta_id]||0)+1;});
     return leadsMes();
   }).then(function(){pintarTudo();graficoLeads();pintarPlanos();pintarSeletor();}).catch(function(e){console.warn(e);});
 }
@@ -334,7 +334,7 @@ function linhasCli(lista,acoes){
       var susp=ativa(c)
         ?'<button class="lk red" onclick="mudarStatus(\''+c.id+'\',\'pausada\')">Suspender</button>'
         :'<button class="lk" onclick="mudarStatus(\''+c.id+'\',\'ativa\')">Reativar</button>';
-      h+='<td style="white-space:nowrap;"><button class="lk" onclick="verPainel(\''+c.id+'\')">Ver painel</button> &nbsp; '+susp+'</td>';
+      h+='<td style="white-space:nowrap;"><button class="lk" onclick="editarConta(\''+c.id+'\')">✏️ Editar</button> &nbsp; <button class="lk" onclick="verPainel(\''+c.id+'\')">Ver painel</button> &nbsp; '+susp+'</td>';
     }else h+='<td><button class="lk" onclick="verPainel(\''+c.id+'\')">Ver painel</button></td>';
     h+='</tr>';
   });
@@ -488,6 +488,96 @@ function novoPlano(){
   .catch(function(e){alert('Falhou ('+e.message+') — nome já existe?');});
 }
 
+function editarConta(id){
+  var c=CONTAS.find(function(x){return x.id===id;});if(!c)return;
+  fetch(SUPA_URL+'/rest/v1/planos?select=*&order=valor.asc',{headers:H})
+  .then(function(r){return r.ok?r.json():PLANOS;}).then(function(ps){PLANOS=ps||PLANOS;edAbrir(c);})
+  .catch(function(){edAbrir(c);});
+}
+function edAbrir(c){
+  var ov=document.createElement('div');ov.className='ov';ov.id='edOv';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var ops='';PLANOS.filter(function(p){return p.ativo||p.nome===c.plano;}).forEach(function(p){
+    ops+='<option value="'+p.nome+'"'+(p.nome===c.plano?' selected':'')+'>'+eh(p.nome)+' · '+brl(p.valor)+'/mês</option>';
+  });
+  ov.innerHTML='<div class="md">'
+    +'<h2>Editar · '+eh(c.empresa)+'</h2><div class="sub">Dados da conta, plano e acessos de plantão</div>'
+    +'<div class="fl"><label>EMPRESA *</label><input id="edEmp" value="'+eh(c.empresa)+'"/></div>'
+    +'<div class="fl"><label>RESPONSÁVEL</label><input id="edResp" value="'+eh(c.responsavel||'')+'"/></div>'
+    +'<div class="fl"><label>CNPJ</label><input id="edCnpj" value="'+eh(c.cnpj||'')+'"/></div>'
+    +'<div class="fl"><label>E-MAIL DE ACESSO (DONO)</label><input id="edMail" value="'+eh(c.email_login||'')+'"/></div>'
+    +'<div class="fl"><label>SENHA PROVISÓRIA (DONO)</label><div class="row"><input id="edSenha" value="'+eh(c.senha_provisoria||'')+'"/><button class="btn gh" onclick="document.getElementById(\'edSenha\').value=gerarSenha()">Gerar</button></div></div>'
+    +'<div class="fl"><label>PLANO</label><select id="edPlano">'+ops+'</select></div>'
+    +'<div class="fl"><label>ACESSOS EXTRAS CONTRATADOS</label><input id="edExtras" type="number" min="0" step="1" value="'+Number(c.acessos_extras||0)+'"/></div>'
+    +'<div class="fl"><label>NÚMERO WHATSAPP 360</label><input id="edZap360" value="'+eh(c.zap_360||'')+'" placeholder="só dígitos"/></div>'
+    +'<div class="fl"><label>WHATSAPP DO RESPONSÁVEL</label><input id="edZapDono" value="'+eh(c.zap_dono||'')+'" placeholder="só dígitos"/></div>'
+    +'<div style="border-top:1px solid var(--bd);margin:14px 0 10px;padding-top:12px;"><div style="font-size:11px;font-weight:800;color:#6d28d9;letter-spacing:.06em;margin-bottom:8px;">🎧 PLANTONISTAS DESTA CONTA</div><div id="edPlList"></div>'
+    +'<div style="border:1px dashed var(--bd);border-radius:12px;padding:12px 14px;background:#fbfaff;">'
+    +'<div class="fl" style="margin-bottom:8px;"><input id="npNome" placeholder="Nome do novo plantonista"/></div>'
+    +'<div class="fl" style="margin-bottom:8px;"><input id="npMail" placeholder="email@plantao.com"/></div>'
+    +'<div class="fl" style="margin-bottom:8px;"><div class="row"><input id="npSenha" placeholder="Senha"/><button class="btn gh" onclick="document.getElementById(\'npSenha\').value=gerarSenha()">Gerar</button></div></div>'
+    +'<button class="btn gh" style="width:100%;" onclick="plAdd(\''+c.id+'\')">+ Adicionar plantonista</button>'
+    +'</div></div>'
+    +'<div class="bts"><button class="btn gh" onclick="this.closest(\'.ov\').remove()">Cancelar</button><button class="btn pri" onclick="edSalvar(\''+c.id+'\',this)">Salvar conta</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  document.getElementById('npSenha').value=gerarSenha();
+  edPlPintar(c.id);
+}
+function edPlPintar(cid){
+  var box=document.getElementById('edPlList');if(!box)return;
+  var pls=USUARIOS.filter(function(u){return u.conta_id===cid&&String(u.papel||'')!=='dono';});
+  var c=CONTAS.find(function(x){return x.id===cid;});
+  var extras=Number((document.getElementById('edExtras')||{}).value||c.acessos_extras||0);
+  var h='';
+  pls.forEach(function(u){
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid #f3f0fa;">'
+      +'<div class="emp" style="flex:1;"><div class="av" style="width:32px;height:32px;font-size:11px;">'+eh(ini(u.nome))+'</div><div><b style="font-size:13px;">'+eh(u.nome)+'</b><small>'+eh(u.email)+'</small></div></div>'
+      +'<button class="lk red" onclick="plDel(\''+u.id+'\',\''+cid+'\')">Remover</button></div>';
+  });
+  if(!pls.length)h='<div class="hint" style="padding:6px 2px 10px;">Nenhum plantonista ainda.</div>';
+  else h+='<div class="hint" style="padding:8px 2px;">'+pls.length+' plantonista(s) · '+extras+' acesso(s) extra(s) contratado(s)'+(pls.length>extras?' · <b style="color:var(--bad);">acima do contratado</b>':'')+'</div>';
+  box.innerHTML=h;
+}
+function plAdd(cid){
+  var n=document.getElementById('npNome').value.trim();
+  var m=document.getElementById('npMail').value.trim().toLowerCase();
+  var s=document.getElementById('npSenha').value.trim();
+  if(!n||!m||!s){alert('Preencha nome, e-mail e senha do plantonista.');return;}
+  fetch(SUPA_URL+'/rest/v1/usuarios',{method:'POST',headers:Object.assign({Prefer:'return=representation'},HJ),
+    body:JSON.stringify({conta_id:cid,nome:n,email:m,papel:'vendedor',senha_provisoria:s})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){USUARIOS.push(rows[0]);NUSU[cid]=(NUSU[cid]||0)+1;
+    registrarMsg('Plantonista adicionado: '+n+' ('+m+')');
+    alert('Acesso criado ✓\n\n🎧 '+n+'\nE-mail: '+m+'\nSenha: '+s+'\nPainel: julia-ia-nine.vercel.app/julia-v2.html');
+    document.getElementById('npNome').value='';document.getElementById('npMail').value='';document.getElementById('npSenha').value=gerarSenha();
+    edPlPintar(cid);})
+  .catch(function(e){alert('Falhou ('+e.message+') — e-mail já usado?');});
+}
+function plDel(uid,cid){
+  var u=USUARIOS.find(function(x){return x.id===uid;});
+  if(!confirm('Remover o acesso de '+(u?u.nome:'este plantonista')+'? Ele não vai mais conseguir logar.'))return;
+  fetch(SUPA_URL+'/rest/v1/usuarios?id=eq.'+uid,{method:'DELETE',headers:HJ})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    USUARIOS=USUARIOS.filter(function(x){return x.id!==uid;});NUSU[cid]=Math.max((NUSU[cid]||1)-1,0);
+    registrarMsg('Plantonista removido: '+(u?u.nome:uid));edPlPintar(cid);})
+  .catch(function(e){alert('Falhou ('+e.message+')');});
+}
+function edSalvar(cid,btn){
+  function v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+  if(!v('edEmp')){alert('Empresa não pode ficar vazia.');return;}
+  var body={empresa:v('edEmp'),responsavel:v('edResp'),cnpj:v('edCnpj')||null,
+    email_login:v('edMail').toLowerCase(),senha_provisoria:v('edSenha'),
+    plano:v('edPlano'),acessos_extras:Number(v('edExtras')||0),
+    zap_360:v('edZap360').replace(/\D/g,'')||null,
+    zap_dono:v('edZapDono').replace(/\D/g,'')||null};
+  btn.disabled=true;btn.textContent='Salvando…';
+  fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+cid,{method:'PATCH',headers:HJ,body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+    registrarMsg('Conta editada: '+body.empresa);
+    var ov=document.getElementById('edOv');if(ov)ov.remove();carregar();})
+  .catch(function(e){alert('Falhou ('+e.message+')');btn.disabled=false;btn.textContent='Salvar conta';});
+}
 function verPainel(id){try{localStorage.setItem('conta_view',id);}catch(e){}window.location.href='julia-v2.html';}
 
 function mudarStatus(id,novo){
