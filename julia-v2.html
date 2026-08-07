@@ -1223,7 +1223,7 @@ body.vw-adm .adm-pill{display:block;}
       </div>
       <div class="card d-tab">
         <table>
-          <thead><tr><th>Produto</th><th>Tipo</th><th>Localização</th><th>Valor</th><th>Status</th><th style="width:130px;text-align:right;">Ações</th></tr></thead>
+          <thead><tr><th>Produto</th><th>Tipo</th><th id="thDet">Localização</th><th>Valor</th><th>Status</th><th style="width:130px;text-align:right;">Ações</th></tr></thead>
           <tbody id="dbBody"></tbody>
         </table>
       </div>
@@ -1246,9 +1246,34 @@ body.vw-adm .adm-pill{display:block;}
               <input class="f-in" id="fTipoOutro" placeholder="Digite o segmento — ex: Pet shop, Escola de idiomas…" style="display:none;margin-top:8px;" oninput="dbResumo()"/></div>
             </div>
             <div class="f-row">
-              <div><label class="f-lbl">Localização</label><input class="f-in" id="fLoc" placeholder="ex: Boa Viagem, Recife – PE" oninput="dbResumo()"/></div>
-              <div><label class="f-lbl">Valor inicial</label><input class="f-in" id="fValor" placeholder="ex: A partir de R$ 249.900" oninput="dbResumo()"/></div>
+              <div id="fgLoc"><label class="f-lbl" id="fLocLbl">Localização</label><input class="f-in" id="fLoc" placeholder="ex: Boa Viagem, Recife – PE" oninput="dbResumo()"/></div>
+              <div><label class="f-lbl">Valor</label><input class="f-in" id="fValor" placeholder="ex: A partir de R$ 249.900" oninput="dbResumo()"/></div>
             </div>
+            <!-- CURSO -->
+            <div id="fgCurso" style="display:none;">
+              <div class="f-row">
+                <div><label class="f-lbl">Formato</label><select class="f-sel" id="fFormato" onchange="dbResumo()"><option>Presencial</option><option>Online</option><option>Híbrido</option></select></div>
+                <div><label class="f-lbl">Data / Acesso</label><input class="f-in" id="fData" placeholder="ex: 05/09 · 8h às 17h — ou acesso imediato" oninput="dbResumo()"/></div>
+              </div>
+              <div class="f-row">
+                <div><label class="f-lbl">Carga horária</label><input class="f-in" id="fCarga" placeholder="ex: 8 horas"/></div>
+                <div><label class="f-lbl">Link de pagamento</label><input class="f-in" id="fLinkPg" placeholder="ex: pay.kiwify.com.br/..."/></div>
+              </div>
+              <div class="f-togs">
+                <label class="tg">Certificado<input type="checkbox" class="sw" id="fCert"/></label>
+                <label class="tg">Suporte no WhatsApp<input type="checkbox" class="sw" id="fSup"/></label>
+                <label class="tg">Garantia 7 dias<input type="checkbox" class="sw" id="fGar7"/></label>
+                <label class="tg">Vagas limitadas<input type="checkbox" class="sw" id="fVagas"/></label>
+              </div>
+            </div>
+            <!-- SERVIÇO -->
+            <div id="fgServico" style="display:none;">
+              <div class="f-row">
+                <div><label class="f-lbl">Duração / Entrega</label><input class="f-in" id="fDur" placeholder="ex: 2h presencial · entrega em 7 dias" oninput="dbResumo()"/></div>
+                <div><label class="f-lbl">Link de agendamento</label><input class="f-in" id="fLinkAg" placeholder="ex: calendly.com/..."/></div>
+              </div>
+            </div>
+            <div id="fgImovel">
             <div class="f-row3">
               <div><label class="f-lbl">Quartos</label><select class="f-sel" id="fQtos" onchange="dbResumo()"><option>1 quarto</option><option selected>2 quartos</option><option>3 quartos</option><option>4+ quartos</option></select></div>
               <div><label class="f-lbl">Suítes</label><select class="f-sel" id="fSui"><option>Nenhuma</option><option selected>1 suíte</option><option>2 suítes</option><option>3+ suítes</option></select></div>
@@ -1266,6 +1291,7 @@ body.vw-adm .adm-pill{display:block;}
               <div><label class="f-lbl">Entrega prevista</label><input class="f-in" id="fEnt" placeholder="ex: Dezembro/2027"/></div>
               <div></div>
             </div>
+            </div><!-- /fgImovel -->
             <label class="f-lbl">Observações</label>
             <textarea class="f-ta" id="fObs" maxlength="1000" placeholder="ex: Empreendimento próximo ao Shopping Recife. Lazer completo equipado..." oninput="fCont.textContent=this.value.length+'/1000 caracteres'"></textarea>
             <div class="f-cont" id="fCont">0/1000 caracteres</div>
@@ -3190,12 +3216,13 @@ function dbTipoVal(){
 }
 var DB=[];
 function dbCarregar(){
+  setorCarregar();
   fetch(SUPA_URL+'/rest/v1/produtos?select=*&order=criado_em.asc'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
     DB=rows.map(function(p){
       var c=p.caracteristicas||{};
-      return{id:p.id,nome:p.nome,tipo:p.tipo||'—',loc:c.loc||'—',valor:c.valor||'—',qtos:c.qtos||'2 quartos',ent:c.ent||'',obs:p.obs||'',tg:c.tg||{}};
+      return{id:p.id,nome:p.nome,tipo:p.tipo||'—',loc:c.loc||'—',valor:c.valor||'—',qtos:c.qtos||'2 quartos',ent:c.ent||'',obs:p.obs||'',tg:c.tg||{},car:c};
     });
     dbRender();
     console.log('produtos: '+DB.length+' carregados do Supabase');
@@ -3210,7 +3237,7 @@ function dbRender(){
     if(q && p.nome.toLowerCase().indexOf(q)<0 && p.tipo.toLowerCase().indexOf(q)<0)return;
     vis++;
     b.insertAdjacentHTML('beforeend','<tr><td><div class="pn">'+p.nome+'</div><div class="ps">Produto cadastrado</div></td>'
-      +'<td>'+p.tipo+'</td><td>'+(p.loc||'—')+'</td><td>'+(p.valor||'—')+'</td>'
+      +'<td>'+p.tipo+'</td><td>'+(SETOR==='curso'?((p.car&&p.car.formato)||p.loc||'—'):(SETOR==='servico'?((p.car&&p.car.dur)||p.loc||'—'):(p.loc||'—')))+'</td><td>'+(p.valor||'—')+'</td>'
       +'<td><span class="st-on"></span></td>'
       +'<td><div style="display:flex;gap:6px;justify-content:flex-end;"><button class="ga" onclick="dbEditar('+i+')">Editar</button><button class="ga" style="color:#b42318;border-color:#f4c6c2;" onclick="dbExcluir('+i+')">Excluir</button></div></td></tr>');
   });
@@ -3229,6 +3256,14 @@ function dbEditar(i){
   if(fTipo.value==='__outro')document.getElementById('fTipoOutro').value=p.tipo;fLoc.value=p.loc==='—'?'':p.loc;fValor.value=p.valor==='—'?'':p.valor;
   document.getElementById('fObs').value=p.obs||'';document.getElementById('fEnt').value=p.ent||'';
   ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){document.getElementById(id).checked=!!(p.tg&&p.tg[id]);});
+  var c=p.car||{};
+  if(document.getElementById('fFormato'))document.getElementById('fFormato').value=c.formato||'Presencial';
+  if(document.getElementById('fData'))document.getElementById('fData').value=c.data||'';
+  if(document.getElementById('fCarga'))document.getElementById('fCarga').value=c.carga||'';
+  if(document.getElementById('fLinkPg'))document.getElementById('fLinkPg').value=c.linkpg||'';
+  ['fCert','fSup','fGar7','fVagas'].forEach(function(id){var el=document.getElementById(id);if(el)el.checked=!!(c.tg&&c.tg[id]);});
+  if(document.getElementById('fDur'))document.getElementById('fDur').value=c.dur||'';
+  if(document.getElementById('fLinkAg'))document.getElementById('fLinkAg').value=c.linkag||'';
   fCont.textContent=(p.obs||'').length+'/1000 caracteres';
   document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);mdCarregar();
 }
@@ -3245,9 +3280,18 @@ function dbExcluir(i){
 function dbSalvar(){
   var nome=fNome.value.trim(); if(!nome){alert('Dá um nome pro produto');fNome.focus();return;}
   if(dbEdit<0 && DB.length>=DB_MAX){alert('Limite do plano PRO atingido ('+DB_MAX+'). Faça upgrade.');return;}
-  var tg={}; ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){tg[id]=document.getElementById(id).checked;});
-  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,conta_id:CONTA_ID,
-    caracteristicas:{loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',qtos:fQtos.value,ent:document.getElementById('fEnt').value,tg:tg}};
+  var car={loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',setor:SETOR};
+  if(SETOR==='imovel'){
+    var tg={}; ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){tg[id]=document.getElementById(id).checked;});
+    car.qtos=fQtos.value; car.ent=document.getElementById('fEnt').value; car.tg=tg;
+  } else if(SETOR==='curso'){
+    var tgc={}; ['fCert','fSup','fGar7','fVagas'].forEach(function(id){tgc[id]=document.getElementById(id).checked;});
+    car.formato=document.getElementById('fFormato').value; car.data=document.getElementById('fData').value.trim();
+    car.carga=document.getElementById('fCarga').value.trim(); car.linkpg=document.getElementById('fLinkPg').value.trim(); car.tg=tgc;
+  } else {
+    car.dur=document.getElementById('fDur').value.trim(); car.linkag=document.getElementById('fLinkAg').value.trim();
+  }
+  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,conta_id:CONTA_ID,caracteristicas:car};
   var editId=(dbEdit>=0 && DB[dbEdit])?DB[dbEdit].id:null;
   var url=SUPA_URL+'/rest/v1/produtos'+(editId?('?id=eq.'+editId):'');
   fetch(url,{method:editId?'PATCH':'POST',
@@ -3264,6 +3308,43 @@ function dbSalvar(){
     else {dbTroca(false);}
   })
   .catch(function(e){alert('Não consegui salvar ('+e.message+'). Tente de novo.');});
+}
+/* ── SETOR DA CONTA (formulário camaleão) ── */
+var SETOR='imovel';
+var SETOR_TIPOS={
+  imovel:['Apartamento','Casa','Terreno','Sala comercial'],
+  curso:['Curso presencial','Curso online','Mentoria','Imersão','Combo'],
+  servico:['Serviço avulso','Pacote','Plano mensal','Consultoria']
+};
+function setorCarregar(){
+  if(!CONTA_ID)return Promise.resolve();
+  return fetch(SUPA_URL+'/rest/v1/contas?select=setor&id=eq.'+CONTA_ID,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){SETOR=(rows[0]&&rows[0].setor)||'imovel';setorAplicar();})
+  .catch(function(){setorAplicar();});
+}
+function setorAplicar(){
+  var ehImovel=SETOR==='imovel', ehCurso=SETOR==='curso', ehServ=SETOR==='servico';
+  var gi=document.getElementById('fgImovel'), gc=document.getElementById('fgCurso'), gs=document.getElementById('fgServico');
+  if(gi)gi.style.display=ehImovel?'block':'none';
+  if(gc)gc.style.display=ehCurso?'block':'none';
+  if(gs)gs.style.display=ehServ?'block':'none';
+  var lbl=document.getElementById('fLocLbl'), loc=document.getElementById('fLoc');
+  if(lbl&&loc){
+    if(ehCurso){lbl.textContent='Local / Plataforma';loc.placeholder='ex: Coworking Horizonte, Boa Viagem — ou Kiwify';}
+    else if(ehServ){lbl.textContent='Local de atendimento';loc.placeholder='ex: presencial em Recife · online';}
+    else{lbl.textContent='Localização';loc.placeholder='ex: Boa Viagem, Recife – PE';}
+  }
+  var th=document.getElementById('thDet');
+  if(th)th.textContent=ehCurso?'Formato':(ehServ?'Atendimento':'Localização');
+  var sel=document.getElementById('fTipo');
+  if(sel){
+    var atual=sel.value;
+    sel.innerHTML=SETOR_TIPOS[SETOR].map(function(t){return '<option>'+t+'</option>';}).join('')+'<option value="__outro">Outro (digitar…)</option>';
+    if(Array.from(sel.options).some(function(o){return o.value===atual;}))sel.value=atual;
+  }
+  var nome=document.getElementById('fNome');
+  if(nome)nome.placeholder=ehCurso?'ex: Trafegou — Formação em Meta Ads':(ehServ?'ex: Gestão de Tráfego — Plano Start':'ex: Edifício Mar de Boa Viagem');
 }
 /* ── MÍDIAS DO PRODUTO (Storage + tabela midias) ── */
 var MD_LIM={image:{max:8,mb:5,rot:'foto'},video:{max:2,mb:16,rot:'vídeo'},document:{max:1,mb:10,rot:'PDF'}};
@@ -3361,14 +3442,28 @@ function mdLimparProduto(pid){
 }
 function dbVoltar(){dbTroca(false);}
 function dbTroca(form){document.getElementById('dbLista').style.display=form?'none':'block';document.getElementById('dbForm').style.display=form?'block':'none';}
-function dbLimpar(){['fNome','fLoc','fValor','fEnt','fObs'].forEach(function(id){document.getElementById(id).value='';});['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){document.getElementById(id).checked=false;});fCont.textContent='0/1000 caracteres';dbResumo();}
+function dbLimpar(){['fNome','fLoc','fValor','fEnt','fObs','fData','fCarga','fLinkPg','fDur','fLinkAg'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['fVar','fPis','fAca','fGar','fMcmv','fMb','fCert','fSup','fGar7','fVagas'].forEach(function(id){var el=document.getElementById(id);if(el)el.checked=false;});fCont.textContent='0/1000 caracteres';dbResumo();}
 function dbResumo(){
-  var r=document.getElementById('fResumo');
-  r.innerHTML='<div class="ri">Nome: <b>'+(fNome.value||'—')+'</b></div>'
-   +'<div class="ri">Tipo: <b>'+dbTipoVal()+'</b></div>'
-   +'<div class="ri">Local: <b>'+(fLoc.value||'—')+'</b></div>'
-   +'<div class="ri">Valor: <b>'+(fValor.value||'—')+'</b></div>'
-   +'<div class="ri">Quartos: <b>'+fQtos.value+'</b></div>';
+  var r=document.getElementById('fResumo'); if(!r)return;
+  var h='<div class="ri">Nome: <b>'+(fNome.value||'—')+'</b></div>'
+   +'<div class="ri">Tipo: <b>'+dbTipoVal()+'</b></div>';
+  if(SETOR==='curso'){
+    var fo=document.getElementById('fFormato'), da=document.getElementById('fData');
+    h+='<div class="ri">Formato: <b>'+((fo&&fo.value)||'—')+'</b></div>'
+      +'<div class="ri">Data: <b>'+((da&&da.value)||'—')+'</b></div>'
+      +'<div class="ri">Local: <b>'+(fLoc.value||'—')+'</b></div>'
+      +'<div class="ri">Valor: <b>'+(fValor.value||'—')+'</b></div>';
+  } else if(SETOR==='servico'){
+    var du=document.getElementById('fDur');
+    h+='<div class="ri">Atendimento: <b>'+(fLoc.value||'—')+'</b></div>'
+      +'<div class="ri">Duração: <b>'+((du&&du.value)||'—')+'</b></div>'
+      +'<div class="ri">Valor: <b>'+(fValor.value||'—')+'</b></div>';
+  } else {
+    h+='<div class="ri">Local: <b>'+(fLoc.value||'—')+'</b></div>'
+      +'<div class="ri">Valor: <b>'+(fValor.value||'—')+'</b></div>'
+      +'<div class="ri">Quartos: <b>'+fQtos.value+'</b></div>';
+  }
+  r.innerHTML=h;
 }
 dbRender();dbResumo();
 
