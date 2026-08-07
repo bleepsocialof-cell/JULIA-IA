@@ -3300,7 +3300,7 @@ function dbSalvar(){
   .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+' — '+t.slice(0,160));});return r.json();})
   .then(function(rows){
     var s=rows[0]||payload, c=s.caracteristicas||payload.caracteristicas;
-    var p={id:s.id||editId,nome:s.nome,tipo:s.tipo,loc:c.loc,valor:c.valor,qtos:c.qtos,ent:c.ent,obs:s.obs||'',tg:c.tg||{}};
+    var p={id:s.id||editId,nome:s.nome,tipo:s.tipo,loc:c.loc,valor:c.valor,qtos:c.qtos,ent:c.ent,obs:s.obs||'',tg:c.tg||{},car:c};
     var eraNovo=(dbEdit<0);
     if(dbEdit>=0)DB[dbEdit]=p; else {DB.push(p);dbEdit=DB.length-1;}
     dbRender();
