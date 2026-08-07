@@ -3291,7 +3291,7 @@ function dbSalvar(){
   } else {
     car.dur=document.getElementById('fDur').value.trim(); car.linkag=document.getElementById('fLinkAg').value.trim();
   }
-  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,conta_id:CONTA_ID,caracteristicas:car};
+  var payload={nome:nome,tipo:dbTipoVal(),obs:document.getElementById('fObs').value,conta_id:contaAtiva(),caracteristicas:car};
   var editId=(dbEdit>=0 && DB[dbEdit])?DB[dbEdit].id:null;
   var url=SUPA_URL+'/rest/v1/produtos'+(editId?('?id=eq.'+editId):'');
   fetch(url,{method:editId?'PATCH':'POST',
@@ -3316,13 +3316,14 @@ var SETOR_TIPOS={
   curso:['Curso presencial','Curso online','Mentoria','Imersão','Combo'],
   servico:['Serviço avulso','Pacote','Plano mensal','Consultoria']
 };
+function contaAtiva(){return window.CONTA_VIEW||CONTA_ID;}
 var setorTent=0;
 function setorCarregar(){
-  if(!CONTA_ID){
+  if(!contaAtiva()){
     if(setorTent++<30)setTimeout(setorCarregar,500);
     return Promise.resolve();
   }
-  return fetch(SUPA_URL+'/rest/v1/contas?select=setor&id=eq.'+CONTA_ID,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  return fetch(SUPA_URL+'/rest/v1/contas?select=setor&id=eq.'+contaAtiva(),{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.ok?r.json():[];})
   .then(function(rows){SETOR=(rows[0]&&rows[0].setor)||'imovel';setorAplicar();})
   .catch(function(){setorAplicar();});
@@ -3405,7 +3406,7 @@ function mdUpload(t,files){
       .catch(function(e){mdBusy=false;mdCarregar();alert('Falhou um upload ('+e.message+'). Os anteriores foram salvos.');});
 }
 function mdSobe(t,pid,f){
-  var path='contas/'+CONTA_ID+'/produtos/'+pid+'/'+Date.now()+'-'+mdSlug(f.name);
+  var path='contas/'+contaAtiva()+'/produtos/'+pid+'/'+Date.now()+'-'+mdSlug(f.name);
   return fetch(SUPA_URL+'/storage/v1/object/midia-julia/'+path,{
     method:'POST',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':f.type||'application/octet-stream','x-upsert':'false'},
@@ -3415,7 +3416,7 @@ function mdSobe(t,pid,f){
     var url=SUPA_URL+'/storage/v1/object/public/midia-julia/'+path;
     var prod=(dbEdit>=0&&DB[dbEdit])?DB[dbEdit].nome:'produto';
     var payload={cliente:'painel',apelido:mdSlug(prod)+'-'+t+'-'+(mdDoTipo(t).length+1),url:url,tipo:t,
-      descricao:prod+' — '+f.name,conta_id:CONTA_ID,produto_id:pid,tamanho:f.size,ordem:mdDoTipo(t).length};
+      descricao:prod+' — '+f.name,conta_id:contaAtiva(),produto_id:pid,tamanho:f.size,ordem:mdDoTipo(t).length};
     return fetch(SUPA_URL+'/rest/v1/midias',{method:'POST',
       headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=representation'},
       body:JSON.stringify(payload)})
