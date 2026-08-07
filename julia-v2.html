@@ -758,6 +758,11 @@ body.vw-adm .adm-pill{display:block;}
 .pl-sel{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:11.5px;font-family:'Sora';font-weight:700;background:#fff;color:var(--ink);max-width:100%;cursor:pointer;outline:none;}
 .pl-sel:focus{border-color:#a855f7;}
 .pl-filtros{flex-direction:column;align-items:stretch;}
+.md-list{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px;}
+.md-it{position:relative;width:64px;height:64px;border-radius:10px;overflow:hidden;border:1px solid #e5e0f0;background:#f6f4fb;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.md-it img{width:100%;height:100%;object-fit:cover;}
+.md-it .md-x{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(20,16,30,.72);color:#fff;border:none;font-size:11px;line-height:18px;cursor:pointer;padding:0;}
+.md-it.md-up{border-style:dashed;color:#7a52f4;font-size:11px;text-align:center;padding:4px;}
 </style>
 </head>
 <body>
@@ -1270,9 +1275,18 @@ body.vw-adm .adm-pill{display:block;}
         <div>
           <div class="card f-files">
             <div class="h3">Arquivos do produto</div><div class="hsub">Fotos, PDFs e vídeos que a Julia envia no WhatsApp</div>
-            <div class="f-file"><b>Fotos</b><small>até 5 imagens</small><button onclick="alert('Upload de fotos: em breve nesta tela')">Adicionar fotos</button></div>
-            <div class="f-file"><b>PDF</b><small>1 documento</small><button onclick="alert('Upload de PDF: em breve nesta tela')">Adicionar PDF</button></div>
-            <div class="f-file"><b>Vídeos</b><small>1 vídeo</small><button onclick="alert('Upload de vídeo: em breve nesta tela')">Adicionar vídeo</button></div>
+            <div id="mdBloq" style="display:none;font-size:12.5px;color:#a8a2ba;background:#f6f4fb;border:1px dashed #d9d3ea;border-radius:10px;padding:10px 12px;margin-top:8px;">💾 Salve o produto primeiro — os uploads liberam em seguida.</div>
+            <div id="mdArea">
+              <div class="f-file"><b>Fotos</b><small id="mdCntImage">até 8 imagens · 5MB cada</small><button id="mdBtImage" onclick="mdPick('image')">Adicionar fotos</button></div>
+              <div id="mdListImage" class="md-list"></div>
+              <div class="f-file"><b>Vídeos</b><small id="mdCntVideo">até 2 vídeos · 16MB cada</small><button id="mdBtVideo" onclick="mdPick('video')">Adicionar vídeo</button></div>
+              <div id="mdListVideo" class="md-list"></div>
+              <div class="f-file"><b>PDF</b><small id="mdCntDocument">1 documento · 10MB</small><button id="mdBtDocument" onclick="mdPick('document')">Adicionar PDF</button></div>
+              <div id="mdListDocument" class="md-list"></div>
+            </div>
+            <input type="file" id="mdInImage" accept="image/*" multiple style="display:none;" onchange="mdUpload('image',this.files)"/>
+            <input type="file" id="mdInVideo" accept="video/mp4,video/quicktime,video/3gpp" style="display:none;" onchange="mdUpload('video',this.files)"/>
+            <input type="file" id="mdInDocument" accept="application/pdf" style="display:none;" onchange="mdUpload('document',this.files)"/>
           </div>
           <div class="card f-resumo">
             <div class="h3">Resumo do produto</div><div class="hsub">Atualiza enquanto você preenche</div>
@@ -3205,7 +3219,7 @@ function dbRender(){
   document.getElementById('dbUsoTx').textContent=DB.length+' de '+DB_MAX+' produtos';
   document.getElementById('dbUsoFl').style.width=Math.min(100,DB.length/DB_MAX*100)+'%';
 }
-function dbNovo(){dbEdit=-1;dbLimpar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);}
+function dbNovo(){dbEdit=-1;dbLimpar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);mdCarregar();}
 function dbEditar(i){
   dbEdit=i;var p=DB[i];
   fNome.value=p.nome;
@@ -3216,13 +3230,15 @@ function dbEditar(i){
   document.getElementById('fObs').value=p.obs||'';document.getElementById('fEnt').value=p.ent||'';
   ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){document.getElementById(id).checked=!!(p.tg&&p.tg[id]);});
   fCont.textContent=(p.obs||'').length+'/1000 caracteres';
-  document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);
+  document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);mdCarregar();
 }
 function dbExcluir(i){
   if(!confirm('Excluir "'+DB[i].nome+'"?'))return;
   var id=DB[i].id;
   if(!id){DB.splice(i,1);dbRender();return;}
-  fetch(SUPA_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  mdLimparProduto(id).then(function(){
+    return fetch(SUPA_URL+'/rest/v1/produtos?id=eq.'+id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}});
+  })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);DB.splice(i,1);dbRender();})
   .catch(function(e){alert('Não consegui excluir ('+e.message+').');});
 }
@@ -3241,10 +3257,107 @@ function dbSalvar(){
   .then(function(rows){
     var s=rows[0]||payload, c=s.caracteristicas||payload.caracteristicas;
     var p={id:s.id||editId,nome:s.nome,tipo:s.tipo,loc:c.loc,valor:c.valor,qtos:c.qtos,ent:c.ent,obs:s.obs||'',tg:c.tg||{}};
-    if(dbEdit>=0)DB[dbEdit]=p; else DB.push(p);
-    dbTroca(false);dbRender();
+    var eraNovo=(dbEdit<0);
+    if(dbEdit>=0)DB[dbEdit]=p; else {DB.push(p);dbEdit=DB.length-1;}
+    dbRender();
+    if(eraNovo){document.getElementById('dbFTit').textContent='Editar produto';mdCarregar();alert('Produto salvo ✓ Agora adiciona as fotos, vídeo e PDF 👉');}
+    else {dbTroca(false);}
   })
   .catch(function(e){alert('Não consegui salvar ('+e.message+'). Tente de novo.');});
+}
+/* ── MÍDIAS DO PRODUTO (Storage + tabela midias) ── */
+var MD_LIM={image:{max:8,mb:5,rot:'foto'},video:{max:2,mb:16,rot:'vídeo'},document:{max:1,mb:10,rot:'PDF'}};
+var MD=[]; var mdBusy=false;
+function mdProdutoId(){return (dbEdit>=0 && DB[dbEdit] && DB[dbEdit].id)?DB[dbEdit].id:null;}
+function mdSlug(s){return (s||'arquivo').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9.]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);}
+function mdSetBloq(){
+  var pid=mdProdutoId();
+  document.getElementById('mdBloq').style.display=pid?'none':'block';
+  document.getElementById('mdArea').style.display=pid?'block':'none';
+}
+function mdCarregar(){
+  MD=[]; mdRender(); mdSetBloq();
+  var pid=mdProdutoId(); if(!pid)return;
+  fetch(SUPA_URL+'/rest/v1/midias?select=*&produto_id=eq.'+pid+'&order=ordem.asc,criado_em.asc',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(rows){MD=rows;mdRender();})
+  .catch(function(e){console.warn('midias indisponíveis',e);});
+}
+function mdDoTipo(t){return MD.filter(function(m){return m.tipo===t;});}
+function mdRender(){
+  ['image','video','document'].forEach(function(t){
+    var box=document.getElementById('mdList'+t.charAt(0).toUpperCase()+t.slice(1)); if(!box)return;
+    var its=mdDoTipo(t), lim=MD_LIM[t];
+    box.innerHTML=its.map(function(m,i){
+      var inner=(t==='image')?'<img src="'+m.url+'" loading="lazy"/>':(t==='video'?'🎬':'📄');
+      return '<div class="md-it" title="'+(m.apelido||'')+'">'+inner+'<button class="md-x" onclick="mdExcluir(\''+m.id+'\')">×</button></div>';
+    }).join('');
+    var cnt=document.getElementById('mdCnt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(cnt)cnt.textContent=its.length+'/'+lim.max+' · '+lim.mb+'MB cada';
+    var bt=document.getElementById('mdBt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(bt)bt.disabled=(its.length>=lim.max)||mdBusy;
+  });
+}
+function mdPick(t){
+  if(mdBusy)return;
+  if(!mdProdutoId()){alert('Salva o produto primeiro 😉');return;}
+  var lim=MD_LIM[t], atual=mdDoTipo(t).length;
+  if(atual>=lim.max){alert('Limite de '+lim.max+' '+lim.rot+'(s) atingido. Exclua um pra subir outro.');return;}
+  document.getElementById('mdIn'+t.charAt(0).toUpperCase()+t.slice(1)).click();
+}
+function mdUpload(t,files){
+  var pid=mdProdutoId(); if(!pid||!files||!files.length)return;
+  var lim=MD_LIM[t], atual=mdDoTipo(t).length;
+  var lista=Array.prototype.slice.call(files);
+  document.getElementById('mdIn'+t.charAt(0).toUpperCase()+t.slice(1)).value='';
+  if(atual+lista.length>lim.max){alert('Só cabem mais '+(lim.max-atual)+' '+lim.rot+'(s) — limite de '+lim.max+'.');return;}
+  var grandes=lista.filter(function(f){return f.size>lim.mb*1024*1024;});
+  if(grandes.length){alert('Arquivo acima de '+lim.mb+'MB: '+grandes.map(function(f){return f.name;}).join(', ')+'. Comprime e tenta de novo (vídeo: ~60–90s).');return;}
+  mdBusy=true; mdRender();
+  var fila=Promise.resolve();
+  lista.forEach(function(f){fila=fila.then(function(){return mdSobe(t,pid,f);});});
+  fila.then(function(){mdBusy=false;mdCarregar();})
+      .catch(function(e){mdBusy=false;mdCarregar();alert('Falhou um upload ('+e.message+'). Os anteriores foram salvos.');});
+}
+function mdSobe(t,pid,f){
+  var path='contas/'+CONTA_ID+'/produtos/'+pid+'/'+Date.now()+'-'+mdSlug(f.name);
+  return fetch(SUPA_URL+'/storage/v1/object/midia-julia/'+path,{
+    method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':f.type||'application/octet-stream','x-upsert':'false'},
+    body:f
+  }).then(function(r){if(!r.ok)return r.text().then(function(x){throw new Error('storage '+r.status+' — '+x.slice(0,120));});})
+  .then(function(){
+    var url=SUPA_URL+'/storage/v1/object/public/midia-julia/'+path;
+    var prod=(dbEdit>=0&&DB[dbEdit])?DB[dbEdit].nome:'produto';
+    var payload={cliente:'painel',apelido:mdSlug(prod)+'-'+t+'-'+(mdDoTipo(t).length+1),url:url,tipo:t,
+      descricao:prod+' — '+f.name,conta_id:CONTA_ID,produto_id:pid,tamanho:f.size,ordem:mdDoTipo(t).length};
+    return fetch(SUPA_URL+'/rest/v1/midias',{method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=representation'},
+      body:JSON.stringify(payload)})
+    .then(function(r){if(!r.ok)return r.text().then(function(x){throw new Error('midias '+r.status+' — '+x.slice(0,120));});return r.json();})
+    .then(function(rows){if(rows[0])MD.push(rows[0]);mdRender();});
+  });
+}
+function mdExcluir(id){
+  var m=MD.find(function(x){return x.id===id;}); if(!m)return;
+  if(!confirm('Excluir este arquivo?'))return;
+  var path=m.url.split('/storage/v1/object/public/midia-julia/')[1];
+  var apaga=path?fetch(SUPA_URL+'/storage/v1/object/midia-julia/'+path,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}):Promise.resolve();
+  apaga.then(function(){return fetch(SUPA_URL+'/rest/v1/midias?id=eq.'+id,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}});})
+  .then(function(){MD=MD.filter(function(x){return x.id!==id;});mdRender();})
+  .catch(function(e){alert('Não consegui excluir ('+e.message+')');});
+}
+function mdLimparProduto(pid){
+  return fetch(SUPA_URL+'/rest/v1/midias?select=url&produto_id=eq.'+pid,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){
+    var fila=Promise.resolve();
+    rows.forEach(function(m){
+      var path=(m.url||'').split('/storage/v1/object/public/midia-julia/')[1]; if(!path)return;
+      fila=fila.then(function(){return fetch(SUPA_URL+'/storage/v1/object/midia-julia/'+path,{method:'DELETE',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).catch(function(){});});
+    });
+    return fila;
+  });
 }
 function dbVoltar(){dbTroca(false);}
 function dbTroca(form){document.getElementById('dbLista').style.display=form?'none':'block';document.getElementById('dbForm').style.display=form?'block':'none';}
