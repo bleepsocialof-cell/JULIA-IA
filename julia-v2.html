@@ -3246,7 +3246,7 @@ function dbRender(){
   document.getElementById('dbUsoTx').textContent=DB.length+' de '+DB_MAX+' produtos';
   document.getElementById('dbUsoFl').style.width=Math.min(100,DB.length/DB_MAX*100)+'%';
 }
-function dbNovo(){dbEdit=-1;dbLimpar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);mdCarregar();}
+function dbNovo(){dbEdit=-1;dbLimpar();setorAplicar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);mdCarregar();}
 function dbEditar(i){
   dbEdit=i;var p=DB[i];
   fNome.value=p.nome;
@@ -3265,7 +3265,7 @@ function dbEditar(i){
   if(document.getElementById('fDur'))document.getElementById('fDur').value=c.dur||'';
   if(document.getElementById('fLinkAg'))document.getElementById('fLinkAg').value=c.linkag||'';
   fCont.textContent=(p.obs||'').length+'/1000 caracteres';
-  document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);mdCarregar();
+  setorAplicar();document.getElementById('dbFTit').textContent='Editar produto';dbResumo();dbTroca(true);mdCarregar();
 }
 function dbExcluir(i){
   if(!confirm('Excluir "'+DB[i].nome+'"?'))return;
@@ -3316,8 +3316,12 @@ var SETOR_TIPOS={
   curso:['Curso presencial','Curso online','Mentoria','Imersão','Combo'],
   servico:['Serviço avulso','Pacote','Plano mensal','Consultoria']
 };
+var setorTent=0;
 function setorCarregar(){
-  if(!CONTA_ID)return Promise.resolve();
+  if(!CONTA_ID){
+    if(setorTent++<30)setTimeout(setorCarregar,500);
+    return Promise.resolve();
+  }
   return fetch(SUPA_URL+'/rest/v1/contas?select=setor&id=eq.'+CONTA_ID,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.ok?r.json():[];})
   .then(function(rows){SETOR=(rows[0]&&rows[0].setor)||'imovel';setorAplicar();})
