@@ -2635,16 +2635,34 @@ function descartarLead(){
   var t8=String(l.t||'').replace(/\D/g,'').slice(-8);
   if(!l.id&&!t8){alert('Lead sem id e sem telefone — recarregue a página.');return;}
   if(!confirm('Descartar '+l.n+' ('+(l.t||'sem telefone')+')? Ele sai da fila da Julia.'))return;
+  var telp=String(l.t||'').replace(/\D/g,'');
+  var HB={apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+  function pausar(){
+    if(!telp)return Promise.resolve();
+    return fetch(SUPA_URL+'/rest/v1/pausas?on_conflict=telefone',{method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+      body:JSON.stringify({telefone:telp,pausada:true,atualizado_em:new Date().toISOString().replace('Z','')})
+    }).catch(function(){});
+  }
+  function fim(){
+    l.e='descartado';l.st='nq';
+    window.CONV_TEL=null;
+    pintarReal();
+    alert('Lead descartado ✓');
+    carregarLeadsReais();
+  }
   var alvo=l.id?('id=eq.'+l.id):('telefone=like.*'+t8);
   fetch(SUPA_URL+'/rest/v1/leads?'+alvo,{method:'PATCH',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'return=representation'},
     body:JSON.stringify({status:'descartado',etapa:'descartado'})})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(rows){
-    if(!rows||!rows.length)throw new Error('nenhuma linha gravada — alvo '+alvo);
-    alert('Lead descartado ✓');
-    window.CONV_TEL=null;
-    carregarLeadsReais();
+    if(rows&&rows.length)return pausar().then(fim);
+    return fetch(SUPA_URL+'/rest/v1/leads',{method:'POST',
+      headers:HB,
+      body:JSON.stringify({telefone:l.t||telp,nome:(l.n&&l.n!=='Sem nome')?l.n:null,status:'descartado',etapa:'descartado',origem:l.origem||'whatsapp',conta_id:(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea')})})
+    .then(function(r2){if(!r2.ok)throw new Error('lead sem cadastro e não consegui criar (HTTP '+r2.status+')');})
+    .then(pausar).then(fim);
   })
   .catch(function(e){alert('Não consegui descartar ('+e.message+').');});
 }
