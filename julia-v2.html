@@ -2330,10 +2330,17 @@ function pintarReal(){
     var B=mfs[ix].querySelector('b'),F=mfs[ix].querySelector('.fl');
     if(B)B.textContent=c; if(F)F.style.width=(gn?Math.max(2,Math.round(c/gn*100)):0)+'%';
   });
-  /* — Início: canais e prioridades (sem origem no banco ainda) — */
-  document.querySelectorAll('#vInicio .cn').forEach(function(cn){
-    var B=cn.querySelector('b'),F=cn.querySelector('.fl');
-    if(B)B.textContent=gn?'—':'0'; if(F)F.style.width='0%';
+  /* — Início: origem dos leads (real) — */
+  var OG={whats:0,meta:0,site:0,ind:0};
+  G.forEach(function(l){var o=String(l.origem||'').toLowerCase();
+    if(o.indexOf('meta')>-1||o.indexOf('face')>-1||o.indexOf('insta')>-1||o.indexOf('ctwa')>-1||o.indexOf('ad')>-1)OG.meta++;
+    else if(o.indexOf('site')>-1||o.indexOf('land')>-1||o.indexOf('portal')>-1||o.indexOf('google')>-1)OG.site++;
+    else if(o.indexOf('indic')>-1)OG.ind++;
+    else OG.whats++;});
+  var OGL=[OG.whats,OG.meta,OG.site,OG.ind];
+  document.querySelectorAll('#vInicio .cn').forEach(function(cn,ix){
+    var B=cn.querySelector('b'),F=cn.querySelector('.fl'),v=OGL[ix]||0;
+    if(B)B.textContent=v; if(F)F.style.width=(gn?Math.max(v?4:0,Math.round(v/gn*100)):0)+'%';
   });
   var acs=document.querySelectorAll('#vInicio .ac b');
   if(acs.length>=3){
@@ -3103,7 +3110,8 @@ function transferirCRM(btn){
 function breve(n){alert(n+' — em construção nesta v2. As abas prontas: Início, Conversas e Leads.');}
 (function(){
   var h=new Date().getHours();
-  document.getElementById('saud').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+' 👋';
+  var _pn='';try{_pn=String((perfilDados()||{}).nome||'').split(' ')[0];}catch(e){}
+  document.getElementById('saud').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+(_pn?', '+_pn:'')+' 👋';
   var m=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var d=new Date();
   var oe=document.getElementById('opEste'); if(oe)oe.textContent=m[d.getMonth()]+', '+d.getFullYear();
