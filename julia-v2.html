@@ -1521,8 +1521,8 @@ body.vw-adm .adm-pill{display:block;}
           <div class="cc-fl"><label>CNPJ</label><input id="ccFCnpj" placeholder="00.000.000/0001-00"/></div>
         </div>
         <div class="cc-gr">
-          <div class="cc-fl"><label>Responsável (dono) *</label><input id="ccFResp" placeholder="Nome do dono da conta"/></div>
-          <div class="cc-fl"><label>WhatsApp do dono</label><input id="ccFZapDono" placeholder="+55 81 9XXXX-XXXX"/><small class="cc-hint">Para onde vamos enviar o acesso</small></div>
+          <div class="cc-fl"><label>Responsável da conta *</label><input id="ccFResp" placeholder="Nome do responsável da conta"/></div>
+          <div class="cc-fl"><label>WhatsApp do responsável</label><input id="ccFZapDono" placeholder="+55 81 9XXXX-XXXX"/><small class="cc-hint">Para onde vamos enviar o acesso</small></div>
         </div>
 
         <div class="cc-sec">JULIA · WHATSAPP DA OPERAÇÃO</div>
@@ -1705,7 +1705,7 @@ function ccMsg(c){
 }
 function ccWa(c){return 'https://wa.me/'+(c.zapDono||'').replace(/\D/g,'')+'?text='+encodeURIComponent(ccMsg(c));}
 function ccMailto(c){return 'mailto:'+c.mail+'?subject='+encodeURIComponent('Seu acesso à Jul.ia — '+c.emp)+'&body='+encodeURIComponent(ccMsg(c));}
-function ccEnviar(i){var c=CC[i];if(!c.zapDono){alert('Cadastre o WhatsApp do dono para enviar o acesso.');return;}window.open(ccWa(c),'_blank');}
+function ccEnviar(i){var c=CC[i];if(!c.zapDono){alert('Cadastre o WhatsApp do responsável para enviar o acesso.');return;}window.open(ccWa(c),'_blank');}
 function ccRender(){
   var q=(document.getElementById('ccBusca').value||'').toLowerCase();
   var tb=document.getElementById('ccBody'), h='';
@@ -1713,15 +1713,15 @@ function ccRender(){
     if(ccF!=='todos'&&c.st!==ccF)return;
     if(q&&(c.emp+' '+c.resp).toLowerCase().indexOf(q)<0)return;
     var contato='';
-    if(c.zapDono)contato+='<a class="cc-lnk" href="'+ccWa(c)+'" target="_blank" title="Abrir WhatsApp do dono com o acesso pronto">📱 '+c.zapDono+'</a>';
+    if(c.zapDono)contato+='<a class="cc-lnk" href="'+ccWa(c)+'" target="_blank" title="Abrir WhatsApp do responsável com o acesso pronto">📱 '+c.zapDono+'</a>';
     if(c.mail)contato+=(contato?' · ':'')+'<a class="cc-lnk" href="'+ccMailto(c)+'" title="Enviar acesso por e-mail">✉ '+c.mail+'</a>';
     h+='<tr><td><div class="cc-emp"><div class="cc-av">'+ccIni(c.emp)+'</div><div><div class="pn">'+c.emp+'</div><div class="ps">'+c.resp+(c.cnpj?' · CNPJ '+c.cnpj:'')+'</div><div class="ps">'+contato+'</div></div></div></td>'
       +'<td><b style="font-family:Sora">'+c.plano+'</b><div class="ps">R$ '+CC_PLANOS[c.plano].toLocaleString('pt-BR')+'/mês</div></td>'
-      +'<td><span class="cc-seats">'+(1+c.seats)+' <small>('+(c.seats>0?'+'+c.seats+' extra'+(c.seats>1?'s':''):'só o dono')+')</small></span></td>'
+      +'<td><span class="cc-seats">'+(1+c.seats)+' <small>('+(c.seats>0?'+'+c.seats+' extra'+(c.seats>1?'s':''):'só o responsável')+')</small></span></td>'
       +'<td style="font-size:11.5px;">'+(c.zap||'—')+'<div class="ps">360dialog</div></td>'
       +'<td>'+ccStBadge(c.st)+'</td>'
       +'<td><div class="cc-ac">'
-      +'<button class="pr" title="Enviar login e senha no WhatsApp do dono" onclick="ccEnviar('+i+')">📤 Acesso</button>'
+      +'<button class="pr" title="Enviar login e senha no WhatsApp do responsável" onclick="ccEnviar('+i+')">📤 Acesso</button>'
       +'<button onclick="ccEditar('+i+')">Editar</button>'
       +'<button onclick="ccPausa('+i+')">'+(c.st==='ativa'?'Pausar':'Reativar')+'</button>'
       +'<button class="rm" onclick="ccExcluir('+i+')">✕</button>'
@@ -1787,7 +1787,7 @@ function ccSalvar(enviar){
     if(!novaConta)ccVoltar();
     function enviarZap(){
       if(!enviar)return;
-      if(!o.zapDono){alert('Conta salva! Mas sem o WhatsApp do dono não dá pra enviar o acesso.');return;}
+      if(!o.zapDono){alert('Conta salva! Mas sem o WhatsApp do responsável não dá pra enviar o acesso.');return;}
       window.open(ccWa(o),'_blank');
     }
     if(novaConta){
@@ -1935,7 +1935,7 @@ function carregarLeadsReais(){
              : (status.indexOf('descart')>-1||status.indexOf('nao')>-1||status.indexOf('não')>-1) ? 'nq'
              : 'pendente';
       var et=['chegou','conversa','qualificacao','documentacao','agendamento','crm'].indexOf(etapa)>-1?etapa:(st==='crm'?'crm':st==='qualificado'?'qualificacao':st==='nq'?'descartado':'chegou');
-      GL.push({id:r.id,cr:r.created_at,n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',origem:r.origem||'',st:st,e:et,
+      GL.push({id:r.id,cr:r.created_at,n:r.nome||'Sem nome',t:r.telefone||'—',i:r.interesse||'—',origem:r.origem||'',resumo:r.resumo||'',st:st,e:et,
                sc:(typeof r.score==='number'?r.score:0),
                u:supaTempo(r.updated_at||r.created_at),cor:['c1','c2','c3',''][ix%4]});
       var L=GL[GL.length-1], o=OLD[String(L.t||'').replace(/\D/g,'').slice(-8)];
@@ -2692,11 +2692,12 @@ function resumoLead(){
   if(l.cr){var h=Math.floor((Date.now()-new Date(l.cr).getTime())/36e5);tempo=h<24?(h+'h na base'):(Math.floor(h/24)+' dias na base');}
   var ov=document.createElement('div');ov.className='pf-ov on';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var RS=String(l.resumo||'').trim();
   function kv(k,v){return '<div class="kv"><span>'+k+'</span><b>'+ehtml(String(v==null||v===''?'—':v))+'</b></div>';}
   ov.innerHTML='<div class="pf-md" style="max-width:380px;"><h2>Resumo do lead</h2>'+
     kv('Nome',l.n)+kv('Telefone',l.t)+kv('Interesse',l.i)+kv('Origem',l.origem)+
     kv('Etapa',ETAPA_NOME[l.e]||l.e)+kv('Score',l.sc+'/100')+kv('Tempo',tempo)+kv('Última atividade',l.u)+
-    '<div class="pf-bts" style="margin-top:14px;"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Fechar</button></div></div>';
+    '<div style="margin-top:12px;"><div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin-bottom:6px;">📝 RESUMO DA CONVERSA (Julia)</div><div style="font-size:12.5px;line-height:1.55;color:var(--tx);background:#faf9fd;border:1px solid var(--line2);border-radius:10px;padding:12px;">'+(RS?ehtml(RS):'A Julia ainda não gerou o resumo deste lead.')+'</div></div>'+'<div class="pf-bts" style="margin-top:14px;"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Fechar</button></div></div>';
   document.body.appendChild(ov);
 }
 function cfContaId(){return window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
@@ -3026,7 +3027,7 @@ function ccVendAcesso(id,contaId){
     var c=CC[ccEdit]||{};
     var msg='Acesso de Vendedor de Plantão 🎧\n\n👤 '+v.nome+'\n🔗 '+(c.link||'https://julia-ia-nine.vercel.app')+'\n📧 Login: '+v.email+'\n🔑 Senha: '+(v.senha_provisoria||'(defina uma nova — senha não registrada)');
     if(c.zapDono){window.open('https://wa.me/'+String(c.zapDono).replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');}
-    else{navigator.clipboard&&navigator.clipboard.writeText(msg);alert('Sem WhatsApp do dono na conta — credenciais copiadas:\n\n'+msg);}
+    else{navigator.clipboard&&navigator.clipboard.writeText(msg);alert('Sem WhatsApp do responsável na conta — credenciais copiadas:\n\n'+msg);}
   });
 }
 function ccVendRenomear(id,contaId){
@@ -3067,7 +3068,7 @@ function ccAddVend(){
     document.getElementById('vNome').value='';document.getElementById('vMail').value='';document.getElementById('vSenha').value='';
     ccVendsCarregar(contaId);
     var c=CC[ccEdit];
-    if(c&&c.zapDono&&confirm('Vendedor criado ✓ Enviar o acesso no WhatsApp do dono agora?')){
+    if(c&&c.zapDono&&confirm('Vendedor criado ✓ Enviar o acesso no WhatsApp do responsável agora?')){
       var msg='Acesso de Vendedor de Plantão criado! 🎧\n\n👤 '+nome+'\n🔗 '+c.link+'\n📧 Login: '+mail+'\n🔑 Senha: '+senha;
       window.open('https://wa.me/'+String(c.zapDono).replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
     }else{alert('Vendedor criado ✓ — login: '+mail);}
@@ -3098,7 +3099,7 @@ function transferirMenu(){
   }
   /* 2 · CRM */
   h+='<div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin:14px 0 8px;">📥 CRM</div>';
-  h+='<button class="pa-dark" style="margin-bottom:12px;" onclick="transferirCRM(this)">Enviar ao CRM (o dono distribui de lá)</button>';
+  h+='<button class="pa-dark" style="margin-bottom:12px;" onclick="transferirCRM(this)">Enviar ao CRM (a equipe distribui de lá)</button>';
   /* 3 · WhatsApp de um corretor */
   h+='<div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin:14px 0 8px;">📲 WHATSAPP DE UM CORRETOR</div>';
   h+='<div style="display:flex;gap:8px;margin-bottom:4px;"><input id="trZap" placeholder="DDI+DDD+número · 5581999998888" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;outline:none;" inputmode="numeric"/>'
@@ -3116,7 +3117,8 @@ function transferirZap(telLead){
     +'👤 '+(l.n||'Sem nome')+'\n'
     +'📱 +'+(telLead||String(l.t||''))+'\n'
     +'🎯 Interesse: '+(l.intr||l.i||'—')+'\n'
-    +'📊 Score: '+String(l.sc||0)+'/100 · Etapa: '+et+'\n\n'
+    +'📊 Score: '+String(l.sc||0)+'/100 · Etapa: '+et+'\n'
+    +(String(l.resumo||'').trim()?('\n📝 Resumo: '+String(l.resumo).trim()+'\n'):'')
     +'Continue o atendimento por aqui: https://wa.me/'+(telLead||'');
   window.open('https://wa.me/'+z+'?text='+encodeURIComponent(tx),'_blank');
 }
