@@ -2722,6 +2722,10 @@ function resumoLead(){
           +'<a href="'+u+'" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#17141f;color:#fff;font-weight:800;font-size:12px;padding:10px;border-radius:10px;text-decoration:none;">⬇ Baixar</a>'
           +'</div></div>';
       });
+      window.__rlAnexRows=rows;
+      if(rows.length>1){
+        h2+='<button id="rlZipBtn" onclick="baixarTodosZip()" style="width:100%;background:#6d28d9;color:#fff;font-weight:800;font-size:12.5px;padding:11px;border-radius:10px;border:none;cursor:pointer;margin-top:2px;">⬇ Baixar todos (ZIP · '+rows.length+' arquivos)</button>';
+      }
       h2+='</div>';
       box.innerHTML=h2;
     }).catch(function(){});
@@ -3140,14 +3144,67 @@ function transferirZap(telLead){
   if(z.length<12){alert('Número incompleto — use DDI+DDD+número, ex.: 5581999998888');return;}
   var l=leadAtual()||{};
   var et=(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1];
-  var tx='*Lead transferido pela Julia*\n\n'
-    +'👤 '+(l.n||'Sem nome')+'\n'
-    +'📱 +'+(telLead||String(l.t||''))+'\n'
-    +'🎯 Interesse: '+(l.intr||l.i||'—')+'\n'
-    +'📊 Score: '+String(l.sc||0)+'/100 · Etapa: '+et+'\n'
-    +(String(l.resumo||'').trim()?('\n📝 Resumo: '+String(l.resumo).trim()+'\n'):'')
-    +'Continue o atendimento por aqui: https://wa.me/'+(telLead||'');
-  window.open('https://wa.me/'+z+'?text='+encodeURIComponent(tx),'_blank');
+  var w=window.open('','_blank');
+  var t8=String(l.t||telLead||'').replace(/\D/g,'').slice(-8);
+  var pr=t8?fetch(SUPA_URL+'/rest/v1/anexos?select=nome_arquivo,url&telefone=like.*'+t8+'&order=criado_em.desc&limit=10'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
+      {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+    .then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
+    :Promise.resolve([]);
+  pr.then(function(rows){
+    var docs='';
+    if(rows&&rows.length){
+      docs='\n📎 Documentos ('+rows.length+'):\n';
+      rows.forEach(function(a){docs+='• '+(a.nome_arquivo||'Documento')+': '+String(a.url||'')+'\n';});
+    }
+    var tx='*Lead transferido pela Julia*\n\n'
+      +'👤 '+(l.n||'Sem nome')+'\n'
+      +'📱 +'+(telLead||String(l.t||''))+'\n'
+      +'🎯 Interesse: '+(l.intr||l.i||'—')+'\n'
+      +'📊 Score: '+String(l.sc||0)+'/100 · Etapa: '+et+'\n'
+      +(String(l.resumo||'').trim()?('\n📝 Resumo: '+String(l.resumo).trim()+'\n'):'')
+      +docs
+      +'\nContinue o atendimento por aqui: https://wa.me/'+(telLead||'');
+    var url='https://wa.me/'+z+'?text='+encodeURIComponent(tx);
+    if(w){w.location=url;}else{window.open(url,'_blank');}
+  });
+}
+function baixarTodosZip(){
+  var rows=window.__rlAnexRows||[]; if(!rows.length)return;
+  var btn=document.getElementById('rlZipBtn');
+  if(btn){btn.textContent='Preparando ZIP…';btn.disabled=true;btn.style.opacity='.7';}
+  function done(ok){if(btn){btn.textContent=ok?'⬇ Baixar todos (ZIP · '+rows.length+' arquivos)':'Falhou — tentar de novo';btn.disabled=false;btn.style.opacity='1';}}
+  function go(){
+    var zip=new JSZip(); var n=0; var seq=Promise.resolve();
+    rows.forEach(function(a,i){
+      seq=seq.then(function(){
+        return fetch(String(a.url||'')).then(function(r){return r.ok?r.blob():null;}).then(function(b){
+          if(!b)return;
+          var ext=(String(a.url||'').split('?')[0].split('.').pop()||'jpg');
+          var nm=String(a.nome_arquivo||('documento-'+(i+1))).replace(/[\\\/:*?"<>|]/g,'-');
+          zip.file(nm+'.'+ext,b); n++;
+        }).catch(function(){});
+      });
+    });
+    seq.then(function(){
+      if(!n){alert('Não consegui baixar os arquivos. Tenta de novo.');done(false);return;}
+      return zip.generateAsync({type:'blob'}).then(function(blob){
+        var tel=String((rows[0]||{}).telefone||'lead').replace(/\D/g,'')||'lead';
+        var a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download='documentos-'+tel+'.zip';
+        document.body.appendChild(a);a.click();a.remove();
+        done(true);
+      });
+    });
+  }
+  if(window.JSZip){go();}
+  else{
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload=go;
+    s.onerror=function(){alert('Falha ao carregar o compactador — confere a internet.');done(false);};
+    document.head.appendChild(s);
+  }
 }
 function transferirPara(btn,vid){
   var l=leadAtual(); if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
