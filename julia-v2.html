@@ -866,7 +866,7 @@ body.vw-adm .adm-pill{display:block;}
   <div class="view" id="vConversas">
     <div class="cl">
       <div class="clh"><h2>Conversas</h2><span class="cnt">20 contatos</span><button class="sino" id="somBtn" onclick="somToggle()" title="Som de notificação"></button></div>
-      <div class="busca"><input placeholder="Buscar por nome ou número"/></div>
+      <div class="busca"><input placeholder="Buscar por nome ou número" id="cvBusca" oninput="CV_Q=this.value;pintarReal();"/></div>
       <div class="filtros"><span class="fp on" data-f="todas" onclick="convFiltro(this)">Todas <b class="fpn">0</b></span><span class="fp" data-f="nl" onclick="convFiltro(this)">Não lidas <b class="fpn">0</b></span><span class="fp" data-f="q" onclick="convFiltro(this)">Quentes <b class="fpn">0</b></span><span class="fp" data-f="desc" onclick="convFiltro(this)" title="Descartadas"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> <b class="fpn">0</b></span></div>
       <div class="cits">
         <div class="cit on"><div class="cav c1">JP<span class="on"></span></div><div class="tx"><div class="nm">João Pereira <small>17:15</small></div><div class="pv">Perto da praia, se possível 🏖️</div><div class="mini"><span class="mp h">QUENTE</span><span class="mp e">QUALIFICAÇÃO</span></div></div><span class="cbd">5</span></div>
@@ -1394,7 +1394,11 @@ body.vw-adm .adm-pill{display:block;}
       </div>
 
       <div class="pc-sec">Perguntas frequentes</div>
-      <div class="aj-faq"><div class="q" onclick="ajFaq(this)">A Julia parou de responder. E agora?<span>+</span></div><div class="a">Primeiro veja em Configurações se o toggle "Pausar a Julia" está desligado e se o modo de atendimento cobre o horário atual. Depois confira em Integrações se o WhatsApp aparece como ATIVO. Persistindo, fale com o suporte — a gente verifica a conexão pra você.</div></div>
+      <div class="aj-faq"><div class="q" onclick="ajFaq(this)">A Julia parou de responder. E agora?<span>+</span></div><div class="cf-row" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-top:1px solid var(--line2);">
+        <div><b style="font-size:13px;">Lead quente a partir de</b><br><small style="color:var(--mut);font-size:11px;">Score mínimo pro filtro Quentes e pra fila de prioridade</small></div>
+        <input id="cfScoreQ" type="number" min="0" max="100" value="60" style="width:86px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:700;text-align:center;outline:none;"/>
+      </div>
+      <div class="a">Primeiro veja em Configurações se o toggle "Pausar a Julia" está desligado e se o modo de atendimento cobre o horário atual. Depois confira em Integrações se o WhatsApp aparece como ATIVO. Persistindo, fale com o suporte — a gente verifica a conexão pra você.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como mudo o jeito que a Julia fala?<span>+</span></div><div class="a">Em Inteligência Julia você edita o prompt, o tom e o objetivo. Use as variáveis clicáveis (como nome do cliente) e valide tudo na aba Testar antes de salvar — a mudança sincroniza na hora.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como coloco meus corretores pra atender?<span>+</span></div><div class="a">Cada corretor é um acesso de equipe (R$ 97/mês), com login e senha próprios e visão restrita. Você define quais leads ele pode assumir; ao Assumir, a Julia pausa só naquele contato e ele conversa pelo painel, no mesmo número. Contrate em Plano e Cobrança.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Cheguei no limite de conversas do plano. O que faço?<span>+</span></div><div class="a">Em Plano e Cobrança você compra pacotes avulsos (+50, +100 ou +200 conversas) sem mudar de plano — cai na conta na hora e não expira enquanto o plano estiver ativo. Se virar rotina, vale o upgrade.</div></div>
@@ -1953,6 +1957,7 @@ function carregarLeadsReais(){
 }
 /* ── CONVERSAS REAIS: lista nasce da tabela conversas (agrupada por telefone) ── */
 var CV_HASH='';
+var CV_Q='';
 function inferirInteresse(t){
   t=' '+String(t||'').toLowerCase()+' ';
   var v=[];
@@ -2264,13 +2269,19 @@ function pintarReal(){
       cits.innerHTML='<div class="vazio"><span class="ic">💬</span><b>Nenhuma conversa ainda</b><small>Quando o WhatsApp religar (360dialog), os clientes da Julia aparecem aqui em tempo real.</small></div>';
     }else{
       var VIS=[];
+      var _q=String(CV_Q||'').trim().toLowerCase(), _qd=_q.replace(/\D/g,'');
       GL.forEach(function(l,i){
         var lDesc=(l.e==='descartado'||l.st==='nq');
         if(CV_F==='desc'){if(!lDesc)return;}
         else{
           if(lDesc)return;
           if(CV_F==='nl'&&!naoLida(l))return;
-          if(CV_F==='q'&&(l.sc||0)<60)return;
+          if(CV_F==='q'&&(l.sc||0)<(window.SCORE_QUENTE||60))return;
+        }
+        if(_q){
+          var nm=String(l.n||'').toLowerCase(), td=String(l.t||'').replace(/\D/g,'');
+          var hitN=nm.indexOf(_q)>-1, hitT=_qd.length>=3&&td.indexOf(_qd)>-1;
+          if(!hitN&&!hitT)return;
         }
         VIS.push(i);
       });
@@ -2693,7 +2704,8 @@ function cfSalvar(){
   function g(id){return document.getElementById(id);}
   var zap=(g('cfZap').value||'').replace(/\D/g,'');
   if(zap&&zap.length<12){alert('Telefone/WhatsApp incompleto — use DDI+DDD+número, ex.: 5581999998888');return;}
-  var body={empresa:(g('cfEmp').value||'').trim(),
+  var body={score_quente:parseInt((g('cfScoreQ')||{value:60}).value,10)||60,
+            empresa:(g('cfEmp').value||'').trim(),
             email_contato:(g('cfMail').value||'').trim(),
             zap_dono:zap,
             cnpj:g('cfCnpj')?(g('cfCnpj').value||'').trim():null,
@@ -2719,11 +2731,13 @@ function cfSalvar(){
 }
 function cfCarregar(){
   function g(id){return document.getElementById(id);}
-  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,email_contato,zap_dono,cnpj,responsavel,zap_360,plano,status,notif_reuniao,notif_erro,notif_resumo,resumo_hora,notif_canal,atende_modo,retomada_ini,retomada_fim,fuso&id=eq.'+cfContaId(),
+  fetch(SUPA_URL+'/rest/v1/contas?select=empresa,email_contato,zap_dono,cnpj,responsavel,zap_360,plano,status,notif_reuniao,notif_erro,notif_resumo,resumo_hora,notif_canal,atende_modo,retomada_ini,retomada_fim,fuso,score_quente&id=eq.'+cfContaId(),
     {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
   .then(function(r){return r.json();})
   .then(function(rows){var c=rows&&rows[0]; if(!c)return;
     if(g('cfEmp'))g('cfEmp').value=c.empresa||'';
+    window.SCORE_QUENTE=(c.score_quente==null?60:c.score_quente);
+    if(g('cfScoreQ'))g('cfScoreQ').value=String(window.SCORE_QUENTE);
     if(g('cfMail'))g('cfMail').value=c.email_contato||'';
     if(g('cfZap'))g('cfZap').value=c.zap_dono||'';
     if(g('cfCnpj'))g('cfCnpj').value=c.cnpj||'';
@@ -3073,17 +3087,38 @@ function transferirMenu(){
   var ov=document.createElement('div'); ov.className='pf-ov on';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   var vends=(PL&&PL.vends)?PL.vends:[];
-  var h='<div class="pf-md" style="max-width:360px;"><h2>Transferir '+ehtml(l.n)+'</h2>';
+  var h='<div class="pf-md" style="max-width:400px;"><h2>Transferir '+ehtml(l.n)+'</h2>';
+  h+='<div style="font-size:11.5px;color:var(--mut);margin:-6px 0 14px;">Escolha o destino deste lead</div>';
+  /* 1 · Plantonista */
+  h+='<div class="cc-sec" style="margin-top:0;">🎧 VENDEDOR DE PLANTÃO</div>';
   if(vends.length){
-    h+='<div class="cc-sec" style="margin-top:0;">VENDEDORES DE PLANTÃO</div>';
-    vends.forEach(function(v){h+='<button class="pillbtn" style="width:100%;margin-bottom:8px;" onclick="transferirPara(this,\''+v.id+'\')">🎧 '+ehtml(v.nome)+'</button>';});
+    vends.forEach(function(v){h+='<button class="pillbtn" style="width:100%;margin-bottom:8px;" onclick="transferirPara(this,\''+v.id+'\')">'+ehtml(v.nome)+'</button>';});
   }else{
-    h+='<div class="cc-hint" style="display:block;margin-bottom:12px;">Sem vendedores de plantão nesta conta — contrate acessos em Plano e Cobrança.</div>';
+    h+='<div class="cc-hint" style="display:block;margin-bottom:12px;opacity:.75;">Nenhum plantonista nesta conta ainda.</div>';
   }
-  h+='<div class="cc-sec">OU</div>';
-  h+='<button class="pa-dark" style="margin-bottom:10px;" onclick="transferirCRM(this)">✈ Enviar ao CRM (o dono distribui de lá)</button>';
+  /* 2 · CRM */
+  h+='<div class="cc-sec">📥 CRM</div>';
+  h+='<button class="pa-dark" style="margin-bottom:12px;" onclick="transferirCRM(this)">Enviar ao CRM (o dono distribui de lá)</button>';
+  /* 3 · WhatsApp de um corretor */
+  h+='<div class="cc-sec">📲 WHATSAPP DE UM CORRETOR</div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:4px;"><input id="trZap" placeholder="DDI+DDD+número · 5581999998888" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;outline:none;" inputmode="numeric"/>'
+    +'<button class="pillbtn" onclick="transferirZap(\''+String(l.t||'').replace(/\\D/g,'')+'\')">Enviar resumo</button></div>';
+  h+='<div style="font-size:10.5px;color:var(--sub);margin-bottom:10px;">Abre o WhatsApp com o resumo do lead pronto pra enviar.</div>';
   h+='<div class="pf-bts"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Cancelar</button></div></div>';
   ov.innerHTML=h; document.body.appendChild(ov);
+}
+function transferirZap(telLead){
+  var z=String((document.getElementById('trZap')||{}).value||'').replace(/\D/g,'');
+  if(z.length<12){alert('Número incompleto — use DDI+DDD+número, ex.: 5581999998888');return;}
+  var l=leadAtual()||{};
+  var et=(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1];
+  var tx='*Lead transferido pela Julia*%0A%0A'
+    +'👤 '+encodeURIComponent(l.n||'Sem nome')+'%0A'
+    +'📱 +'+encodeURIComponent(telLead||String(l.t||''))+'%0A'
+    +'🎯 Interesse: '+encodeURIComponent(l.intr||l.i||'—')+'%0A'
+    +'📊 Score: '+encodeURIComponent(String(l.sc||0))+'/100 · Etapa: '+encodeURIComponent(et)+'%0A%0A'
+    +'Continue o atendimento por aqui: https://wa.me/'+encodeURIComponent(telLead||'');
+  window.open('https://wa.me/'+z+'?text='+tx,'_blank');
 }
 function transferirPara(btn,vid){
   var l=leadAtual(); if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
