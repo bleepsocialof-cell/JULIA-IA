@@ -2720,11 +2720,12 @@ function resumoLead(){
       rows.forEach(function(a,i){
         var nm=ehtml(a.nome_arquivo||'documento');
         var u=String(a.url||'').replace(/"/g,'');
+        var ud=u+(u.indexOf('?')>-1?'&':'?')+'download=';
         var wa='https://wa.me/?text='+encodeURIComponent('📎 '+(a.nome_arquivo||'Documento')+' — '+u);
         h2+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;'+(i?'border-top:1px solid var(--line2);':'')+'">'
           +'<div title="'+nm+'" style="min-width:0;font-size:11.5px;font-weight:700;line-height:1.35;word-break:break-word;">'+nm+' <span style="color:#12a150;font-size:10px;">✓</span></div>'
           +'<div style="display:flex;gap:5px;flex:none;">'
-          +'<a href="'+u+'" target="_blank" rel="noopener" title="Baixar" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#17141f;color:#fff;border-radius:7px;text-decoration:none;font-size:11px;">⬇</a>'
+          +'<a href="'+ud+'" target="_blank" rel="noopener" title="Baixar" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#17141f;color:#fff;border-radius:7px;text-decoration:none;font-size:11px;">⬇</a>'
           +'<a href="'+wa+'" target="_blank" rel="noopener" title="Enviar no WhatsApp" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;border-radius:7px;text-decoration:none;font-size:11px;">💬</a>'
           +'</div></div>';
       });
