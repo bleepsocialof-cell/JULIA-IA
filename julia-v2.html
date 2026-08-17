@@ -894,8 +894,8 @@ body.vw-adm .adm-pill{display:block;}
       <div class="stbar" id="stbar"><span class="p"></span>Julia está respondendo automaticamente — digite para assumir</div>
       <div class="comp">
         <textarea id="msgIn" rows="1" placeholder="Digite uma mensagem…" oninput="msgGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg();}"></textarea>
-        <input type="file" id="anexoFile" accept="image/*,video/*,.pdf" style="display:none" onchange="anexoEscolhido(this)"/>
-        <button class="icb" data-tip="Enviar anexo (foto, PDF, vídeo)" onclick="document.getElementById('anexoFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+        <input type="file" id="anexoFile" accept="image/*,video/*,audio/*,.pdf" style="display:none" onchange="anexoEscolhido(this)"/>
+        <button class="icb" data-tip="Enviar anexo (foto, PDF, vídeo, áudio)" onclick="document.getElementById('anexoFile').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
         <button class="icb" data-tip="Descartar lead" onclick="descartarLead()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
         <button class="icb q" data-tip="Qualificar lead ✦" onclick="qualificarLead()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8L12 14.6l-5 3.6 1.9-5.8L4 8.8h6.1z"/></svg></button>
         <button class="send" data-tip="Enviar" onclick="enviarMsg()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -1901,13 +1901,18 @@ function anexoEscolhido(inp){
   var f=inp.files&&inp.files[0];
   inp.value='';
   if(!f)return;
-  if(f.size>15*1024*1024){alert('Arquivo muito grande (máx. 15 MB).');return;}
   var tel=String(window.CONV_TEL||'').replace(/\D/g,'');
   if(!tel){alert('Abra uma conversa primeiro.');return;}
   if(!chatAssumido)assumir();
-  var tipo=f.type.indexOf('image')===0?'image':(f.type.indexOf('video')===0?'video':'document');
+  var tipo=f.type.indexOf('image')===0?'image':(f.type.indexOf('video')===0?'video':(f.type.indexOf('audio')===0?'audio':'document'));
+  var mb=f.size/1048576;
+  if(tipo==='audio'&&mb>16){alert('Áudio acima de 16 MB — o WhatsApp não aceita.');return;}
+  if(tipo==='image'&&mb>5){alert('Foto acima de 5 MB — o WhatsApp não aceita. Reduz a qualidade (ou manda print) e tenta de novo.');return;}
+  if(tipo==='video'&&mb>16){tipo='document';}
+  if(mb>95){alert('Arquivo acima de 95 MB — o WhatsApp não aceita.');return;}
   var nomeLimpo=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  var path='manual/'+tel+'/'+Date.now()+'_'+nomeLimpo;
+  var conta=(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea');
+  var path='manual/'+conta+'/'+tel+'/'+Date.now()+'_'+nomeLimpo;
   var m=document.createElement('div');m.className='m ju';
   m.innerHTML='<span style="display:block;font-size:8px;font-family:Sora;font-weight:800;letter-spacing:.8px;color:#e84393;margin-bottom:3px;">VOCÊ</span>📎 Enviando '+f.name.replace(/</g,'&lt;')+'…<div class="mt">'+horaAgora()+'</div>';
   document.querySelector('.msgs').appendChild(m);msgsFim();
@@ -1920,7 +1925,7 @@ function anexoEscolhido(inp){
     var url=SUPA_URL+'/storage/v1/object/public/docs-leads/'+path;
     return fetch('https://jadsonsantos.app.n8n.cloud/webhook/envio-anexo',{
       method:'POST',headers:{'Content-Type':'application/json','X-Token':'blee-68abf71ef3737bd4b11d0ef1'},
-      body:JSON.stringify({telefone:tel,conta_id:(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea'),anexo_url:url,anexo_tipo:tipo,anexo_nome:f.name})
+      body:JSON.stringify({telefone:tel,conta_id:conta,anexo_url:url,anexo_tipo:tipo,anexo_nome:f.name})
     });
   }).then(function(r){
     if(r&&!r.ok)throw new Error('Webhook '+r.status);
