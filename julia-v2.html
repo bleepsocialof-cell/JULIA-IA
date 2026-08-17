@@ -3090,17 +3090,17 @@ function transferirMenu(){
   var h='<div class="pf-md" style="max-width:400px;"><h2>Transferir '+ehtml(l.n)+'</h2>';
   h+='<div style="font-size:11.5px;color:var(--mut);margin:-6px 0 14px;">Escolha o destino deste lead</div>';
   /* 1 · Plantonista */
-  h+='<div class="cc-sec" style="margin-top:0;">🎧 VENDEDOR DE PLANTÃO</div>';
+  h+='<div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin:2px 0 8px;">🎧 VENDEDOR DE PLANTÃO</div>';
   if(vends.length){
     vends.forEach(function(v){h+='<button class="pillbtn" style="width:100%;margin-bottom:8px;" onclick="transferirPara(this,\''+v.id+'\')">'+ehtml(v.nome)+'</button>';});
   }else{
     h+='<div class="cc-hint" style="display:block;margin-bottom:12px;opacity:.75;">Nenhum plantonista nesta conta ainda.</div>';
   }
   /* 2 · CRM */
-  h+='<div class="cc-sec">📥 CRM</div>';
+  h+='<div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin:14px 0 8px;">📥 CRM</div>';
   h+='<button class="pa-dark" style="margin-bottom:12px;" onclick="transferirCRM(this)">Enviar ao CRM (o dono distribui de lá)</button>';
   /* 3 · WhatsApp de um corretor */
-  h+='<div class="cc-sec">📲 WHATSAPP DE UM CORRETOR</div>';
+  h+='<div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin:14px 0 8px;">📲 WHATSAPP DE UM CORRETOR</div>';
   h+='<div style="display:flex;gap:8px;margin-bottom:4px;"><input id="trZap" placeholder="DDI+DDD+número · 5581999998888" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;outline:none;" inputmode="numeric"/>'
     +'<button class="pillbtn" onclick="transferirZap(\''+String(l.t||'').replace(/\\D/g,'')+'\')">Enviar resumo</button></div>';
   h+='<div style="font-size:10.5px;color:var(--sub);margin-bottom:10px;">Abre o WhatsApp com o resumo do lead pronto pra enviar.</div>';
@@ -3112,13 +3112,13 @@ function transferirZap(telLead){
   if(z.length<12){alert('Número incompleto — use DDI+DDD+número, ex.: 5581999998888');return;}
   var l=leadAtual()||{};
   var et=(ETAPAS.filter(function(e){return e[0]===l.e;})[0]||['','—'])[1];
-  var tx='*Lead transferido pela Julia*%0A%0A'
-    +'👤 '+encodeURIComponent(l.n||'Sem nome')+'%0A'
-    +'📱 +'+encodeURIComponent(telLead||String(l.t||''))+'%0A'
-    +'🎯 Interesse: '+encodeURIComponent(l.intr||l.i||'—')+'%0A'
-    +'📊 Score: '+encodeURIComponent(String(l.sc||0))+'/100 · Etapa: '+encodeURIComponent(et)+'%0A%0A'
-    +'Continue o atendimento por aqui: https://wa.me/'+encodeURIComponent(telLead||'');
-  window.open('https://wa.me/'+z+'?text='+tx,'_blank');
+  var tx='*Lead transferido pela Julia*\n\n'
+    +'👤 '+(l.n||'Sem nome')+'\n'
+    +'📱 +'+(telLead||String(l.t||''))+'\n'
+    +'🎯 Interesse: '+(l.intr||l.i||'—')+'\n'
+    +'📊 Score: '+String(l.sc||0)+'/100 · Etapa: '+et+'\n\n'
+    +'Continue o atendimento por aqui: https://wa.me/'+(telLead||'');
+  window.open('https://wa.me/'+z+'?text='+encodeURIComponent(tx),'_blank');
 }
 function transferirPara(btn,vid){
   var l=leadAtual(); if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
