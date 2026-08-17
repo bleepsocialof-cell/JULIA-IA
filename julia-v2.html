@@ -2697,8 +2697,35 @@ function resumoLead(){
   ov.innerHTML='<div class="pf-md" style="max-width:380px;"><h2>Resumo do lead</h2>'+
     kv('Nome',l.n)+kv('Telefone',l.t)+kv('Interesse',l.i)+kv('Origem',l.origem)+
     kv('Etapa',ETAPA_NOME[l.e]||l.e)+kv('Score',l.sc+'/100')+kv('Tempo',tempo)+kv('Última atividade',l.u)+
+    '<div id="rlAnex"></div>'+
     '<div style="margin-top:12px;"><div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin-bottom:6px;">📝 RESUMO DA CONVERSA (Julia)</div><div style="font-size:12.5px;line-height:1.55;color:var(--tx);background:#faf9fd;border:1px solid var(--line2);border-radius:10px;padding:12px;">'+(RS?ehtml(RS):'A Julia ainda não gerou o resumo deste lead.')+'</div></div>'+'<div class="pf-bts" style="margin-top:14px;"><button class="ghost" onclick="this.closest(\'.pf-ov\').remove()">Fechar</button></div></div>';
   document.body.appendChild(ov);
+  (function(){
+    var t8=String(l.t||'').replace(/\D/g,'').slice(-8); if(!t8)return;
+    fetch(SUPA_URL+'/rest/v1/anexos?select=*&telefone=like.*'+t8+'&order=criado_em.desc&limit=12'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
+      {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+    .then(function(r){return r.ok?r.json():[];})
+    .then(function(rows){
+      var box=ov.querySelector('#rlAnex'); if(!box)return;
+      if(!rows||!rows.length){box.innerHTML='';return;}
+      var h2='<div style="margin-top:12px;"><div style="font-size:9.5px;font-family:Sora;font-weight:800;letter-spacing:1px;color:var(--mut);margin-bottom:6px;">📎 ARQUIVOS DO LEAD ('+rows.length+')</div>';
+      rows.forEach(function(a){
+        var kb=a.tamanho?Math.max(1,Math.round(a.tamanho/1024))+' KB':'';
+        var nm=ehtml(a.nome_arquivo||'documento');
+        var u=String(a.url||'').replace(/"/g,'');
+        var wa='https://wa.me/?text='+encodeURIComponent('📎 '+(a.nome_arquivo||'Documento')+' — '+u);
+        h2+='<div style="border:1px solid var(--line2);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff;">'
+          +'<div style="font-size:12.5px;font-weight:800;margin-bottom:2px;">'+nm+'</div>'
+          +'<div style="font-size:11px;color:#12a150;font-weight:700;margin-bottom:8px;">✓ '+(a.status||'Recebido')+(kb?' · '+kb:'')+'</div>'
+          +'<div style="display:flex;gap:8px;">'
+          +'<a href="'+wa+'" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#22c55e;color:#fff;font-weight:800;font-size:12px;padding:10px;border-radius:10px;text-decoration:none;">💬 Compartilhar no WhatsApp</a>'
+          +'<a href="'+u+'" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#17141f;color:#fff;font-weight:800;font-size:12px;padding:10px;border-radius:10px;text-decoration:none;">⬇ Baixar</a>'
+          +'</div></div>';
+      });
+      h2+='</div>';
+      box.innerHTML=h2;
+    }).catch(function(){});
+  })();
 }
 function cfContaId(){return window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea';}
 function cfSalvar(){
