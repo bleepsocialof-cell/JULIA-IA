@@ -219,6 +219,19 @@ tr:last-child td{border-bottom:none;}
         <div class="hint" style="margin-top:8px;">Regra da casa: margem saudável ≥ 60%. O simulador sugere o preço mínimo pra isso.</div>
       </div>
     </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;margin-bottom:4px;"><h3 style="margin:0;">Potes de infraestrutura</h3><div class="grow"></div><span id="ifResumo" style="font-size:12px;font-weight:700;"></span></div>
+      <div class="hint" style="margin-bottom:12px;">Onde depositar, quanto custa e até quantos clientes cada pote aguenta. Edite quando mudar de plano — fica salvo neste navegador.</div>
+      <div style="overflow-x:auto;"><table><thead><tr><th>SERVIÇO</th><th>PLANO ATUAL</th><th>R$/MÊS</th><th>AGUENTA ~</th><th>PRÓXIMO DEGRAU</th><th></th></tr></thead><tbody id="ifBody"></tbody></table></div>
+      <div id="ifAlerta" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;margin-bottom:4px;"><h3 style="margin:0;">Consumo do mês por cliente</h3><div class="grow"></div><button class="btn gh" onclick="ifConsumo()">⟳ Atualizar</button></div>
+      <div class="hint" style="margin-bottom:12px;">Conversas usadas vs. franquia — quem está usando (saudável) e quem está parado (risco de cancelar).</div>
+      <div id="ifConsBody"><div class="empty">Carregando consumo…</div></div>
+    </div>
   </div>
 
   <div class="wrap" id="vMsg">
@@ -772,7 +785,7 @@ function meFotoPintar(){
 }
 meFotoPintar();
 
-var CX_PLANOS=[['1.697 / 300',300,1697],['1.997 / 500',500,1997],['2.497 / 800',800,2497]];
+var CX_PLANOS=[['Essencial · 300',300,1697],['Plus · 500',500,1997],['Performance · 800',800,2497]];
 function cxN(id,d){var e=document.getElementById(id);return e?Number(e.value||d):d;}
 function cxEdit(){var a=document.getElementById('cxAjuste');a.style.display=(a.style.display==='none')?'block':'none';}
 function cxCusto(conv){
@@ -797,6 +810,65 @@ function cxSim(){
     +'<small style="color:#6b6580;">Preço mínimo pra margem 60%: <b>'+brl(sug)+'</b></small>';
 }
 cxPintar();
+
+var IF_DEF=[
+ {id:'d360',n:'360dialog',pl:'€49 por cliente',rs:300,cap:0,up:'Pacote com desconto em volume',lk:'https://hub.360dialog.com',porCliente:true},
+ {id:'anth',n:'Anthropic (IA)',pl:'Saldo pré-pago',rs:0,cap:0,up:'Auto-recharge LIGADO = nunca seca',lk:'https://console.anthropic.com',saldo:true},
+ {id:'oai',n:'OpenAI (áudio)',pl:'Saldo pré-pago',rs:0,cap:0,up:'US$ 10 duram meses',lk:'https://platform.openai.com',saldo:true},
+ {id:'n8n',n:'n8n Cloud',pl:'Starter €24',rs:150,cap:1,up:'Pro €60 (~4 clientes) → self-host VPS ~R$80 = ilimitado',lk:'https://app.n8n.cloud'},
+ {id:'el',n:'ElevenLabs (voz)',pl:'Creator $22',rs:120,cap:2,up:'Pro $99 (~8 clientes)',lk:'https://elevenlabs.io'},
+ {id:'sb',n:'Supabase',pl:'Free ⚠️',rs:0,cap:1,up:'Pro $25 (~R$140) → 20-50 clientes',lk:'https://supabase.com/dashboard'}
+];
+function ifLoad(){try{var v=JSON.parse(localStorage.getItem('cx_potes')||'null');if(v&&v.length)return v;}catch(e){}return JSON.parse(JSON.stringify(IF_DEF));}
+function ifSave(p){try{localStorage.setItem('cx_potes',JSON.stringify(p));}catch(e){}}
+var IF_P=ifLoad();
+function ifNAtivas(){return CONTAS.filter(function(c){return pagante(c)&&ativa(c);}).length;}
+function ifPintar(){
+  var b=document.getElementById('ifBody'); if(!b)return;
+  var n=ifNAtivas();
+  b.innerHTML=IF_P.map(function(p,i){
+    var cap=p.porCliente?'1 por cliente':(p.saldo?'depende do saldo':('<input style="width:52px;" type="number" value="'+p.cap+'" onchange="IF_P['+i+'].cap=Number(this.value);ifSave(IF_P);ifPintar();"/>'));
+    var ok=p.porCliente||p.saldo||p.cap>=n;
+    return '<tr><td><b>'+eh(p.n)+'</b></td>'
+      +'<td><input style="width:130px;" value="'+eh(p.pl)+'" onchange="IF_P['+i+'].pl=this.value;ifSave(IF_P);"/></td>'
+      +'<td><input style="width:80px;" type="number" value="'+p.rs+'" onchange="IF_P['+i+'].rs=Number(this.value);ifSave(IF_P);ifPintar();"/>'+(p.porCliente?'<small style="color:var(--tx2);"> /cliente</small>':'')+'</td>'
+      +'<td>'+cap+(ok?'':' <b style="color:#c02626;">⚠️</b>')+'</td>'
+      +'<td><small>'+eh(p.up)+'</small></td>'
+      +'<td><a class="lk" href="'+p.lk+'" target="_blank">Depositar ↗</a></td></tr>';
+  }).join('');
+  var fixo=IF_P.filter(function(p){return !p.porCliente&&!p.saldo;}).reduce(function(a,p){return a+p.rs;},0);
+  var porCli=IF_P.filter(function(p){return p.porCliente;}).reduce(function(a,p){return a+p.rs;},0);
+  var r=document.getElementById('ifResumo');
+  if(r)r.innerHTML='Fixo: <b>'+brl(fixo)+'/mês</b> · + '+brl(porCli)+'/cliente · '+n+' cliente'+(n===1?'':'s')+' ativo'+(n===1?'':'s');
+  var estour=IF_P.filter(function(p){return !p.porCliente&&!p.saldo&&p.cap<n;});
+  var al=document.getElementById('ifAlerta');
+  if(al)al.innerHTML=estour.length
+    ?'<div style="background:#fceaea;border:1px solid #f0c0c0;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#A32D2D;"><b>⚠️ Upgrade necessário:</b> '+estour.map(function(p){return p.n;}).join(', ')+' não aguenta'+(estour.length>1?'m':'')+' '+n+' clientes — veja o próximo degrau na tabela.</div>'
+    :'<div style="background:#e9f7ef;border:1px solid #bfe4cd;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#0a7d43;">✓ Infra confortável pros '+n+' cliente'+(n===1?'':'s')+' atuais.</div>';
+}
+function ifConsumo(){
+  var box=document.getElementById('ifConsBody'); if(!box)return;
+  var cls=CONTAS.filter(function(c){return pagante(c)&&ativa(c);});
+  if(!cls.length){box.innerHTML='<div class="empty">Nenhum cliente pagante ativo ainda.</div>';return;}
+  box.innerHTML='<div class="empty">Calculando…</div>';
+  Promise.all(cls.map(function(c){
+    return fetch(SUPA_URL+'/rest/v1/rpc/consumo_mes',{method:'POST',headers:HJ,body:JSON.stringify({p_conta:c.id})})
+      .then(function(r){return r.ok?r.json():[];}).then(function(rows){return {c:c,tot:((rows&&rows[0])||{}).total||0};})
+      .catch(function(){return {c:c,tot:0};});
+  })).then(function(res){
+    box.innerHTML=res.map(function(x){
+      var fr=Number(x.c.franquia_convs||300), pct=Math.min(100,Math.round(x.tot*100/fr));
+      var cor=x.tot===0?'#c02626':(pct>=90?'#a06b00':'#0a7d43');
+      var nota=x.tot===0?'⚠️ sem uso — risco de cancelar':(pct>=90?'perto do limite — hora de upgrade':'saudável');
+      return '<div style="display:flex;align-items:center;gap:14px;padding:10px 4px;border-bottom:1px solid #f3f0fa;">'
+        +'<div style="flex:1;min-width:150px;"><b style="font-size:13px;">'+eh(x.c.empresa)+'</b><br/><small style="color:'+cor+';font-weight:700;">'+nota+'</small></div>'
+        +'<div style="flex:2;"><div style="height:8px;background:#efeaf8;border-radius:4px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#7c3aed,#e84393);"></div></div></div>'
+        +'<b style="font-size:13px;min-width:90px;text-align:right;">'+x.tot+' de '+fr+'</b></div>';
+    }).join('');
+  });
+}
+ifPintar();
+setTimeout(function(){ifPintar();ifConsumo();},1500);
 </script>
 </body>
 </html>
