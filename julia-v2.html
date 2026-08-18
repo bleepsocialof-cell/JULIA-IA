@@ -944,6 +944,18 @@ body.vw-adm .adm-pill{display:block;}
 
   <!-- ══ GESTÃO DE LEADS ══ -->
   <div class="view" id="vGestao">
+    <style>
+      #vGestao .g-stats{gap:10px;}
+      #vGestao .g-stats .gs{flex:1;min-width:120px;padding:10px 14px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all .12s;}
+      #vGestao .g-stats .gs .l{font-size:9.5px;letter-spacing:.6px;}
+      #vGestao .g-stats .gs .n{font-size:22px;margin-top:2px;}
+      #vGestao .g-stats .gs:hover{transform:translateY(-1px);}
+      #vGestao .g-stats .gs.on{border-color:#7c3aed;box-shadow:0 2px 10px rgba(124,58,237,.18);}
+      #vGestao .g-stats .gs.q{background:#e9f7ef;}#vGestao .g-stats .gs.q .n{color:#16803c;}
+      #vGestao .g-stats .gs.p{background:#fdf3d8;}#vGestao .g-stats .gs.p .n{color:#a06b00;}
+      #vGestao .g-stats .gs.c{background:#e6f1fb;}#vGestao .g-stats .gs.c .n{color:#185FA5;}
+      #vGestao .g-stats .gs.x{background:#fceaea;}#vGestao .g-stats .gs.x .n{color:#A32D2D;}
+    </style>
     <div class="g-top">
       <div><h1>Gestão de Leads</h1><p>Acompanhe, qualifique e envie leads para o seu CRM</p></div>
       <button class="gbtn" onclick="glExportar()">↓ Exportar</button>
@@ -959,14 +971,12 @@ body.vw-adm .adm-pill{display:block;}
       <div class="g-busca"><input id="gBusca" placeholder="Buscar por nome ou telefone" oninput="gRender(1)"/></div>
       <select id="gAno" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="">Todos os anos</option></select>
       <select id="gMes" class="fp" style="cursor:pointer;" onchange="gRender(1)"><option value="">Todos os meses</option><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select>
-      <input type="date" id="gDe" class="fp" style="cursor:pointer;" onchange="gRender(1)" title="De (data inicial)"/>
-      <input type="date" id="gAte" class="fp" style="cursor:pointer;" onchange="gRender(1)" title="Até (data final)"/>
-      <span class="fp" style="cursor:pointer;" onclick="gFiltroLimpar()" title="Limpar filtros de data">✕</span>
-      <span class="fp on" data-f="todos" onclick="gFiltro(this)">Todos</span>
-      <span class="fp" data-f="pendente" onclick="gFiltro(this)">Pendentes</span>
-      <span class="fp" data-f="qualificado" onclick="gFiltro(this)">Qualificados</span>
-      <span class="fp" data-f="crm" onclick="gFiltro(this)">No CRM</span>
-      <span class="fp" data-f="nq" onclick="gFiltro(this)">Não qualif.</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2dcf0;border-radius:12px;padding:5px 10px;">
+        <small style="font-size:10px;font-weight:800;letter-spacing:.5px;color:#8a7fa8;">PERÍODO</small>
+        <label style="font-size:10.5px;color:#8a7fa8;font-weight:700;">De</label><input type="date" id="gDe" onchange="gRender(1)" style="border:none;outline:none;font-size:12px;font-weight:600;color:#2b2140;width:118px;background:transparent;"/>
+        <label style="font-size:10.5px;color:#8a7fa8;font-weight:700;">até</label><input type="date" id="gAte" onchange="gRender(1)" style="border:none;outline:none;font-size:12px;font-weight:600;color:#2b2140;width:118px;background:transparent;"/>
+        <span style="cursor:pointer;color:#b0a8c6;font-weight:800;padding:0 2px;" onclick="gFiltroLimpar()" title="Limpar período">✕</span>
+      </span>
     </div>
     <div class="g-bulk">
       <span class="sel" id="gSel">0 selecionados</span>
@@ -3772,7 +3782,12 @@ function gListaBase(comStatus){
       if(de&&d<de)return false;
       if(ate&&d>ate)return false;
     }
-    if(q&&l.n.toLowerCase().indexOf(q)<0&&l.t.replace(/\D/g,'').indexOf(q.replace(/\D/g,''))<0)return false;
+    if(q){
+      var qd=q.replace(/\D/g,'');
+      var hitN=String(l.n||'').toLowerCase().indexOf(q)>-1;
+      var hitT=qd.length>=3&&String(l.t||'').replace(/\D/g,'').indexOf(qd)>-1;
+      if(!hitN&&!hitT)return false;
+    }
     return true;
   });
 }
@@ -3805,7 +3820,7 @@ function gRender(pg){
      +'<td>'+l.t+'</td><td>'+l.i+'</td>'
      +'<td><span class="pl '+st[1]+'">'+st[0]+'</span></td>'
      +'<td><span class="sc"><span class="tk"><span class="fl" style="width:'+l.sc+'%"></span></span><b>'+l.sc+'</b></span></td>'
-     +'<td>'+crm+'</td><td>'+l.u+'</td>'
+     +(function(){var ts=(typeof dspUltTs==='function')?dspUltTs(l):0;var dd=ts?Math.floor((Date.now()-ts)/86400000):null;var tt=dd===null?(l.u||'—'):(dd<1?'hoje':'há '+dd+'d');var cc=dd===null?'#8a7fa8':(dd>=7?'#A32D2D':(dd>=3?'#854F0B':'#0F6E56'));return '<td>'+crm+'</td><td><b style="color:'+cc+';font-weight:700;">'+tt+'</b></td>';})()
      +'<td><button class="ga" onclick="gVer('+idx+')">Ver</button></td></tr>');
   });
   document.getElementById('gInfo').textContent=ls.length+' leads · '+gPP+' por página';
@@ -3846,9 +3861,29 @@ function gSelUi(){
   document.getElementById('gSel').textContent=n+' selecionado'+(n===1?'':'s');
   document.getElementById('gEnvSel').disabled=(n===0);
 }
-function gEnviar(i){ GL[i].st='crm'; gRender(); }
-function gEnviarSel(){ Object.keys(gMarc).forEach(function(i){ if(GL[i].st!=='crm'&&GL[i].st!=='nq')GL[i].st='crm'; }); gMarc={}; document.getElementById('gAll').checked=false; gRender(); }
-function gEnviarPend(){ GL.forEach(function(l){ if(l.st==='pendente')l.st='crm'; }); gRender(); }
+function gCrmPatch(leads,depois){
+  var ids=leads.filter(function(l){return l.id;}).map(function(l){return l.id;});
+  var done=function(){leads.forEach(function(l){l.st='crm';l.e='crm';});if(depois)depois();gRender();};
+  if(!ids.length){done();return;}
+  fetch(SUPA_URL+'/rest/v1/leads?id=in.('+ids.join(',')+')',{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({etapa:'crm',crm_enviado:true})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);done();})
+  .catch(function(e){alert('Não consegui gravar no banco ('+e.message+').');});
+}
+function gEnviar(i){ gCrmPatch([GL[i]]); }
+function gEnviarSel(){
+  var ls=Object.keys(gMarc).map(function(i){return GL[i];}).filter(function(l){return l&&l.st!=='crm'&&l.st!=='nq';});
+  if(!ls.length){alert('Nenhum lead elegível selecionado.');return;}
+  if(!confirm('Enviar '+ls.length+' lead'+(ls.length>1?'s':'')+' ao CRM?'))return;
+  gCrmPatch(ls,function(){gMarc={};var ga=document.getElementById('gAll');if(ga)ga.checked=false;});
+}
+function gEnviarPend(){
+  var ls=gLista().filter(function(l){return l.st==='pendente';});
+  if(!ls.length){alert('Nenhum pendente no filtro atual.');return;}
+  if(!confirm('Enviar os '+ls.length+' pendentes DO FILTRO ATUAL ao CRM? (busca, período e cards contam)'))return;
+  gCrmPatch(ls);
+}
 gRender(1);
 
 /* ══ BANCO DE DADOS ══ */
