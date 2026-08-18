@@ -202,10 +202,9 @@ tr:last-child td{border-bottom:none;}
       <div id="cxAjuste" style="display:none;border:1px dashed var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#fbfaff;">
         <div style="display:flex;gap:14px;flex-wrap:wrap;">
           <div class="fl" style="margin:0;min-width:170px;"><label>VARIÁVEL POR CONVERSA (R$)</label><input id="cxVar" type="number" step="0.01" value="0.65" oninput="cxPintar()"/></div>
-          <div class="fl" style="margin:0;min-width:170px;"><label>360DIALOG POR CLIENTE (R$/mês)</label><input id="cxD360" type="number" step="1" value="270" oninput="cxPintar()"/></div>
           <div class="fl" style="margin:0;min-width:170px;"><label>INFRA RATEADA (R$/mês)</label><input id="cxInfra" type="number" step="1" value="137" oninput="cxPintar()"/></div>
         </div>
-        <div class="hint" style="margin-top:8px;">Variável = Anthropic ~R$ 0,60 + OpenAI/reativações ~R$ 0,05 · Infra = (n8n + Supabase + ElevenLabs) ÷ nº de clientes.</div>
+        <div class="hint" style="margin-top:8px;">Variável = Anthropic ~R$ 0,60 + OpenAI/reativações ~R$ 0,05 · Infra = (n8n + Supabase + ElevenLabs) ÷ nº de clientes · 360dialog vem do pote abaixo (Regular R$300 / Premium R$600 por número).</div>
       </div>
       <div style="overflow-x:auto;"><table><thead><tr><th>PLANO</th><th>CONVERSAS</th><th>VARIÁVEL</th><th>FIXO</th><th>CUSTO</th><th>PREÇO</th><th>MARGEM</th></tr></thead><tbody id="cxBody"></tbody></table></div>
 
@@ -811,7 +810,7 @@ var CX_PLANOS=[['Essencial · 300',300,1697],['Plus · 500',500,1997],['Performa
 function cxN(id,d){var e=document.getElementById(id);return e?Number(e.value||d):d;}
 function cxEdit(){var a=document.getElementById('cxAjuste');a.style.display=(a.style.display==='none')?'block':'none';}
 function cxCusto(conv){
-  var v=cxN('cxVar',0.65), f=cxN('cxD360',270)+cxN('cxInfra',137);
+  var v=cxN('cxVar',0.65), f=d360RS()+cxN('cxInfra',137);
   return {vr:conv*v, fx:f, tot:conv*v+f};
 }
 function cxPintar(){
@@ -834,23 +833,25 @@ function cxSim(){
 cxPintar();
 
 var IF_OPTS={
+ d360:[{pl:'Regular €49/nº',rs:300,cap:0,up:'Premium €99 = MESMO 1 número, só SLA <30min + PLBV (não dá números extras)'},{pl:'Premium €99/nº',rs:600,cap:0,up:'Volte pro Regular se não precisar de SLA/PLBV'},{pl:'Partner/ISV (volume)',rs:150,cap:0,up:'Preço negociado com o comercial — pergunte no chat e ajuste o valor aqui do lado',custom:true}],
  n8n:[{pl:'Starter €24',rs:150,cap:1,up:'Pro €60 aguenta ~4'},{pl:'Pro €60',rs:380,cap:4,up:'Business €180 (~15) ou self-host VPS ~R$80 = ilimitado'},{pl:'Business €180',rs:1130,cap:15,up:'Self-host VPS ~R$80 = ilimitado'},{pl:'Self-host VPS',rs:80,cap:999,up:'Ilimitado — só cresce o VPS'}],
  el:[{pl:'Starter $5',rs:28,cap:1,up:'Creator $22 aguenta ~2'},{pl:'Creator $22',rs:120,cap:2,up:'Pro $99 aguenta ~8'},{pl:'Pro $99',rs:545,cap:8,up:'Scale $330 aguenta ~25'},{pl:'Scale $330',rs:1815,cap:25,up:'Business sob consulta'}],
  sb:[{pl:'Free ⚠️',rs:0,cap:1,up:'Pro $25 aguenta 20-50'},{pl:'Pro $25',rs:140,cap:30,up:'Team $599 aguenta ~200'},{pl:'Team $599',rs:3300,cap:200,up:'Enterprise sob consulta'}]
 };
 var IF_DEF=[
- {id:'d360',n:'360dialog',pl:'€49 por cliente',rs:300,cap:0,up:'Pacote com desconto em volume',lk:'https://hub.360dialog.com',porCliente:true},
+ {id:'d360',n:'360dialog',op:0,lk:'https://hub.360dialog.com',porCliente:true},
  {id:'anth',n:'Anthropic (IA)',pl:'Saldo pré-pago',rs:0,cap:0,up:'Auto-recharge LIGADO = nunca seca',lk:'https://console.anthropic.com',saldo:true},
  {id:'oai',n:'OpenAI (áudio)',pl:'Saldo pré-pago',rs:0,cap:0,up:'US$ 10 duram meses',lk:'https://platform.openai.com',saldo:true},
  {id:'n8n',n:'n8n Cloud',op:0,lk:'https://app.n8n.cloud'},
  {id:'el',n:'ElevenLabs (voz)',op:1,lk:'https://elevenlabs.io'},
  {id:'sb',n:'Supabase',op:0,lk:'https://supabase.com/dashboard'}
 ];
+function d360RS(){var p=(IF_P||[]).filter(function(x){return x.id==='d360';})[0];if(!p)return 300;var pd=ifPlano(p);return (pd.custom&&p.rsCustom)?Number(p.rsCustom):pd.rs;}
 function ifPlano(p){var o=IF_OPTS[p.id];return o?o[Math.min(p.op||0,o.length-1)]:p;}
-function ifTroca(i,op){IF_P[i].op=Number(op);ifSave(IF_P);ifPintar();}
+function ifTroca(i,op){IF_P[i].op=Number(op);ifSave(IF_P);ifPintar();if(typeof gpCalc==="function")gpCalc();if(typeof cxPintar==="function")cxPintar();}
 function ifLoad(){try{var v=JSON.parse(localStorage.getItem('cx_potes')||'null');if(v&&v.length)return v;}catch(e){}return JSON.parse(JSON.stringify(IF_DEF));}
 function ifSave(p){try{localStorage.setItem('cx_potes',JSON.stringify(p));}catch(e){}}
-try{var _o=JSON.parse(localStorage.getItem('cx_potes')||'null');if(_o&&_o[3]&&_o[3].op===undefined)localStorage.removeItem('cx_potes');}catch(e){}
+try{var _o=JSON.parse(localStorage.getItem('cx_potes')||'null');if(_o&&_o[0]&&_o[0].op===undefined)localStorage.removeItem('cx_potes');}catch(e){}
 var IF_P=ifLoad();
 function ifNAtivas(){return CONTAS.filter(function(c){return pagante(c)&&ativa(c);}).length;}
 function ifPintar(){
@@ -863,16 +864,16 @@ function ifPintar(){
                    :('<b style="font-size:12.5px;">'+eh(p.pl)+'</b>');
     var cap=p.porCliente?'1 por cliente':(p.saldo?'depende do saldo':('<b>'+pd.cap+(pd.cap>=999?'∞':'')+' cliente'+(pd.cap===1?'':'s')+'</b>'));
     var ok=p.porCliente||p.saldo||pd.cap>=n;
-    var rs=p.porCliente||p.saldo?p.rs:pd.rs;
+    var rs=p.saldo?p.rs:(opts?((pd.custom&&p.rsCustom)?Number(p.rsCustom):pd.rs):p.rs);
     return '<tr><td><b>'+eh(p.n)+'</b></td>'
       +'<td>'+plCell+'</td>'
-      +'<td><b>'+(rs?brl(rs):'—')+'</b>'+(p.porCliente?'<small style="color:var(--tx2);"> /cliente</small>':'')+'</td>'
+      +'<td>'+((opts&&pd.custom)?('<input style="width:80px;" type="number" value="'+(p.rsCustom||pd.rs)+'" onchange="IF_P['+i+'].rsCustom=Number(this.value);ifSave(IF_P);ifPintar();gpCalc();cxPintar();"/>'):('<b>'+(rs?brl(rs):'—')+'</b>'))+(p.porCliente?'<small style="color:var(--tx2);"> /cliente</small>':'')+'</td>'
       +'<td>'+cap+(ok?'':' <b style="color:#c02626;">⚠️</b>')+'</td>'
-      +'<td><small>'+eh(p.porCliente||p.saldo?p.up:pd.up)+'</small></td>'
+      +'<td><small>'+eh(opts?pd.up:p.up)+'</small></td>'
       +'<td><a class="lk" href="'+p.lk+'" target="_blank">Depositar ↗</a></td></tr>';
   }).join('');
   var fixo=IF_P.filter(function(p){return !p.porCliente&&!p.saldo;}).reduce(function(a,p){return a+ifPlano(p).rs;},0);
-  var porCli=IF_P.filter(function(p){return p.porCliente;}).reduce(function(a,p){return a+p.rs;},0);
+  var porCli=IF_P.filter(function(p){return p.porCliente;}).reduce(function(a,p){var pd=ifPlano(p);return a+((pd.custom&&p.rsCustom)?Number(p.rsCustom):pd.rs);},0);
   var r=document.getElementById('ifResumo');
   if(r)r.innerHTML='Fixo: <b>'+brl(fixo)+'/mês</b> · + '+brl(porCli)+'/cliente · '+n+' cliente'+(n===1?'':'s')+' ativo'+(n===1?'':'s');
   var estour=IF_P.filter(function(p){return !p.porCliente&&!p.saldo&&ifPlano(p).cap<n;});
@@ -919,7 +920,7 @@ function gpCalc(){
   var convs=e*300+p*500+f*800;
   var vconv=cxN('cxVar',0.65);
   var varTot=convs*vconv;
-  var d360=n*cxN('cxD360',300);
+  var d360=n*d360RS();
   var n8=gpDegrau('n8n',n), el=gpDegrau('el',n), sb=gpDegrau('sb',n);
   var fixos=n8.rs+el.rs+sb.rs;
   var custo=varTot+d360+fixos;
@@ -929,7 +930,7 @@ function gpCalc(){
     '<div style="background:#f4efff;border:1px solid #e4d9ff;border-radius:12px;padding:6px 14px 2px;margin-bottom:10px;">'
     +ln('📈 Receita mensal ('+n+' cliente'+(n>1?'s':'')+')','<span style="color:#0a7d43;">'+brl(receita)+'</span>')
     +ln('🤖 Variável IA/áudio','−'+brl(varTot),convs+' conversas × R$ '+vconv.toFixed(2).replace('.',','))
-    +ln('📱 360dialog','−'+brl(d360),n+' número'+(n>1?'s':'')+' × '+brl(cxN('cxD360',300)))
+    +ln('📱 360dialog','−'+brl(d360),n+' número'+(n>1?'s':'')+' × '+brl(d360RS()))
     +ln('⚙️ n8n <b style="color:#6d28d9;">'+n8.pl+'</b> (obrigatório p/ '+n+')','−'+brl(n8.rs))
     +ln('🎙 ElevenLabs <b style="color:#6d28d9;">'+el.pl+'</b>','−'+brl(el.rs))
     +ln('🗄 Supabase <b style="color:#6d28d9;">'+sb.pl+'</b>','−'+brl(sb.rs))
