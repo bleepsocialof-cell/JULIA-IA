@@ -2290,10 +2290,18 @@ function carregarConversasReais(){
         }
       });
       deltas.sort(function(a,b){return a-b;});
+      var heat=[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+      asc.forEach(function(m){
+        var p2=String(m.papel||'').toLowerCase();
+        if(!(p2.indexOf('cli')>-1||p2.indexOf('user')>-1||p2.indexOf('hum')>-1||p2.indexOf('lead')>-1))return;
+        var dt2=supaData(m.criado_em); if(!dt2.getTime())return;
+        var hx=dt2.getHours(), fx=(hx>=8&&hx<12)?0:((hx>=12&&hx<19)?1:2);
+        heat[dt2.getDay()][fx]++;
+      });
       window.REL_STATS={
         resp:deltas.length?Math.round(deltas[Math.floor(deltas.length/2)]):null,
         foraPct:cliTot?Math.round(fora*100/cliTot):0,
-        foraN:fora
+        foraN:fora, heat:heat
       };
     })();
     var hash=JSON.stringify(mapa);
@@ -2866,6 +2874,9 @@ function pintarReal(){
   /* — Relatórios 100% reais (mata os números fabricados) — */
   var rs=document.querySelector('#vRelatorios .r-scroll');
   if(rs){
+    var RP=window.RPER||30;
+    G=GL.filter(function(l){if(!l.cr)return false;return (Date.now()-new Date(l.cr).getTime())/86400000<=RP;});
+    gn=G.length;
     var q2=G.filter(function(l){return l.e==='qualificacao';}).length;
     var ag=G.filter(function(l){return l.e==='agendamento';}).length;
     var cr=G.filter(function(l){return l.e==='crm';}).length;
@@ -2888,8 +2899,8 @@ function pintarReal(){
     function ins(bg,bd,cor,ic,tit,tx){return '<div style="flex:1;min-width:190px;background:'+bg+';border:1px solid '+bd+';border-radius:12px;padding:11px 13px;"><div style="font-size:12px;font-weight:800;color:'+cor+';">'+ic+' '+tit+'</div><div style="font-size:10.5px;color:#6b6580;margin-top:3px;">'+tx+'</div></div>';}
     /* barras 14 dias */
     var hoje2=new Date(); hoje2.setHours(0,0,0,0);
-    var bar=[], mx=1;
-    for(var bi=13;bi>=0;bi--){var d0=new Date(hoje2.getTime()-bi*86400000);var n2=G.filter(function(l){if(!l.cr)return false;var x=new Date(l.cr);x.setHours(0,0,0,0);return x.getTime()===d0.getTime();}).length;bar.push(n2);if(n2>mx)mx=n2;}
+    var nDias=Math.min(14,RP), bar=[], mx=1;
+    for(var bi=nDias-1;bi>=0;bi--){var d0=new Date(hoje2.getTime()-bi*86400000);var n2=G.filter(function(l){if(!l.cr)return false;var x=new Date(l.cr);x.setHours(0,0,0,0);return x.getTime()===d0.getTime();}).length;bar.push({n:n2,d:d0.getDate()});if(n2>mx)mx=n2;}
     rs.innerHTML=
       '<div style="background:linear-gradient(135deg,#0e0a1f 55%,#1a1035);border-radius:14px;padding:14px 18px;margin-bottom:12px;">'
       +'<div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#a89fc9;margin-bottom:10px;">FUNIL DO PERÍODO</div>'
@@ -2903,10 +2914,28 @@ function pintarReal(){
       +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">FRANQUIA</small><div class="pc-price" id="relFrq">—</div><small style="font-size:9.5px;color:var(--mut);">conversas usadas no mês</small></div>'
       +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">REUNIÕES</small><div class="pc-price" id="relReu">'+ag+'</div><small style="font-size:9.5px;color:var(--mut);">marcadas pela Julia</small></div>'
       +'</div>'
-      +'<div class="cf-card"><h3>Leads por dia</h3><div class="sb">últimos 14 dias</div>'
-      +'<div style="display:flex;align-items:flex-end;gap:4px;height:64px;margin-top:8px;">'
-      +bar.map(function(n3){var h3=Math.max(6,Math.round(n3*100/mx));return '<div title="'+n3+'" style="flex:1;background:'+(n3===mx?'#7F77DD':'#C8C3F2')+';height:'+h3+'%;border-radius:3px 3px 0 0;"></div>';}).join('')
-      +'</div></div>';
+      +'<div class="cf-card"><h3>Leads por dia</h3><div class="sb">últimos '+nDias+' dias</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:4px;height:76px;margin-top:8px;">'
+      +bar.map(function(b3){var h3=Math.max(6,Math.round(b3.n*100/mx));return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;">'+(b3.n?'<small style="font-size:8.5px;font-weight:800;color:#5b21b6;">'+b3.n+'</small>':'')+'<div style="width:100%;background:'+(b3.n===mx?'#7F77DD':'#C8C3F2')+';height:'+h3+'%;border-radius:3px 3px 0 0;"></div></div>';}).join('')
+      +'</div><div style="display:flex;gap:4px;margin-top:3px;">'
+      +bar.map(function(b3){return '<small style="flex:1;text-align:center;font-size:8px;color:#b0a8c6;font-weight:700;">'+b3.d+'</small>';}).join('')
+      +'</div></div>'
+      +(function(){
+        var H=(window.REL_STATS||{}).heat; if(!H)return '';
+        var mx2=1; H.forEach(function(r2){r2.forEach(function(v2){if(v2>mx2)mx2=v2;});});
+        var cores=['#F1EFFB','#D9D5F6','#B4ADEE','#8A80E2','#534AB7'];
+        function cel(v2){var ix2=v2===0?0:Math.min(4,1+Math.floor(v2*3.99/mx2));return '<span title="'+v2+' mensagens" style="background:'+cores[ix2]+';height:15px;border-radius:3px;"></span>';}
+        var rot=['8h–12h','12h–19h','19h–8h'];
+        var h4='<div class="cf-card" style="margin-top:12px;"><h3>Quando os clientes chamam</h3><div class="sb">mensagens recebidas · hora × dia da semana</div>'
+          +'<div style="display:grid;grid-template-columns:52px repeat(7,1fr);gap:3px;margin-top:10px;font-size:9px;color:#8a7fa8;font-weight:700;">'
+          +'<span></span><span style="text-align:center;">DOM</span><span style="text-align:center;">SEG</span><span style="text-align:center;">TER</span><span style="text-align:center;">QUA</span><span style="text-align:center;">QUI</span><span style="text-align:center;">SEX</span><span style="text-align:center;">SÁB</span>';
+        for(var fx2=0;fx2<3;fx2++){
+          h4+='<span style="align-self:center;">'+rot[fx2]+'</span>';
+          for(var dw=0;dw<7;dw++)h4+=cel(H[dw][fx2]);
+        }
+        h4+='</div><div style="font-size:9.5px;color:#b0a8c6;margin-top:6px;">Quanto mais escuro, mais mensagens — programe disparos e plantão pros picos.</div></div>';
+        return h4;
+      })();
     fetch(SUPA_URL+'/rest/v1/rpc/consumo_mes',{method:'POST',
       headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
       body:JSON.stringify({p_conta:(window.CONTA_VIEW||CONTA_ID)})})
@@ -4505,7 +4534,7 @@ var RDATA={
     rank:[['Apto 2 qts · Boa Viagem',158],['Casa · Casa Forte',101],['Apto 3 qts · Pina',77],['Terreno · Aldeia',52],['Comercial · Centro',30]]}
 };
 var RSEMN=['seg','ter','qua','qui','sex','sáb','dom'];
-function rPer(el){document.querySelectorAll('#vRelatorios .fp').forEach(function(f){f.classList.remove('on');});el.classList.add('on');rRender(el.dataset.p);}
+function rPer(el){document.querySelectorAll('#vRelatorios .fp').forEach(function(f){f.classList.remove('on');});el.classList.add('on');window.RPER=Number(el.dataset.p)||30;pintarReal();}
 function rPath(serie,mx){var n=serie.length;var pts=serie.map(function(v,i){return [(i/(n-1))*560,130-(v/mx)*100];});return 'M'+pts.map(function(q){return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' L');}
 function rRender(p){
   var d=RDATA[p];
