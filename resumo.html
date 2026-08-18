@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Jul.ia — Resumo do atendimento</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{--roxo:#7c3aed;--rosa:#e84393;--tx:#17141f;--mut:#8a7fa8;}
+  *{box-sizing:border-box;margin:0;}
+  body{font-family:Inter,sans-serif;background:#f4f2fa;color:var(--tx);}
+  .top{background:linear-gradient(135deg,#0e0a1f 55%,#2a1548);padding:22px 18px;color:#fff;}
+  .wrap{max-width:760px;margin:0 auto;}
+  .logo{font-family:Sora;font-weight:800;font-size:19px;}
+  .logo b{color:#e84393;}
+  .sub{font-size:11px;color:#a89fc9;margin-top:2px;}
+  .card{background:#fff;border:1px solid #e9e4f4;border-radius:16px;padding:16px 18px;margin:14px 0;box-shadow:0 1px 3px rgba(60,40,110,.06);}
+  .nome{font-family:Sora;font-weight:800;font-size:18px;}
+  .pill{display:inline-block;font-size:10px;font-weight:700;background:#f4efff;color:#6d28d9;border:1px solid #e4d9ff;padding:3px 10px;border-radius:10px;margin:6px 6px 0 0;}
+  h2{font-family:Sora;font-size:13px;letter-spacing:.5px;color:#4c3d6b;margin:20px 4px 8px;}
+  .chat{display:flex;flex-direction:column;gap:7px;}
+  .m{max-width:82%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;}
+  .m small{display:block;font-size:9.5px;color:#9a92b5;margin-top:4px;}
+  .cli{align-self:flex-start;background:#fff;border:1px solid #e9e4f4;border-bottom-left-radius:4px;}
+  .ju{align-self:flex-end;background:#dcf8c6;border-bottom-right-radius:4px;}
+  .ju small{color:#5b7a63;}
+  .doc{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e9e4f4;border-radius:12px;padding:10px 13px;margin-bottom:7px;text-decoration:none;color:inherit;}
+  .doc:hover{border-color:#c9b8f0;}
+  .doc .ic{font-size:20px;}
+  .doc b{font-size:12.5px;word-break:break-all;}
+  .zip{display:block;width:100%;text-align:center;background:linear-gradient(90deg,var(--rosa),var(--roxo));color:#fff;border:none;font-family:Sora;font-weight:700;font-size:14px;padding:14px;border-radius:14px;cursor:pointer;margin:10px 0 26px;}
+  .zip:disabled{opacity:.6;}
+  .err{text-align:center;padding:60px 20px;color:var(--mut);}
+  .rod{font-size:10px;color:#b0a8c6;text-align:center;padding:18px 0 26px;}
+  .mid{font-size:12px;}
+  @media print{.zip{display:none;}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <div class="logo">Jul<b>.ia</b> · Resumo do atendimento</div>
+  <div class="sub" id="cab">carregando…</div>
+</div></div>
+<div class="wrap" style="padding:6px 14px 10px;" id="app">
+  <div class="err">⏳ Carregando o atendimento…</div>
+</div>
+<div class="rod">Gerado pela Jul.ia · link privado — não compartilhe fora da equipe</div>
+<script>
+var SUPA_URL='https://acohtqxersbhgbrlzqii.supabase.co';
+var SUPA_KEY='sb_publishable_zgWKIwXALOWRbac_13-DWg_ruoyaNkg';
+function q(k){return new URLSearchParams(location.search).get(k)||'';}
+function eh(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sb(p){return fetch(SUPA_URL+'/rest/v1/'+p,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];});}
+function midia(t){
+  var m=String(t||'').match(/^\[MIDIA:(\w+)\]\s*(\S+)(?:\s*\|\s*([\s\S]*))?$/);
+  if(!m)return null;
+  return {tipo:m[1],url:m[2],leg:(m[3]||'').trim()};
+}
+var C=q('c'), T=String(q('t')).replace(/\D/g,''), K=q('k');
+var APP=document.getElementById('app');
+if(!C||!T||!K){APP.innerHTML='<div class="err">🔒 Link incompleto.</div>';}
+else sb('contas?select=empresa,lead_token&id=eq.'+C).then(function(cs){
+  var conta=cs&&cs[0];
+  if(!conta||String(conta.lead_token)!==K){APP.innerHTML='<div class="err">🔒 Link inválido ou expirado.</div>';return;}
+  document.getElementById('cab').textContent=conta.empresa||'';
+  var t8=T.slice(-8);
+  Promise.all([
+    sb('leads?select=nome,interesse,etapa,score,criado_em&conta_id=eq.'+C+'&telefone=like.*'+t8+'&limit=1'),
+    sb('conversas?select=papel,mensagem,criado_em&conta_id=eq.'+C+'&telefone=like.*'+t8+'&order=criado_em.asc&limit=400'),
+    sb('anexos?select=nome_arquivo,url,criado_em&conta_id=eq.'+C+'&telefone=like.*'+t8+'&order=criado_em.asc&limit=40')
+  ]).then(function(rs){
+    var lead=(rs[0]||[])[0]||{}, ms=rs[1]||[], docs=rs[2]||[];
+    var h='<div class="card"><div class="nome">'+eh(lead.nome||'Lead')+'</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">📱 '+eh(T)+'</div>'
+      +(lead.interesse?'<span class="pill">🎯 '+eh(lead.interesse)+'</span>':'')
+      +(lead.etapa?'<span class="pill">'+eh(lead.etapa)+'</span>':'')
+      +(lead.score?'<span class="pill">score '+eh(lead.score)+'</span>':'')
+      +'</div>';
+    /* documentos */
+    if(docs.length){
+      h+='<h2>📎 DOCUMENTOS ('+docs.length+')</h2>';
+      docs.forEach(function(d){
+        h+='<a class="doc" href="'+eh(d.url)+'" target="_blank" rel="noopener"><span class="ic">📄</span><div><b>'+eh(d.nome_arquivo||'Documento')+'</b></div></a>';
+      });
+      h+='<button class="zip" id="btZip" onclick="baixarTudo()">⬇ Baixar documentação completa (ZIP)</button>';
+    }
+    /* conversa */
+    h+='<h2>💬 CONVERSA COMPLETA ('+ms.length+' mensagens)</h2><div class="chat">';
+    ms.forEach(function(m){
+      var p=String(m.papel||'').toLowerCase();
+      if(p.indexOf('nota')>-1)return;
+      var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
+      var d=new Date(m.criado_em);
+      var hh=isNaN(d)?'':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      var md=midia(m.mensagem), corpo;
+      if(md){
+        var ic=md.tipo==='image'?'📷 Foto':md.tipo==='video'?'🎬 Vídeo':md.tipo==='audio'?'🎙 Áudio':'📄 Documento';
+        corpo='<span class="mid"><a href="'+eh(md.url)+'" target="_blank" rel="noopener">'+ic+'</a>'+(md.leg?' — '+eh(md.leg):'')+'</span>';
+      }else corpo=eh(m.mensagem);
+      h+='<div class="m '+(cli?'cli':'ju')+'">'+corpo+'<small>'+(cli?'Cliente':'Julia')+' · '+hh+'</small></div>';
+    });
+    h+='</div>';
+    APP.innerHTML=h;
+    window.DOCS=docs;
+  });
+});
+function baixarTudo(){
+  var bt=document.getElementById('btZip');
+  bt.disabled=true;bt.textContent='⏳ Montando o pacote…';
+  var zip=new JSZip(), fila=Promise.resolve(), n=0;
+  (window.DOCS||[]).forEach(function(d,i){
+    fila=fila.then(function(){
+      return fetch(d.url).then(function(r){return r.blob();}).then(function(b){
+        var nome=(d.nome_arquivo||('documento-'+(i+1))).replace(/[\\/:*?"<>|]/g,'-');
+        zip.file(nome,b);n++;
+      }).catch(function(){});
+    });
+  });
+  fila.then(function(){return zip.generateAsync({type:'blob'});}).then(function(blob){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='documentos-lead.zip';
+    document.body.appendChild(a);a.click();a.remove();
+    bt.disabled=false;bt.textContent='⬇ Baixar documentação completa (ZIP)';
+  }).catch(function(){bt.disabled=false;bt.textContent='⬇ Baixar documentação completa (ZIP)';alert('Não consegui montar o ZIP — baixe os arquivos um a um pelos links acima.');});
+}
+</script>
+</body>
+</html>

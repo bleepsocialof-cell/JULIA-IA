@@ -3939,8 +3939,13 @@ function transferirZap(telLead){
     :Promise.resolve([]);
   pr.then(function(rows){
     var docs='';
+    var telFull=String(l.t||telLead||'').replace(/\D/g,'');
+    if(window.LEAD_TOKEN&&telFull){
+      docs+='\n📋 *Conversa completa + documentos (1 clique):*\n'
+        +'https://julia-ia-nine.vercel.app/resumo.html?c='+(window.CONTA_VIEW||CONTA_ID)+'&t='+telFull+'&k='+window.LEAD_TOKEN+'\n';
+    }
     if(rows&&rows.length){
-      docs='\n📎 Documentos ('+rows.length+'):\n';
+      docs+='\n📎 Documentos ('+rows.length+'):\n';
       rows.forEach(function(a){docs+='• '+(a.nome_arquivo||'Documento')+': '+String(a.url||'')+'\n';});
     }
     var tx='*Lead transferido pela Julia*\n\n'
@@ -4735,6 +4740,7 @@ function nIntegCarregar(){
   .then(function(r){return r.ok?r.json():[];})
   .then(function(rows){
     var c=rows&&rows[0]; if(!c)return;
+    window.LEAD_TOKEN=c.lead_token||'';
     var base='https://jadsonsantos.app.n8n.cloud/webhook/lead-entrada?c='+cid+'&t='+(c.lead_token||'')+'&origem=';
     var g=document.getElementById('nUrlGoogle'); if(g)g.textContent=base+'google';
     var st=document.getElementById('nUrlSite'); if(st)st.textContent=base+'site';
