@@ -1120,7 +1120,9 @@ body.vw-adm .adm-pill{display:block;}
   <div class="view" id="vDisparos">
     <style>
       #vDisparos{padding:26px clamp(28px,3vw,48px) 30px;overflow:auto;}
+      #vDisparos .dsp-hero{background:linear-gradient(135deg,#0e0a1f 60%,#1a1035);border-radius:18px;padding:24px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:16px;}
       #vDisparos .dsp-card{background:#fff;border:1px solid #eee9f6;border-radius:16px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 2px rgba(60,40,110,.04);}
+      #vDisparos .dsp-mini{background:#fff;border:1px solid #eee9f6;border-radius:14px;padding:14px 16px;flex:1;min-width:160px;}
       #vDisparos .dsp-tit{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:800;letter-spacing:.4px;color:#4c3d6b;margin-bottom:14px;}
       #vDisparos .dsp-n{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#7c3aed,#e84393);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
       #vDisparos .dsp-lb{display:block;font-size:11px;font-weight:700;color:#8a7fa8;margin-bottom:5px;}
@@ -1135,13 +1137,35 @@ body.vw-adm .adm-pill{display:block;}
       #vDisparos .dsp-pgb{width:30px;height:30px;border-radius:9px;border:1px solid #e2dcf0;background:#fff;font-size:14px;color:#4c3d6b;cursor:pointer;}
       #vDisparos .dsp-pgb:hover{border-color:#7c3aed;color:#7c3aed;}
       #vDisparos .dsp-dias{font-size:11px;font-weight:700;color:#996d1d;background:#fdf3d8;padding:3px 9px;border-radius:12px;}
+      #vDisparos .dsp-wa{background:#dcf8c6;border-radius:14px 14px 14px 4px;padding:11px 14px;max-width:440px;box-shadow:0 1px 1px rgba(0,0,0,.06);}
     </style>
-    <div class="i-top"><div><h1>Disparos de Reativação</h1><p>Reacenda leads antigos com template aprovado — respondeu, vira conversa</p></div></div>
+
+    <div class="dsp-hero">
+      <div style="flex:1;min-width:220px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#a89fc9;margin-bottom:4px;">DISPAROS DE REATIVAÇÃO</div>
+        <div style="font-size:21px;font-weight:800;color:#fff;font-family:Sora,sans-serif;">Transforme leads esquecidos em novas oportunidades</div>
+        <div style="font-size:12px;color:#8b80ad;margin-top:6px;">A partir de 3 dias parado — antes disso a Julia reengaja sozinha</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#a89fc9;margin-bottom:2px;">Saldo da franquia</div>
+        <div style="font-size:30px;font-weight:800;color:#fff;font-family:Sora,sans-serif;"><span id="dspHeroNum">—</span> <span style="font-size:13px;color:#8b80ad;font-weight:600;" id="dspHeroDe">de —</span></div>
+        <div style="width:160px;height:6px;background:#241c3f;border-radius:3px;overflow:hidden;margin-top:6px;margin-left:auto;">
+          <div id="dspHeroBar" style="width:0%;height:100%;background:linear-gradient(90deg,#7c3aed,#e84393);transition:width .5s;"></div>
+        </div>
+      </div>
+      <button id="dspHeroBtn" class="pillbtn" style="opacity:.5;cursor:not-allowed;padding:13px 24px;" title="Workflow de disparo em massa entra na próxima sessão">Disparar para 0</button>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+      <div class="dsp-mini"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#b0a8c6;margin-bottom:6px;">1 · PÚBLICO</div><div id="dspR1" style="font-size:13px;font-weight:700;color:#2b2140;">—</div><div id="dspR1b" style="font-size:11px;color:#8a7fa8;margin-top:2px;">use os filtros abaixo</div></div>
+      <div class="dsp-mini"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#b0a8c6;margin-bottom:6px;">2 · TEMPLATE</div><div id="dspR2" style="font-size:13px;font-weight:700;color:#2b2140;">reativacao_juliablee</div><div id="dspR2b" style="font-size:11px;color:#8a7fa8;margin-top:2px;">enviar agora</div></div>
+      <div class="dsp-mini"><div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#b0a8c6;margin-bottom:6px;">3 · CUSTO</div><div id="dspR3" style="font-size:13px;font-weight:700;color:#2b2140;">R$ 0,00</div><div id="dspR3b" style="font-size:11px;color:#16a34a;margin-top:2px;">dentro da franquia</div></div>
+    </div>
 
     <div class="dsp-card">
       <div class="dsp-tit"><span class="dsp-n">1</span>ESCOLHA O PÚBLICO</div>
       <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
-        <div><label class="dsp-lb">Parados há pelo menos (dias)</label><input id="dspDias" type="number" min="1" value="30" class="dsp-in" style="width:90px;"/></div>
+        <div><label class="dsp-lb">Parados há pelo menos (dias)</label><input id="dspDias" type="number" min="3" value="30" class="dsp-in" style="width:90px;"/></div>
         <div><label class="dsp-lb">Score mínimo</label><select id="dspScore" class="dsp-in"><option value="0">Todos</option><option value="50">50+</option><option value="70">70+</option></select></div>
         <button class="pillbtn" onclick="dispRender()">Buscar parados</button>
         <span id="dspInfo" style="font-size:12.5px;color:#8a7fa8;margin-left:auto;font-weight:600;">—</span>
@@ -1151,20 +1175,21 @@ body.vw-adm .adm-pill{display:block;}
     <div class="dsp-card">
       <div class="dsp-tit"><span class="dsp-n">2</span>MENSAGEM E AGENDAMENTO</div>
       <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
-        <div style="flex:1;min-width:240px;"><label class="dsp-lb">Template aprovado (Meta)</label>
+        <div style="flex:1;min-width:240px;"><label class="dsp-lb">Template aprovado (Meta) — criamos os seus na implementação</label>
           <select id="dspTpl" onchange="dispTpl()" class="dsp-in" style="width:100%;"><option value="reativacao_juliablee">reativacao_juliablee</option><option value="abandono_trafegou_blee">abandono_trafegou_blee</option></select></div>
         <div><label class="dsp-lb">Quando</label><select id="dspQuando" class="dsp-in"><option value="agora">Agora</option><option value="agendar">Agendar data e hora…</option></select></div>
       </div>
-      <div style="background:#faf8ff;border:1px solid #efe9fb;border-radius:12px;padding:12px 16px;max-width:500px;">
-        <div style="font-size:10px;font-weight:800;letter-spacing:.6px;color:#b0a8c6;margin-bottom:5px;">PRÉVIA</div>
-        <div id="dspPrev" style="font-size:13.5px;color:#2b2140;line-height:1.55;">Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?</div>
-        <div style="font-size:10.5px;color:#c4bcd8;margin-top:6px;">O texto oficial é o aprovado na Meta para este template.</div>
+      <div class="dsp-wa">
+        <div id="dspPrev" style="font-size:13.5px;color:#1f2c22;line-height:1.55;">Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?</div>
+        <div style="font-size:10px;color:#5b7a63;text-align:right;margin-top:4px;">agora ✓✓</div>
       </div>
+      <div style="font-size:10.5px;color:#c4bcd8;margin-top:8px;">Prévia usa o primeiro selecionado · o texto oficial é o aprovado na Meta.</div>
     </div>
 
     <div class="dsp-card" style="padding:0;overflow:hidden;">
       <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #f3effa;flex-wrap:wrap;">
         <div class="dsp-tit" style="margin:0;"><span class="dsp-n">3</span>CONFIRA QUEM VAI RECEBER</div>
+        <span style="font-size:11px;color:#b0a8c6;font-weight:600;">mais antigos primeiro</span>
         <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;">
           <span class="dsp-chip" onclick="dispSelTudo(true)">Selecionar todos</span>
           <span class="dsp-chip" onclick="dispSelPagina()">Só esta página</span>
@@ -1174,12 +1199,7 @@ body.vw-adm .adm-pill{display:block;}
       <div id="dspLista"></div>
       <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #f3effa;">
         <div class="dsp-pg"><button class="dsp-pgb" onclick="dispPage(-1)">‹</button><span id="dspPgInfo">—</span><button class="dsp-pgb" onclick="dispPage(1)">›</button></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid #eee9f6;background:#faf9ff;flex-wrap:wrap;">
-        <b id="dspSel" style="font-size:14px;color:#2b2140;">0 selecionados</b>
-        <span id="dspCusto" style="font-size:12.5px;color:#8a7fa8;font-weight:600;">custo R$ 0,00</span>
-        <span id="dspSaldo" style="font-size:12.5px;color:#8a7fa8;font-weight:600;">· saldo: —</span>
-        <button class="pillbtn" style="margin-left:auto;opacity:.5;cursor:not-allowed;" title="Workflow de disparo em massa entra na próxima sessão">Disparar reativação</button>
+        <span style="margin-left:auto;font-size:12.5px;color:#8a7fa8;font-weight:600;"><b id="dspSel" style="color:#2b2140;">0 selecionados</b> · <span id="dspCusto">R$ 0,00</span> <span id="dspSaldo"></span></span>
       </div>
       <div style="padding:10px 20px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Envio escalonado 1 msg a cada 6s, só horário comercial. Cada disparo consome 1 conversa da franquia; excedente sob confirmação.</div>
     </div>
@@ -2243,10 +2263,7 @@ var DSP_TPLS={
   reativacao_juliablee:'Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?',
   abandono_trafegou_blee:'Oi {{nome}}! Vi que você chegou pertinho de garantir o Trafegou e parou no caminho. Ainda tá aí a vontade de dominar o tráfego pago? 🚀'
 };
-function dispTpl(){
-  var t=(document.getElementById('dspTpl')||{}).value||'reativacao_juliablee';
-  var p=document.getElementById('dspPrev'); if(p)p.textContent=DSP_TPLS[t]||'';
-}
+function dispTpl(){dispPrevNome();dispConta();}
 function dispSaldo(){
   var conta=(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea');
   Promise.all([
@@ -2256,7 +2273,9 @@ function dispSaldo(){
     var tot=((res[0]&&res[0][0])||{}).total||0;
     var fr=(res[1]&&res[1][0]&&res[1][0].franquia_convs)||300;
     var s=document.getElementById('dspSaldo');
-    if(s)s.innerHTML='· saldo da franquia: <b style="color:'+(fr-tot<=0?'#ef4444':'#16a34a')+';">'+Math.max(0,fr-tot)+'</b> de '+fr;
+    if(s)s.innerHTML='· saldo <b style="color:'+(fr-tot<=0?'#ef4444':'#16a34a')+';">'+Math.max(0,fr-tot)+'</b> de '+fr;
+    var hn=document.getElementById('dspHeroNum'),hd=document.getElementById('dspHeroDe'),hb=document.getElementById('dspHeroBar');
+    if(hn){hn.textContent=Math.max(0,fr-tot);hd.textContent='de '+fr;var p=Math.min(100,Math.round(tot*100/fr));hb.style.width=p+'%';if(p>=90)hb.style.background='#ef4444';}
   }).catch(function(){});
 }
 function dispHist(){
@@ -2275,9 +2294,11 @@ function dispHist(){
     }).join('');
   }).catch(function(){});
 }
-window.DSP_ROWS=[];window.DSP_PAG=0;var DSP_PP=50;
+window.DSP_ROWS=[];window.DSP_PAG=0;var DSP_PP=10;
 function dispRender(){
-  var dias=parseInt((document.getElementById('dspDias')||{}).value||'30',10);
+  var dEl=document.getElementById('dspDias');
+  var dias=Math.max(3,parseInt((dEl||{}).value||'30',10)||3);
+  if(dEl&&String(dEl.value)!==String(dias))dEl.value=dias;
   var sc=parseInt((document.getElementById('dspScore')||{}).value||'0',10);
   var corte=Date.now()-dias*86400000;
   window.DSP_ROWS=GL.filter(function(l){
@@ -2285,6 +2306,8 @@ function dispRender(){
     if(!(d&&d<corte))return false;
     if(sc>0&&(Number(l.score)||0)<sc)return false;
     return true;
+  }).sort(function(a,b){
+    return new Date(a.cr).getTime()-new Date(b.cr).getTime();
   });
   window.DSP_PAG=0;
   var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=window.DSP_ROWS.length+' contato'+(window.DSP_ROWS.length===1?'':'s')+' parado'+(window.DSP_ROWS.length===1?'':'s');
@@ -2330,7 +2353,28 @@ function dispConta(){
   var n=0; for(var k in window.DSP_SEL)if(window.DSP_SEL[k])n++;
   var s1=document.getElementById('dspSel'), s2=document.getElementById('dspCusto');
   if(s1)s1.textContent=n+' selecionado'+(n===1?'':'s');
-  if(s2)s2.textContent='custo estimado R$ '+(n*0.5).toFixed(2).replace('.',',');
+  if(s2)s2.textContent='R$ '+(n*0.5).toFixed(2).replace('.',',');
+  var hb=document.getElementById('dspHeroBtn'); if(hb)hb.textContent='Disparar para '+n;
+  var r1=document.getElementById('dspR1'),r1b=document.getElementById('dspR1b');
+  if(r1){var di=(document.getElementById('dspDias')||{}).value||'30';var sc=(document.getElementById('dspScore')||{}).value||'0';
+    r1.textContent=di+'+ dias'+(sc!=='0'?' · score '+sc+'+':'');
+    r1b.textContent=window.DSP_ROWS.length+' contatos parados';}
+  var r2=document.getElementById('dspR2'),r2b=document.getElementById('dspR2b');
+  if(r2){r2.textContent=(document.getElementById('dspTpl')||{}).value||'—';
+    r2b.textContent=((document.getElementById('dspQuando')||{}).value==='agendar')?'agendado':'enviar agora';}
+  var r3=document.getElementById('dspR3');
+  if(r3)r3.textContent=n+' × R$ 0,50 = R$ '+(n*0.5).toFixed(2).replace('.',',');
+  dispPrevNome();
+}
+function dispPrevNome(){
+  var nome='{{nome}}';
+  for(var k in window.DSP_SEL){if(window.DSP_SEL[k]){
+    for(var i2=0;i2<window.DSP_ROWS.length;i2++){var tl=String(window.DSP_ROWS[i2].t||'').replace(/\D/g,'');
+      if(tl===k){nome=(window.DSP_ROWS[i2].n||'').split(' ')[0]||nome;break;}}
+    break;}}
+  var t=(document.getElementById('dspTpl')||{}).value||'reativacao_juliablee';
+  var p=document.getElementById('dspPrev');
+  if(p)p.textContent=(DSP_TPLS[t]||'').replace('{{nome}}',nome);
 }
 /* ── TEMPO REAL: WebSocket Supabase (instantâneo) + polling 10s de backup ── */
 var RT_WS=null,RT_REF=0,RT_TRY=0;
