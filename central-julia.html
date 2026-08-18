@@ -178,7 +178,7 @@ tr:last-child td{border-bottom:none;}
     </div>
     <div class="card">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-        <h3 style="margin:0;">Faturas · <span id="fatAno"></span></h3>
+        <h3 style="margin:0;">Faturas · <select id="fatAnoSel" onchange="carregar()" style="font-size:15px;font-weight:800;border:1px solid var(--bd);border-radius:8px;padding:2px 8px;"></select></h3><span id="fatAno" style="display:none;"></span>
         <div class="grow"></div>
         <span class="hint">clique na célula: cria/paga/reabre</span>
         <button class="btn gh" onclick="gerarFaturasMes()">Gerar faturas do mês</button>
@@ -283,7 +283,9 @@ function carregar(){
     fetch(SUPA_URL+'/rest/v1/contas?select=*&order=criada_em.asc',{headers:H}).then(function(r){return r.ok?r.json():[];}),
     fetch(SUPA_URL+'/rest/v1/planos?select=*&order=valor.asc',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
     fetch(SUPA_URL+'/rest/v1/usuarios?select=id,conta_id,nome,email,papel',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];}),
-    fetch(SUPA_URL+'/rest/v1/faturas?select=*&competencia=gte.'+ano+'-01-01&competencia=lte.'+ano+'-12-31',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];})
+    (function(){var sel=document.getElementById('fatAnoSel');if(sel&&sel.value)ano=Number(sel.value);window.FAT_ANO=ano;
+      if(sel&&!sel.options.length){var y=new Date().getFullYear();for(var yy=y+1;yy>=2025;yy--){var o=document.createElement('option');o.value=yy;o.textContent=yy;if(yy===y)o.selected=true;sel.appendChild(o);}}
+      return fetch(SUPA_URL+'/rest/v1/faturas?select=*&competencia=gte.'+ano+'-01-01&competencia=lte.'+ano+'-12-31',{headers:H}).then(function(r){return r.ok?r.json():[];}).catch(function(){return [];});})()
   ]).then(function(rs){
     CONTAS=rs[0]||[];PLANOS=rs[1]||[];FATU=rs[3]||[];
     USUARIOS=rs[2]||[];NUSU={};USUARIOS.forEach(function(u){NUSU[u.conta_id]=(NUSU[u.conta_id]||0)+1;});
@@ -408,13 +410,13 @@ function pintarFat(pag,ativas,mrr){
     for(var m=0;m<12;m++){
       var f=fatDe(c.id,m);
       var antesEntrada=ent&&(ano<ent.getFullYear()||(ano===ent.getFullYear()&&m<ent.getMonth()));
-      var futuro=m>mesAtual;
+      var futuro=(ano===new Date().getFullYear())?(m>mesAtual):(ano>new Date().getFullYear());
       var cls,txt,click='';
-      if(f&&f.status==='paga'){cls='paga';txt='✓';click=' onclick="celClique(\''+c.id+'\','+m+')"';}
-      else if(f&&vencida(f)){cls='venc';txt='!';abertoC+=Number(f.valor||0);click=' onclick="celClique(\''+c.id+'\','+m+')"';}
-      else if(f){cls='aberta';txt='◌';abertoC+=Number(f.valor||0);click=' onclick="celClique(\''+c.id+'\','+m+')"';}
+      if(f&&f.status==='paga'){cls='paga';txt='✓';click=' onclick="celClique(\''+c.id+'\','+m+',event)"';}
+      else if(f&&vencida(f)){cls='venc';txt='!';abertoC+=Number(f.valor||0);click=' onclick="celClique(\''+c.id+'\','+m+',event)"';}
+      else if(f){cls='aberta';txt='◌';abertoC+=Number(f.valor||0);click=' onclick="celClique(\''+c.id+'\','+m+',event)"';}
       else if(futuro||antesEntrada){cls='fut';txt='';}
-      else{cls='vazia';txt='–';click=' onclick="celClique(\''+c.id+'\','+m+')"';}
+      else{cls='vazia';txt='–';click=' onclick="celClique(\''+c.id+'\','+m+',event)"';}
       hb+='<td><div class="cel '+cls+'"'+click+'>'+txt+'</div></td>';
     }
     hb+='<td class="resta" style="text-align:right;">'+(abertoC?brl(abertoC):'—')+'</td>';
@@ -424,12 +426,20 @@ function pintarFat(pag,ativas,mrr){
   document.getElementById('fatVazio').style.display=pag.length?'none':'block';
 }
 
-function celClique(cid,mes){
+function celClique(cid,mes,ev){
   var c=CONTAS.find(function(x){return x.id===cid;});if(!c)return;
-  var ano=new Date().getFullYear();
+  var ano=window.FAT_ANO||new Date().getFullYear();
   var comp=ano+'-'+String(mes+1).padStart(2,'0')+'-01';
   var f=fatDe(cid,mes);
   var nomeMes=MESES[mes]+'/'+String(ano).slice(2);
+  if(f&&ev&&ev.shiftKey){
+    if(!confirm('EXCLUIR a fatura de '+nomeMes+' de '+c.empresa+' ('+brl(f.valor)+')? Some do faturamento de vez.'))return;
+    fetch(SUPA_URL+'/rest/v1/faturas?id=eq.'+f.id,{method:'DELETE',headers:HJ})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);registrarMsg('Fatura excluída '+nomeMes+': '+c.empresa);carregar();})
+    .catch(function(e){alert('Falhou ('+e.message+')');});
+    return;
+  }
+  if(!f&&mensalidade(c)<=0){alert(c.empresa+' é cortesia/personalizada (R$ 0) — sem fatura pra criar. Ajuste em Clientes → Editar se mudar.');return;}
   if(!f){
     var val=mensalidade(c);
     if(!confirm('Criar fatura de '+nomeMes+' pra '+c.empresa+' ('+brl(val)+') e marcar como PAGA?'))return;
@@ -811,36 +821,49 @@ function cxSim(){
 }
 cxPintar();
 
+var IF_OPTS={
+ n8n:[{pl:'Starter €24',rs:150,cap:1,up:'Pro €60 aguenta ~4'},{pl:'Pro €60',rs:380,cap:4,up:'Business €180 (~15) ou self-host VPS ~R$80 = ilimitado'},{pl:'Business €180',rs:1130,cap:15,up:'Self-host VPS ~R$80 = ilimitado'},{pl:'Self-host VPS',rs:80,cap:999,up:'Ilimitado — só cresce o VPS'}],
+ el:[{pl:'Starter $5',rs:28,cap:1,up:'Creator $22 aguenta ~2'},{pl:'Creator $22',rs:120,cap:2,up:'Pro $99 aguenta ~8'},{pl:'Pro $99',rs:545,cap:8,up:'Scale $330 aguenta ~25'},{pl:'Scale $330',rs:1815,cap:25,up:'Business sob consulta'}],
+ sb:[{pl:'Free ⚠️',rs:0,cap:1,up:'Pro $25 aguenta 20-50'},{pl:'Pro $25',rs:140,cap:30,up:'Team $599 aguenta ~200'},{pl:'Team $599',rs:3300,cap:200,up:'Enterprise sob consulta'}]
+};
 var IF_DEF=[
  {id:'d360',n:'360dialog',pl:'€49 por cliente',rs:300,cap:0,up:'Pacote com desconto em volume',lk:'https://hub.360dialog.com',porCliente:true},
  {id:'anth',n:'Anthropic (IA)',pl:'Saldo pré-pago',rs:0,cap:0,up:'Auto-recharge LIGADO = nunca seca',lk:'https://console.anthropic.com',saldo:true},
  {id:'oai',n:'OpenAI (áudio)',pl:'Saldo pré-pago',rs:0,cap:0,up:'US$ 10 duram meses',lk:'https://platform.openai.com',saldo:true},
- {id:'n8n',n:'n8n Cloud',pl:'Starter €24',rs:150,cap:1,up:'Pro €60 (~4 clientes) → self-host VPS ~R$80 = ilimitado',lk:'https://app.n8n.cloud'},
- {id:'el',n:'ElevenLabs (voz)',pl:'Creator $22',rs:120,cap:2,up:'Pro $99 (~8 clientes)',lk:'https://elevenlabs.io'},
- {id:'sb',n:'Supabase',pl:'Free ⚠️',rs:0,cap:1,up:'Pro $25 (~R$140) → 20-50 clientes',lk:'https://supabase.com/dashboard'}
+ {id:'n8n',n:'n8n Cloud',op:0,lk:'https://app.n8n.cloud'},
+ {id:'el',n:'ElevenLabs (voz)',op:1,lk:'https://elevenlabs.io'},
+ {id:'sb',n:'Supabase',op:0,lk:'https://supabase.com/dashboard'}
 ];
+function ifPlano(p){var o=IF_OPTS[p.id];return o?o[Math.min(p.op||0,o.length-1)]:p;}
+function ifTroca(i,op){IF_P[i].op=Number(op);ifSave(IF_P);ifPintar();}
 function ifLoad(){try{var v=JSON.parse(localStorage.getItem('cx_potes')||'null');if(v&&v.length)return v;}catch(e){}return JSON.parse(JSON.stringify(IF_DEF));}
 function ifSave(p){try{localStorage.setItem('cx_potes',JSON.stringify(p));}catch(e){}}
+try{var _o=JSON.parse(localStorage.getItem('cx_potes')||'null');if(_o&&_o[3]&&_o[3].op===undefined)localStorage.removeItem('cx_potes');}catch(e){}
 var IF_P=ifLoad();
 function ifNAtivas(){return CONTAS.filter(function(c){return pagante(c)&&ativa(c);}).length;}
 function ifPintar(){
   var b=document.getElementById('ifBody'); if(!b)return;
   var n=ifNAtivas();
   b.innerHTML=IF_P.map(function(p,i){
-    var cap=p.porCliente?'1 por cliente':(p.saldo?'depende do saldo':('<input style="width:52px;" type="number" value="'+p.cap+'" onchange="IF_P['+i+'].cap=Number(this.value);ifSave(IF_P);ifPintar();"/>'));
-    var ok=p.porCliente||p.saldo||p.cap>=n;
+    var pd=ifPlano(p);
+    var opts=IF_OPTS[p.id];
+    var plCell=opts?('<select onchange="ifTroca('+i+',this.value)" style="width:150px;">'+opts.map(function(o,j){return '<option value="'+j+'"'+((p.op||0)===j?' selected':'')+'>'+eh(o.pl)+'</option>';}).join('')+'</select>')
+                   :('<b style="font-size:12.5px;">'+eh(p.pl)+'</b>');
+    var cap=p.porCliente?'1 por cliente':(p.saldo?'depende do saldo':('<b>'+pd.cap+(pd.cap>=999?'∞':'')+' cliente'+(pd.cap===1?'':'s')+'</b>'));
+    var ok=p.porCliente||p.saldo||pd.cap>=n;
+    var rs=p.porCliente||p.saldo?p.rs:pd.rs;
     return '<tr><td><b>'+eh(p.n)+'</b></td>'
-      +'<td><input style="width:130px;" value="'+eh(p.pl)+'" onchange="IF_P['+i+'].pl=this.value;ifSave(IF_P);"/></td>'
-      +'<td><input style="width:80px;" type="number" value="'+p.rs+'" onchange="IF_P['+i+'].rs=Number(this.value);ifSave(IF_P);ifPintar();"/>'+(p.porCliente?'<small style="color:var(--tx2);"> /cliente</small>':'')+'</td>'
+      +'<td>'+plCell+'</td>'
+      +'<td><b>'+(rs?brl(rs):'—')+'</b>'+(p.porCliente?'<small style="color:var(--tx2);"> /cliente</small>':'')+'</td>'
       +'<td>'+cap+(ok?'':' <b style="color:#c02626;">⚠️</b>')+'</td>'
-      +'<td><small>'+eh(p.up)+'</small></td>'
+      +'<td><small>'+eh(p.porCliente||p.saldo?p.up:pd.up)+'</small></td>'
       +'<td><a class="lk" href="'+p.lk+'" target="_blank">Depositar ↗</a></td></tr>';
   }).join('');
-  var fixo=IF_P.filter(function(p){return !p.porCliente&&!p.saldo;}).reduce(function(a,p){return a+p.rs;},0);
+  var fixo=IF_P.filter(function(p){return !p.porCliente&&!p.saldo;}).reduce(function(a,p){return a+ifPlano(p).rs;},0);
   var porCli=IF_P.filter(function(p){return p.porCliente;}).reduce(function(a,p){return a+p.rs;},0);
   var r=document.getElementById('ifResumo');
   if(r)r.innerHTML='Fixo: <b>'+brl(fixo)+'/mês</b> · + '+brl(porCli)+'/cliente · '+n+' cliente'+(n===1?'':'s')+' ativo'+(n===1?'':'s');
-  var estour=IF_P.filter(function(p){return !p.porCliente&&!p.saldo&&p.cap<n;});
+  var estour=IF_P.filter(function(p){return !p.porCliente&&!p.saldo&&ifPlano(p).cap<n;});
   var al=document.getElementById('ifAlerta');
   if(al)al.innerHTML=estour.length
     ?'<div style="background:#fceaea;border:1px solid #f0c0c0;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#A32D2D;"><b>⚠️ Upgrade necessário:</b> '+estour.map(function(p){return p.n;}).join(', ')+' não aguenta'+(estour.length>1?'m':'')+' '+n+' clientes — veja o próximo degrau na tabela.</div>'
