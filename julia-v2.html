@@ -2272,6 +2272,30 @@ function carregarConversasReais(){
     });
     var ult={}; for(var k8 in mapa){ if(mapa[k8].uc) ult[k8]=supaData(mapa[k8].uc).getTime(); }
     window.DSP_ULT=ult;
+    /* stats pros Relatórios: 1ª resposta da Julia + fora do horário */
+    (function(){
+      var asc=rows.slice().reverse(), pri={}, deltas=[], fora=0, cliTot=0;
+      asc.forEach(function(m){
+        var tel=String(m.telefone||'').replace(/\D/g,''); if(!tel)return;
+        var t8=tel.slice(-8), p=String(m.papel||'').toLowerCase();
+        var ts=supaData(m.criado_em).getTime(); if(!ts)return;
+        var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
+        if(cli){
+          cliTot++;
+          var hh2=supaData(m.criado_em).getHours();
+          if(hh2<8||hh2>=19)fora++;
+          if(!pri[t8])pri[t8]={c:ts,j:null};
+        }else if(p.indexOf('julia')>-1&&pri[t8]&&!pri[t8].j&&ts>=pri[t8].c){
+          pri[t8].j=ts; deltas.push((ts-pri[t8].c)/1000);
+        }
+      });
+      deltas.sort(function(a,b){return a-b;});
+      window.REL_STATS={
+        resp:deltas.length?Math.round(deltas[Math.floor(deltas.length/2)]):null,
+        foraPct:cliTot?Math.round(fora*100/cliTot):0,
+        foraN:fora
+      };
+    })();
     var hash=JSON.stringify(mapa);
     if(hash===CV_HASH)return;
     CV_HASH=hash;
@@ -2846,18 +2870,49 @@ function pintarReal(){
     var ag=G.filter(function(l){return l.e==='agendamento';}).length;
     var cr=G.filter(function(l){return l.e==='crm';}).length;
     function linha(nome,qtd){return '<div class="rw" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line2);font-size:12.5px;"><span style="color:var(--mut);">'+nome+'</span><b>'+qtd+'</b></div>';}
+    var chegou=gn;
+    var conv2=G.filter(function(l){return ['conversa','qualificacao','documentacao','agendamento','aprovado','vendido','crm'].indexOf(l.e)>-1;}).length;
+    var vend2=G.filter(function(l){return l.e==='vendido';}).length;
+    function pf(a,b){return a?Math.round(b*100/a):0;}
+    function fb(n,l2){return '<div style="flex:1;min-width:0;background:#241c3f;padding:10px 12px;"><div style="font-family:Sora;font-size:19px;font-weight:800;color:#fff;">'+n+'</div><div style="font-size:8.5px;letter-spacing:.5px;color:#a89fc9;font-weight:700;">'+l2+'</div></div>';}
+    function seta(p){return '<span style="font-size:10px;color:'+(p>=50?'#4ade80':(p>=15?'#fbbf24':'#f87171'))+';font-weight:800;padding:0 3px;">'+p+'%</span>';}
+    var ST=window.REL_STATS||{};
+    var respTx=ST.resp==null?'—':(ST.resp<60?ST.resp+' seg':Math.round(ST.resp/60)+' min');
+    /* insights */
+    var dias2=['domingo','segunda','terça','quarta','quinta','sexta','sábado'], cntD=[0,0,0,0,0,0,0];
+    G.forEach(function(l){if(l.cr)cntD[new Date(l.cr).getDay()]++;});
+    var melhor=cntD.indexOf(Math.max.apply(null,cntD));
+    var funil2=[['Chegaram',chegou],['Em conversa+',conv2],['Qualificados',q2],['Agendados',ag]];
+    var pior={p:101,de:'',pa:''};
+    for(var fi=0;fi<funil2.length-1;fi++){var pp2=pf(funil2[fi][1],funil2[fi+1][1]);if(funil2[fi][1]>0&&pp2<pior.p){pior={p:pp2,de:funil2[fi][0],pa:funil2[fi+1][0]};}}
+    function ins(bg,bd,cor,ic,tit,tx){return '<div style="flex:1;min-width:190px;background:'+bg+';border:1px solid '+bd+';border-radius:12px;padding:11px 13px;"><div style="font-size:12px;font-weight:800;color:'+cor+';">'+ic+' '+tit+'</div><div style="font-size:10.5px;color:#6b6580;margin-top:3px;">'+tx+'</div></div>';}
+    /* barras 14 dias */
+    var hoje2=new Date(); hoje2.setHours(0,0,0,0);
+    var bar=[], mx=1;
+    for(var bi=13;bi>=0;bi--){var d0=new Date(hoje2.getTime()-bi*86400000);var n2=G.filter(function(l){if(!l.cr)return false;var x=new Date(l.cr);x.setHours(0,0,0,0);return x.getTime()===d0.getTime();}).length;bar.push(n2);if(n2>mx)mx=n2;}
     rs.innerHTML=
-      '<div class="pc-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">'
-      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">LEADS</small><div class="pc-price">'+gn+'</div></div>'
-      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">QUALIFICADOS</small><div class="pc-price">'+q2+'</div></div>'
-      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">AGENDAMENTOS</small><div class="pc-price">'+ag+'</div></div>'
-      +'<div class="pc-card"><small style="font-size:9.5px;font-family:Sora;font-weight:700;letter-spacing:.8px;color:var(--mut);">ENVIADOS AO CRM</small><div class="pc-price">'+cr+'</div></div>'
+      '<div style="background:linear-gradient(135deg,#0e0a1f 55%,#1a1035);border-radius:14px;padding:14px 18px;margin-bottom:12px;">'
+      +'<div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#a89fc9;margin-bottom:10px;">FUNIL DO PERÍODO</div>'
+      +'<div style="display:flex;align-items:stretch;gap:4px;">'
+      +fb(chegou,'CHEGARAM')+seta(pf(chegou,conv2))+fb(conv2,'EM CONVERSA+')+seta(pf(conv2,q2))+fb(q2,'QUALIFICADOS')+seta(pf(q2,ag))+fb(ag,'AGENDADOS')
+      +'<div style="flex:1;min-width:0;background:#173c2e;border-radius:0 8px 8px 0;padding:10px 12px;"><div style="font-family:Sora;font-size:19px;font-weight:800;color:#4ade80;">'+vend2+'</div><div style="font-size:8.5px;letter-spacing:.5px;color:#7fb89c;font-weight:700;">VENDIDOS</div></div>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">'
+      +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">1ª RESPOSTA DA JULIA</small><div class="pc-price" style="color:#0a7d43;">'+respTx+'</div><small style="font-size:9.5px;color:var(--mut);">humano médio: horas</small></div>'
+      +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">FORA DO COMERCIAL</small><div class="pc-price" style="color:#7c3aed;">'+(ST.foraPct||0)+'%</div><small style="font-size:9.5px;color:var(--mut);">das mensagens · todas atendidas</small></div>'
+      +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">FRANQUIA</small><div class="pc-price" id="relFrq">—</div><small style="font-size:9.5px;color:var(--mut);">conversas usadas no mês</small></div>'
+      +'<div class="pc-card" style="flex:1;min-width:140px;"><small style="font-size:9px;font-family:Sora;font-weight:700;letter-spacing:.7px;color:var(--mut);">REUNIÕES</small><div class="pc-price" id="relReu">'+ag+'</div><small style="font-size:9.5px;color:var(--mut);">marcadas pela Julia</small></div>'
       +'</div>'
-      +'<div class="cf-card"><h3>Funil do período</h3><div class="sb">Contagem real por etapa</div>'
-      +ETAPAS.map(function(e){return linha(e[1],G.filter(function(l){return l.e===e[0];}).length);}).join('')
-      +'</div>'
-      +(gn===0?'<div class="vazio"><span class="ic">📊</span><b>Sem dados ainda</b><small>Os relatórios completos (gráficos, canais, horários de pico) enchem quando a Julia começar a atender pelo WhatsApp.</small></div>'
-             :'<div class="cf-card" style="margin-top:14px;"><div class="sb" style="margin:0;">Gráficos por dia, canais e horários de pico entram junto com o histórico do n8n.</div></div>');
+      +'<div class="cf-card"><h3>Leads por dia</h3><div class="sb">últimos 14 dias</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:4px;height:64px;margin-top:8px;">'
+      +bar.map(function(n3){var h3=Math.max(6,Math.round(n3*100/mx));return '<div title="'+n3+'" style="flex:1;background:'+(n3===mx?'#7F77DD':'#C8C3F2')+';height:'+h3+'%;border-radius:3px 3px 0 0;"></div>';}).join('')
+      +'</div></div>';
+    fetch(SUPA_URL+'/rest/v1/rpc/consumo_mes',{method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({p_conta:(window.CONTA_VIEW||CONTA_ID)})})
+    .then(function(r){return r.ok?r.json():[];})
+    .then(function(rw){var el=document.getElementById('relFrq');if(el)el.innerHTML=(((rw&&rw[0])||{}).total||0)+'<small style="font-size:12px;color:var(--mut);">/300</small>';})
+    .catch(function(){});
   }
   /* — Kanban real (1A: semáforo + saúde) — */
   var kb=document.querySelector('.kb');
