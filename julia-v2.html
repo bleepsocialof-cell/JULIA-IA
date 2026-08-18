@@ -736,10 +736,12 @@ body.vw-adm .adm-pill{display:block;}
 /* ── PLACAR DO PLANTÃO ── */
 #vPlantao{flex-direction:column;}
 .pl-corpo{display:flex;flex:1;min-height:0;}
-.plz{background:linear-gradient(120deg,#161129,#241a40);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.plz-av{width:42px;height:42px;border-radius:12px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:13px;flex-shrink:0;}
-.plz-oi b{font-family:'Sora';font-size:14.5px;display:block;}
-.plz-oi small{font-size:10.5px;color:#8f88a8;}
+.plz{background:linear-gradient(135deg,#0e0a1f 55%,#1a1035);color:#fff;padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.plz-av{width:64px;height:64px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Sora';font-weight:800;font-size:20px;flex-shrink:0;border:3px solid #e84393;box-shadow:0 0 0 3px rgba(232,67,147,.25);overflow:hidden;}
+.plz-av img{width:100%;height:100%;object-fit:cover;}
+.plz-oi b{font-family:'Sora';font-size:16.5px;display:block;}
+.plz-oi small{font-size:11px;color:#4ade80;font-weight:700;display:block;}
+.plz-oi .plz-auto{font-size:10.5px;color:#8b80ad;font-weight:400;display:block;margin-top:2px;}
 .plz-fogo{background:rgba(232,67,147,.14);border:1px solid rgba(232,67,147,.3);border-radius:99px;padding:7px 14px;font-size:11px;font-family:'Sora';font-weight:700;}
 .plz-stats{display:flex;gap:10px;margin-left:auto;}
 .plz-s{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px 14px;text-align:center;min-width:88px;}
@@ -1638,7 +1640,7 @@ body.vw-adm .adm-pill{display:block;}
   <div class="view" id="vPlantao">
     <div class="plz" id="plzBar" style="display:none;">
       <div class="plz-av" id="plzAv" onclick="perfilAbrir()" style="cursor:pointer;" title="Trocar foto">?</div>
-      <div class="plz-oi"><b id="plzOi">Bom dia! ☀️</b><small id="plzData">plantão ativo</small></div>
+      <div class="plz-oi"><b id="plzOi">Bom dia! ☀️</b><small id="plzData">🎧 Plantonista ativa · recebendo leads</small><span class="plz-auto" id="plzAuto">Recebe por Transferir · automático por etapa em breve</span></div>
       <span class="plz-fogo" id="plzFogo">☀️ pronto pro primeiro atendimento</span>
       <div class="plz-stats">
         <div class="plz-s hl"><b id="plzHoje">0</b><small>PRA VOCÊ HOJE</small></div>
@@ -3124,7 +3126,7 @@ function plPlacar(){
   var dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
   var meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   var d=new Date();
-  document.getElementById('plzData').textContent=dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()]+' · plantão ativo';
+  document.getElementById('plzData').textContent='🎧 Plantonista ativa · recebendo leads · '+dias[d.getDay()]+', '+d.getDate()+' de '+meses[d.getMonth()];
   var hoje=new Date(); hoje.setHours(0,0,0,0);
   var novosHoje=PL.leads.filter(function(l){var t=new Date(l.updated_at||l.created_at);return t>=hoje;}).length;
   var atendendo=PL.leads.filter(function(l){return l.pausado;}).length;
