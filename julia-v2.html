@@ -1119,19 +1119,15 @@ body.vw-adm .adm-pill{display:block;}
         <div class="card" style="padding:16px 18px;">
           <div class="h3">Configuração rápida</div><div class="hsub">Aplicada por cima do prompt</div>
           <label class="f-lbl">Tom de voz</label>
-          <select class="f-sel" id="jTom"><option>Consultivo — entende e orienta</option><option>Direto — objetivo e rápido</option><option>Amigável — leve e próximo</option></select>
+          <select class="f-sel" id="jTom" onchange="jPrev()"><option>Consultivo — entende e orienta</option><option>Direto — objetivo e rápido</option><option>Amigável — leve e próximo</option><option>Caloroso — acolhedor e humano</option><option>Profissional — formal e seguro</option><option>Entusiasmado — energia de vendedora</option></select>
           <label class="f-lbl">Objetivo principal</label>
-          <select class="f-sel" id="jObj"><option>Fechar venda</option><option>Agendar visita</option><option>Qualificar e enviar ao corretor</option></select>
+          <select class="f-sel" id="jObj" onchange="jPrev()"><option>Fechar venda</option><option>Agendar visita</option><option>Qualificar e enviar ao corretor</option><option>Qualificar e enviar ao CRM</option><option>Conduzir documentação</option></select>
           <div class="kv" style="padding:10px 0 4px;border:none;margin-top:10px;border-top:1px solid var(--line2);"><span>Tamanho do prompt</span><b id="jTam">0 caracteres</b></div>
           <div class="kv" style="border:none;"><span>Última atualização</span><b id="jUpd">—</b></div>
         </div>
         <div class="card" style="padding:16px 18px;margin-top:12px;">
-          <div class="h3">Preview da Julia</div><div class="hsub">Como ela aparece pro cliente</div>
-          <div class="j-prev">
-            <div class="jm j" style="max-width:100%;">Olá! Sou a Julia 😊 Como posso te ajudar hoje?</div>
-            <div class="jm u" style="max-width:100%;align-self:flex-end;">Quero saber sobre o apartamento</div>
-            <div class="jm j" style="max-width:100%;">Perfeito! Temos 3 opções em Boa Viagem. Prefere perto da praia ou mais pro centro?</div>
-          </div>
+          <div class="h3">Preview da Julia</div><div class="hsub">Prévia de estilo — muda com o tom e o objetivo · o teste com IA de verdade fica na aba <b>Testar</b></div>
+          <div class="j-prev" id="jPrevBox"></div>
         </div>
       </div>
     </div>
@@ -2630,6 +2626,31 @@ function agGravar(n,t,d,h){
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);document.getElementById('agModal').remove();agCarregar();})
   .catch(function(e){alert('Falhou ('+e.message+')');});
 }
+
+function jPrev(){
+  var box=document.getElementById('jPrevBox'); if(!box)return;
+  var tom=((document.getElementById('jTom')||{}).value||'').split(' — ')[0]||'Consultivo';
+  var obj=(document.getElementById('jObj')||{}).value||'Fechar venda';
+  var ABRE={
+    'Consultivo':'Oi! Sou a Julia 😊 Me conta: o que você procura hoje?',
+    'Direto':'Oi! Julia aqui 😊 Me diz o que você precisa que eu já te mostro.',
+    'Amigável':'Oiie! Aqui é a Julia 😊 Que bom te ver por aqui! Como posso ajudar?',
+    'Caloroso':'Olá! Sou a Julia 🤗 Fica à vontade, tô aqui pra te ajudar no que precisar.',
+    'Profissional':'Olá, sou a Julia. Seja bem-vindo! Em que posso ajudá-lo hoje?',
+    'Entusiasmado':'Oi! Julia na área 🚀 Chegou no lugar certo — bora achar o ideal pra você?'
+  };
+  var FECHA={
+    'Fechar venda':'Consigo uma condição especial pra você HOJE. Te passo agora?',
+    'Agendar visita':'Que tal conhecer pessoalmente? Tenho horário amanhã às 10h ou 15h 📅',
+    'Qualificar e enviar ao corretor':'Perfeito! Já te conecto com nosso especialista pra fechar os detalhes 🤝',
+    'Qualificar e enviar ao CRM':'Anotei tudo certinho! Nossa equipe entra em contato ainda hoje ✅',
+    'Conduzir documentação':'Pra agilizar sua análise: me manda RG, CPF e comprovante de renda por aqui mesmo 📄'
+  };
+  box.innerHTML='<div class="jm j" style="max-width:100%;">'+(ABRE[tom]||ABRE['Consultivo'])+'</div>'
+    +'<div class="jm u" style="max-width:100%;align-self:flex-end;">Quero saber mais 👀</div>'
+    +'<div class="jm j" style="max-width:100%;">'+(FECHA[obj]||FECHA['Fechar venda'])+'</div>';
+}
+
 /* ── TEMPO REAL: WebSocket Supabase (instantâneo) + polling 10s de backup ── */
 var RT_WS=null,RT_REF=0,RT_TRY=0;
 function rtRefresh(){
@@ -4606,6 +4627,7 @@ function jCarregar(){
     var ta=document.getElementById('jTa');
     var ptx=c.instrucoes||c.prompt_completo||'';
     if(ta&&ptx){ta.value=ptx;if(typeof jConta==='function')jConta();}
+    jPrev();
     if(c.tom_voz){var t=document.getElementById('jTom');
       for(var i=0;i<t.options.length;i++)if(t.options[i].text.toLowerCase().indexOf(String(c.tom_voz).toLowerCase())>-1)t.selectedIndex=i;}
     if(c.objetivo){var o=document.getElementById('jObj');
