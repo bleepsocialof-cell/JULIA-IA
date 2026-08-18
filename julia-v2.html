@@ -719,6 +719,9 @@ body.vw-adm .adm-pill{display:block;}
 .pl-assumir{background:#fff;border-top:1px solid var(--line);padding:14px 18px;text-align:center;}
 .pl-assumir p{font-size:11.5px;color:var(--mut);margin-bottom:10px;}
 .pl-assumir button{background:var(--grad);color:#fff;border:none;border-radius:12px;padding:13px 26px;font-family:'Sora';font-weight:800;font-size:13px;box-shadow:0 10px 22px rgba(168,85,247,.35);}
+.m.nota{background:#fff8dc;border:1px solid #f0e0a0;color:#6b5a1e;align-self:flex-end;}
+.m.nota .et2{color:#a06b00;}
+.pl-nota-on{background:#fff8dc !important;border-color:#e6c96a !important;}
 .pl-chip{font-size:11px;font-weight:700;color:#8a7fa8;background:#f6f4fb;border:1px solid #e8e3f4;padding:5px 11px;border-radius:16px;cursor:pointer;}
 .pl-chip.on{color:#7c3aed;background:#f4efff;border-color:#d9c9fb;}
 .pl-chip b{color:inherit;}
@@ -2705,6 +2708,7 @@ function convAbrir(i,el,silent){
         var p=String(m.papel||'').toLowerCase();
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
         var vend=(p.indexOf('vend')>-1);
+        if(p==='nota'){h+='<div class="m eu2 nota"><span class="et2">🕶 NOTA · '+ehtml((m.nome||'EQUIPE').toUpperCase())+'</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+'</div></div>';return;}
         var au=cli?'<div style="font-size:8px;font-weight:700;font-family:\'Sora\';letter-spacing:1.2px;color:var(--sub);margin-bottom:3px;">'+ehtml(String(l.n||'CLIENTE').toUpperCase())+'</div>':'';
         if(vend){h+='<div class="m eu2"><span class="et2">VOCÊ</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+' <span class="tk2">✓✓</span></div></div>';}
         else h+='<div class="m '+(cli?'cli':'ju')+'">'+au+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
@@ -2943,7 +2947,7 @@ function descartarLead(){
   })
   .catch(function(e){alert('Não consegui descartar ('+e.message+').');});
 }
-var ETAPA_NOME={chegou:'Chegou',conversa:'Em conversa',qualificacao:'Qualificação',documentacao:'Documentação',agendamento:'Agendamento',crm:'Enviado ao CRM',descartado:'Descartado'};
+var ETAPA_NOME={chegou:'Chegou',conversa:'Em conversa',qualificacao:'Qualificação',documentacao:'Documentação',agendamento:'Agendamento',aprovado:'Aprovado',vendido:'Vendido',crm:'Enviado ao CRM',descartado:'Descartado'};
 function resumoLead(){
   var l=leadAtual();
   if(!l){alert('Selecione uma conversa primeiro.');return;}
@@ -3232,7 +3236,7 @@ function plAbrir(ix){
   else st.textContent=l.assumido_por?('com '+plVendNome(l.assumido_por)):'com a Julia';
   /* ações do topo */
   var acts=document.getElementById('plActs'), h='';
-  var ets=['chegou','conversa','qualificacao','documentacao','agendamento','crm'];
+  var ets=['chegou','conversa','qualificacao','documentacao','agendamento','aprovado','vendido'];
   h+='<select id="plEtapaSel" onchange="plEtapa(this.value)" title="Etapa do funil"><option value="">Etapa…</option>'+ets.map(function(e){return '<option value="'+e+'"'+(String(l.etapa||'')===e?' selected':'')+'>'+(ETAPA_NOME[e]||e)+'</option>';}).join('')+'</select>';
   var tp=String(l.temperatura||'');
   h+='<span class="pl-temp"><b data-t="frio" class="'+(tp==='frio'?'on':'')+'" onclick="plTemp(\'frio\')" title="Frio">🥶</b><b data-t="morno" class="'+(tp==='morno'?'on':'')+'" onclick="plTemp(\'morno\')" title="Morno">🌤</b><b data-t="quente" class="'+(tp==='quente'?'on':'')+'" onclick="plTemp(\'quente\')" title="Quente">🔥</b></span>';
@@ -3262,7 +3266,8 @@ function plAbrir(ix){
       if(d){var dl=d.toLocaleDateString('pt-BR');if(dl!==dia){dia=dl;h+='<div class="dia">'+dl+'</div>';}}
       var hh=d?(('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)):'';
       var p=String(m.papel||'').toLowerCase();
-      if(p==='vendedor'){h+='<div class="m eu2"><span class="et2">'+ehtml((m.nome||'VENDEDOR').toUpperCase())+'</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+' ✓✓</div></div>';}
+      if(p==='nota'){h+='<div class="m eu2 nota"><span class="et2">🕶 NOTA · '+ehtml((m.nome||'EQUIPE').toUpperCase())+'</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+'</div></div>';}
+      else if(p==='vendedor'){h+='<div class="m eu2"><span class="et2">'+ehtml((m.nome||'VENDEDOR').toUpperCase())+'</span>'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+' ✓✓</div></div>';}
       else{
         var cli=(p.indexOf('cli')>-1||p.indexOf('user')>-1||p.indexOf('hum')>-1||p.indexOf('lead')>-1);
         h+='<div class="m '+(cli?'cli':'ju')+'">'+midiaHtml(m.mensagem||'')+'<div class="mt">'+hh+(cli?'':' <span class="tk2">✓✓</span>')+'</div></div>';
@@ -3279,7 +3284,7 @@ function plFoot(l){
   if(!l.pausado){
     f.innerHTML='<div class="pl-assumir"><p>A Julia está segurando a conversa. Quando você assumir, ela pausa e <b>o cliente fala com você</b> — pelo mesmo WhatsApp.</p><button onclick="plAssumir()">▶ Assumir atendimento</button></div>';
   }else{
-    f.innerHTML='<div class="pl-comp"><input type="file" id="plAnexoFile" accept="image/*,video/*,audio/*,.pdf" style="display:none" onchange="plAnexo(this)"/><button class="send2" style="background:#fff;border:1px solid var(--line);color:#8a7fa8;box-shadow:none;" title="Enviar anexo (foto, PDF, vídeo, áudio)" onclick="document.getElementById(\'plAnexoFile\').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
+    f.innerHTML='<div class="pl-comp"><input type="file" id="plAnexoFile" accept="image/*,video/*,audio/*,.pdf" style="display:none" onchange="plAnexo(this)"/><button class="send2" style="background:#fff;border:1px solid var(--line);color:#8a7fa8;box-shadow:none;" title="Enviar anexo (foto, PDF, vídeo, áudio)" onclick="document.getElementById(\'plAnexoFile\').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button><button class="send2" id="plNotaBtn" style="background:#fff;border:1px solid var(--line);color:#a06b00;box-shadow:none;" title="Nota interna — só a equipe vê, não vai pro cliente" onclick="plNotaToggle()">🕶</button><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
   }
 }
 function plPatch(l,body,ok){
@@ -3357,7 +3362,7 @@ function plPausaReal(tel,v){
 function plKanban(){
   var ov=document.createElement('div');ov.className='pf-ov on';ov.id='plKb';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var ets=['chegou','conversa','qualificacao','documentacao','agendamento','crm'];
+  var ets=['chegou','conversa','qualificacao','documentacao','agendamento','aprovado','vendido'];
   var leads=PL.leads.filter(function(l){return String(l.status||'')!=='descartado'&&String(l.etapa||'')!=='descartado';});
   var h='<div style="background:#fff;border-radius:18px;max-width:1240px;width:96vw;max-height:88vh;overflow:auto;padding:18px 20px;">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><b style="font-family:Sora;font-size:16px;">📋 Funil do plantão</b><small style="color:#8a7fa8;">arraste os cards entre as etapas · clique num card pra abrir a conversa</small><button class="pl-dev" style="margin-left:auto;" onclick="document.getElementById(\'plKb\').remove()">Fechar</button></div>';
@@ -3399,10 +3404,27 @@ function plDirecionar(){
   if(!sel||!sel.value){alert('Escolha o vendedor.');return;}
   plPatch(l,plVivo(l,{assumido_por:sel.value,pausado:false}),function(){plAbrir(PL.sel);});
 }
+function plNotaToggle(){
+  PL.nota=!PL.nota;
+  var i=document.getElementById('plIn'),b=document.getElementById('plNotaBtn');
+  if(i){i.classList.toggle('pl-nota-on',PL.nota);i.placeholder=PL.nota?'🕶 Nota interna — o cliente NÃO vê':'Digite uma mensagem…';i.focus();}
+  if(b)b.style.background=PL.nota?'#fff8dc':'#fff';
+}
 function plEnviar(){
   var l=PL.leads[PL.sel];if(!l)return;
   var i=document.getElementById('plIn'),t=i.value.trim();if(!t)return;
   var tel=String(l.telefone||'').replace(/\D/g,'');
+  if(PL.nota){
+    fetch(SUPA_URL+'/rest/v1/conversas',{method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({telefone:l.telefone,conta_id:(l.conta_id||window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea'),nome:PL.nomeMe||'Gestor',mensagem:t,papel:'nota'})})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
+      var ms=document.getElementById('plMsgs'),d=new Date();
+      ms.insertAdjacentHTML('beforeend','<div class="m eu2 nota"><span class="et2">🕶 NOTA · '+ehtml((PL.nomeMe||'GESTOR').toUpperCase())+'</span>'+ehtml(t)+'<div class="mt">'+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+'</div></div>');
+      ms.scrollTop=999999;i.value='';
+    }).catch(function(e){alert('Nota não salvou ('+e.message+').');});
+    return;
+  }
   fetch('https://jadsonsantos.app.n8n.cloud/webhook/envio-manual',{
     method:'POST',headers:{'Content-Type':'application/json','X-Token':'blee-68abf71ef3737bd4b11d0ef1'},
     body:JSON.stringify({telefone:tel,texto:t,conta_id:(l.conta_id||window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea')})})
