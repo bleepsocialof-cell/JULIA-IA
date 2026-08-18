@@ -1603,6 +1603,17 @@ body.vw-adm .adm-pill{display:block;}
     </div>
     <div class="pc-scroll">
 
+      <div class="pa-hero" style="margin-bottom:14px;">
+        <div style="flex:1;">
+          <small>CONVERSAS DO MÊS</small>
+          <h2 id="frqNum" style="margin:2px 0 6px;">— de —</h2>
+          <div style="height:8px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;margin-bottom:8px;">
+            <div id="frqBar" style="width:0%;height:100%;background:linear-gradient(90deg,#7c3aed,#e84393);transition:width .5s;"></div>
+          </div>
+          <div class="pv" id="frqQuebra">Atendimento — · Disparos —</div>
+        </div>
+      </div>
+
       <div class="pa-hero">
         <div>
           <small>SEU PLANO ATUAL</small>
@@ -1666,11 +1677,13 @@ function go(el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.getElementById(el.dataset.v).classList.add('on');
   if(el.dataset.v==='vConversas'&&window.MS_FIM!==false&&typeof msgsFim==='function')msgsFim();
+  if(el.dataset.v==='vPlano'&&typeof frqCarregar==='function')frqCarregar();
 }
 function goTo(id){
   document.querySelectorAll('.ni').forEach(n=>n.classList.toggle('on',n.dataset.v===id));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===id));
   if(id==='vConversas'&&window.MS_FIM!==false&&typeof msgsFim==='function')msgsFim();
+  if(id==='vPlano'&&typeof frqCarregar==='function')frqCarregar();
 }
 /* ── PLANO E COBRANÇA ── */
 var PA_PRECOS={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
@@ -1896,6 +1909,23 @@ function enviarMsg(){
   msgsFim();
   i.value='';
   i.style.height='40px';
+}
+function frqCarregar(){
+  var conta=(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea');
+  Promise.all([
+    fetch(SUPA_URL+'/rest/v1/rpc/consumo_mes',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_conta:conta})}).then(function(r){return r.json();}),
+    fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+conta+'&select=franquia_convs',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    var c=(res[0]&&res[0][0])||{atendimento:0,disparo:0,total:0};
+    var fr=(res[1]&&res[1][0]&&res[1][0].franquia_convs)||300;
+    var num=document.getElementById('frqNum'),bar=document.getElementById('frqBar'),qb=document.getElementById('frqQuebra');
+    if(!num)return;
+    num.textContent=c.total+' de '+fr;
+    var pct=Math.min(100,Math.round(c.total*100/fr));
+    bar.style.width=pct+'%';
+    if(pct>=90)bar.style.background='#ef4444';
+    qb.innerHTML='Atendimento '+c.atendimento+' · Disparos '+c.disparo+(c.total>=fr?' · <b style="color:#f87171;">limite atingido — excedente sob confirmação</b>':' · restam <b style="color:#4ade80;">'+(fr-c.total)+'</b>');
+  }).catch(function(){});
 }
 function anexoEscolhido(inp){
   var f=inp.files&&inp.files[0];
