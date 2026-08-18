@@ -1118,49 +1118,74 @@ body.vw-adm .adm-pill{display:block;}
 
   <!-- ══ RELATÓRIOS ══ -->
   <div class="view" id="vDisparos">
+    <style>
+      #vDisparos{padding:26px clamp(28px,3vw,48px) 30px;overflow:auto;}
+      #vDisparos .dsp-card{background:#fff;border:1px solid #eee9f6;border-radius:16px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 2px rgba(60,40,110,.04);}
+      #vDisparos .dsp-tit{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:800;letter-spacing:.4px;color:#4c3d6b;margin-bottom:14px;}
+      #vDisparos .dsp-n{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#7c3aed,#e84393);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+      #vDisparos .dsp-lb{display:block;font-size:11px;font-weight:700;color:#8a7fa8;margin-bottom:5px;}
+      #vDisparos .dsp-in{padding:9px 12px;border:1px solid #e2dcf0;border-radius:10px;font-size:13px;font-weight:600;background:#fff;}
+      #vDisparos .dsp-row{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid #f3effa;cursor:pointer;transition:background .12s;}
+      #vDisparos .dsp-row:hover{background:#faf8ff;}
+      #vDisparos .dsp-row.sel{background:#f4efff;box-shadow:inset 3px 0 0 #7c3aed;}
+      #vDisparos .dsp-row input{width:17px;height:17px;accent-color:#7c3aed;flex-shrink:0;}
+      #vDisparos .dsp-chip{font-size:12px;font-weight:700;color:#7c3aed;background:#f4efff;border:1px solid #e4d9ff;padding:6px 12px;border-radius:20px;cursor:pointer;transition:all .12s;}
+      #vDisparos .dsp-chip:hover{background:#7c3aed;color:#fff;}
+      #vDisparos .dsp-pg{display:flex;align-items:center;gap:8px;font-size:12px;color:#8a7fa8;font-weight:600;}
+      #vDisparos .dsp-pgb{width:30px;height:30px;border-radius:9px;border:1px solid #e2dcf0;background:#fff;font-size:14px;color:#4c3d6b;cursor:pointer;}
+      #vDisparos .dsp-pgb:hover{border-color:#7c3aed;color:#7c3aed;}
+      #vDisparos .dsp-dias{font-size:11px;font-weight:700;color:#996d1d;background:#fdf3d8;padding:3px 9px;border-radius:12px;}
+    </style>
     <div class="i-top"><div><h1>Disparos de Reativação</h1><p>Reacenda leads antigos com template aprovado — respondeu, vira conversa</p></div></div>
 
-    <div class="card" style="padding:18px 22px;margin-bottom:14px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin-bottom:10px;">1 · ESCOLHA O PÚBLICO</div>
-      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Parados há pelo menos</label>
-          <input id="dspDias" type="number" min="1" value="30" style="width:80px;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"/></div>
-        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Score mínimo</label>
-          <select id="dspScore" style="padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="0">Todos</option><option value="50">50+</option><option value="70">70+</option></select></div>
+    <div class="dsp-card">
+      <div class="dsp-tit"><span class="dsp-n">1</span>ESCOLHA O PÚBLICO</div>
+      <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;">
+        <div><label class="dsp-lb">Parados há pelo menos (dias)</label><input id="dspDias" type="number" min="1" value="30" class="dsp-in" style="width:90px;"/></div>
+        <div><label class="dsp-lb">Score mínimo</label><select id="dspScore" class="dsp-in"><option value="0">Todos</option><option value="50">50+</option><option value="70">70+</option></select></div>
         <button class="pillbtn" onclick="dispRender()">Buscar parados</button>
-        <span id="dspInfo" style="font-size:12px;color:#8a7fa8;margin-left:auto;">—</span>
+        <span id="dspInfo" style="font-size:12.5px;color:#8a7fa8;margin-left:auto;font-weight:600;">—</span>
       </div>
     </div>
 
-    <div class="card" style="padding:18px 22px;margin-bottom:14px;">
-      <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin-bottom:10px;">2 · MENSAGEM E AGENDAMENTO</div>
-      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
-        <div style="flex:1;min-width:220px;"><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Template aprovado (Meta)</label>
-          <select id="dspTpl" onchange="dispTpl()" style="width:100%;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="reativacao_juliablee">reativacao_juliablee</option><option value="abandono_trafegou_blee">abandono_trafegou_blee</option></select></div>
-        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Quando</label>
-          <select id="dspQuando" style="padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="agora">Agora</option><option value="agendar">Agendar data e hora…</option></select></div>
+    <div class="dsp-card">
+      <div class="dsp-tit"><span class="dsp-n">2</span>MENSAGEM E AGENDAMENTO</div>
+      <div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="flex:1;min-width:240px;"><label class="dsp-lb">Template aprovado (Meta)</label>
+          <select id="dspTpl" onchange="dispTpl()" class="dsp-in" style="width:100%;"><option value="reativacao_juliablee">reativacao_juliablee</option><option value="abandono_trafegou_blee">abandono_trafegou_blee</option></select></div>
+        <div><label class="dsp-lb">Quando</label><select id="dspQuando" class="dsp-in"><option value="agora">Agora</option><option value="agendar">Agendar data e hora…</option></select></div>
       </div>
-      <div style="background:#faf9ff;border:1px solid #eee9f6;border-radius:10px;padding:10px 14px;max-width:480px;">
-        <div style="font-size:10px;font-weight:800;letter-spacing:.6px;color:#8a7fa8;margin-bottom:4px;">PRÉVIA</div>
-        <div id="dspPrev" style="font-size:13px;color:#2b2140;line-height:1.5;">Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?</div>
-        <div style="font-size:10.5px;color:#b0a8c6;margin-top:5px;">O texto oficial é o aprovado na Meta para este template.</div>
+      <div style="background:#faf8ff;border:1px solid #efe9fb;border-radius:12px;padding:12px 16px;max-width:500px;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.6px;color:#b0a8c6;margin-bottom:5px;">PRÉVIA</div>
+        <div id="dspPrev" style="font-size:13.5px;color:#2b2140;line-height:1.55;">Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?</div>
+        <div style="font-size:10.5px;color:#c4bcd8;margin-top:6px;">O texto oficial é o aprovado na Meta para este template.</div>
       </div>
     </div>
 
-    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
-      <div style="padding:12px 18px;border-bottom:1px solid #f1ecf9;font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;">3 · CONFIRA QUEM VAI RECEBER</div>
-      <div id="dspLista" style="max-height:340px;overflow:auto;"></div>
-      <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid #eee9f6;background:#faf9ff;flex-wrap:wrap;">
-        <b id="dspSel" style="font-size:13px;">0 selecionados</b>
-        <span id="dspCusto" style="font-size:12px;color:#8a7fa8;">custo R$ 0,00</span>
-        <span id="dspSaldo" style="font-size:12px;color:#8a7fa8;">· saldo da franquia: —</span>
+    <div class="dsp-card" style="padding:0;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #f3effa;flex-wrap:wrap;">
+        <div class="dsp-tit" style="margin:0;"><span class="dsp-n">3</span>CONFIRA QUEM VAI RECEBER</div>
+        <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;">
+          <span class="dsp-chip" onclick="dispSelTudo(true)">Selecionar todos</span>
+          <span class="dsp-chip" onclick="dispSelPagina()">Só esta página</span>
+          <span class="dsp-chip" style="color:#8a7fa8;background:#f6f4fb;border-color:#e8e3f4;" onclick="dispSelTudo(false)">Limpar</span>
+        </div>
+      </div>
+      <div id="dspLista"></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #f3effa;">
+        <div class="dsp-pg"><button class="dsp-pgb" onclick="dispPage(-1)">‹</button><span id="dspPgInfo">—</span><button class="dsp-pgb" onclick="dispPage(1)">›</button></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid #eee9f6;background:#faf9ff;flex-wrap:wrap;">
+        <b id="dspSel" style="font-size:14px;color:#2b2140;">0 selecionados</b>
+        <span id="dspCusto" style="font-size:12.5px;color:#8a7fa8;font-weight:600;">custo R$ 0,00</span>
+        <span id="dspSaldo" style="font-size:12.5px;color:#8a7fa8;font-weight:600;">· saldo: —</span>
         <button class="pillbtn" style="margin-left:auto;opacity:.5;cursor:not-allowed;" title="Workflow de disparo em massa entra na próxima sessão">Disparar reativação</button>
       </div>
-      <div style="padding:10px 18px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Envio escalonado 1 msg a cada 6s, só horário comercial. Cada disparo consome 1 conversa da franquia; excedente sob confirmação.</div>
+      <div style="padding:10px 20px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Envio escalonado 1 msg a cada 6s, só horário comercial. Cada disparo consome 1 conversa da franquia; excedente sob confirmação.</div>
     </div>
 
-    <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin:0 2px 8px;">HISTÓRICO DE DISPAROS</div>
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div style="font-size:12.5px;font-weight:800;letter-spacing:.4px;color:#4c3d6b;margin:4px 2px 10px;">HISTÓRICO DE DISPAROS</div>
+    <div class="dsp-card" style="padding:0;overflow:hidden;">
       <div id="dspHist"><div class="vazio" style="padding:32px;"><span class="ic">📤</span><b>Nenhum disparo ainda</b><small>Quando você disparar a primeira reativação, o histórico com enviados, respostas e custo aparece aqui.</small></div></div>
     </div>
   </div>
@@ -2250,33 +2275,56 @@ function dispHist(){
     }).join('');
   }).catch(function(){});
 }
+window.DSP_ROWS=[];window.DSP_PAG=0;var DSP_PP=50;
 function dispRender(){
   var dias=parseInt((document.getElementById('dspDias')||{}).value||'30',10);
   var sc=parseInt((document.getElementById('dspScore')||{}).value||'0',10);
   var corte=Date.now()-dias*86400000;
-  var parados=GL.filter(function(l){
+  window.DSP_ROWS=GL.filter(function(l){
     var d=l.cr?new Date(l.cr).getTime():0;
     if(!(d&&d<corte))return false;
     if(sc>0&&(Number(l.score)||0)<sc)return false;
     return true;
   });
-  var el=document.getElementById('dspLista'); if(!el)return;
-  if(!parados.length){el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado h\u00e1 '+dias+'+ dias'+(sc>0?' com score '+sc+'+':'')+'</b><small>Todos os contatos tiveram movimento recente.</small></div>';}
-  else{
-    el.innerHTML=parados.map(function(l,ix){
-      var d=Math.floor((Date.now()-new Date(l.cr).getTime())/86400000);
-      var tel=String(l.t||'').replace(/\D/g,'');
-      return '<label style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #f1ecf9;cursor:pointer;">'
-        +'<input type="checkbox" onchange="window.DSP_SEL[\''+tel+'\']=this.checked;dispConta();" '+(window.DSP_SEL[tel]?'checked':'')+'/>'
-        +'<div class="cav '+(l.cor||'')+'">'+iniciais(l.n)+'</div>'
-        +'<div style="flex:1;"><b style="font-size:13px;">'+ehtml(l.n)+'</b> '+origemIcone(l.origem)
-        +'<div style="font-size:11.5px;color:#8a7fa8;">'+ehtml(l.t)+' \u00b7 parado h\u00e1 '+d+' dias</div></div></label>';
-    }).join('');
-  }
-  var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=parados.length+' contato'+(parados.length===1?'':'s')+' parado'+(parados.length===1?'':'s');
-  dispConta();
+  window.DSP_PAG=0;
+  var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=window.DSP_ROWS.length+' contato'+(window.DSP_ROWS.length===1?'':'s')+' parado'+(window.DSP_ROWS.length===1?'':'s');
+  dispPage(0);
   dispSaldo();
   dispHist();
+}
+function dispPage(delta){
+  var tot=window.DSP_ROWS.length,pgs=Math.max(1,Math.ceil(tot/DSP_PP));
+  window.DSP_PAG=Math.min(pgs-1,Math.max(0,window.DSP_PAG+(delta||0)));
+  var ini=window.DSP_PAG*DSP_PP,fim=Math.min(tot,ini+DSP_PP);
+  var el=document.getElementById('dspLista'); if(!el)return;
+  if(!tot){
+    var dias=(document.getElementById('dspDias')||{}).value||'30';
+    el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado nesse filtro</b><small>Todos os contatos tiveram movimento recente.</small></div>';
+  }else{
+    el.innerHTML=window.DSP_ROWS.slice(ini,fim).map(function(l){
+      var d=Math.floor((Date.now()-new Date(l.cr).getTime())/86400000);
+      var tel=String(l.t||'').replace(/\D/g,'');
+      var on=!!window.DSP_SEL[tel];
+      return '<label class="dsp-row'+(on?' sel':'')+'">'
+        +'<input type="checkbox" onchange="window.DSP_SEL[\''+tel+'\']=this.checked;this.parentNode.classList.toggle(\'sel\',this.checked);dispConta();" '+(on?'checked':'')+'/>'
+        +'<div class="cav '+(l.cor||'')+'">'+iniciais(l.n)+'</div>'
+        +'<div style="flex:1;"><b style="font-size:13.5px;">'+ehtml(l.n)+'</b> '+origemIcone(l.origem)
+        +'<div style="font-size:11.5px;color:#8a7fa8;margin-top:2px;">'+ehtml(l.t)+'</div></div>'
+        +'<span class="dsp-dias">'+d+' dias</span></label>';
+    }).join('');
+  }
+  var pi=document.getElementById('dspPgInfo'); if(pi)pi.textContent=tot?('página '+(window.DSP_PAG+1)+' de '+pgs+' · '+(ini+1)+'–'+fim+' de '+tot):'—';
+  dispConta();
+}
+function dispSelTudo(marca){
+  window.DSP_ROWS.forEach(function(l){var tel=String(l.t||'').replace(/\D/g,'');if(marca)window.DSP_SEL[tel]=true;else delete window.DSP_SEL[tel];});
+  if(!marca)window.DSP_SEL={};
+  dispPage(0);
+}
+function dispSelPagina(){
+  var ini=window.DSP_PAG*DSP_PP,fim=Math.min(window.DSP_ROWS.length,ini+DSP_PP);
+  window.DSP_ROWS.slice(ini,fim).forEach(function(l){window.DSP_SEL[String(l.t||'').replace(/\D/g,'')]=true;});
+  dispPage(0);
 }
 function dispConta(){
   var n=0; for(var k in window.DSP_SEL)if(window.DSP_SEL[k])n++;
