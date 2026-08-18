@@ -795,6 +795,7 @@ body.vw-adm .adm-pill{display:block;}
     <div class="ni" data-v="vConversas" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversas<span class="bd">20</span></div>
     <div class="ni" data-v="vDisparos" onclick="go(this);dispRender();"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>Disparos</div>
     <div class="ni" data-v="vPlantao" id="niPlantao" style="display:none;" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Plantão</div>
+    <div class="ni" data-v="vAgenda" onclick="go(this);agCarregar()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</div>
     <div class="ni" data-v="vLeads" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="10" y="3" width="5" height="12" rx="1.5"/><rect x="17" y="3" width="5" height="8" rx="1.5"/></svg>Leads</div>
     <div class="nd"></div>
     <div class="ni" data-v="vGestao" onclick="go(this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Gestão de Leads</div>
@@ -1230,6 +1231,26 @@ body.vw-adm .adm-pill{display:block;}
     <div class="dsp-card" style="padding:0;overflow:hidden;">
       <div id="dspHist"><div class="vazio" style="padding:32px;"><span class="ic">📤</span><b>Nenhum disparo ainda</b><small>Quando você disparar a primeira reativação, o histórico com enviados, respostas e custo aparece aqui.</small></div></div>
     </div>
+  </div>
+  <div class="view" id="vAgenda">
+    <style>
+      #vAgenda{padding:22px clamp(26px,2.8vw,44px) 28px;display:none;flex-direction:column;height:100%;overflow:auto;}
+      #vAgenda.on{display:flex;}
+      #vAgenda .ag-sec{font-size:11px;font-weight:800;letter-spacing:.6px;color:#4c3d6b;margin:16px 2px 8px;}
+      #vAgenda .ag-card{background:#fff;border:1px solid #eee9f6;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;box-shadow:0 1px 2px rgba(60,40,110,.04);flex-wrap:wrap;}
+      #vAgenda .ag-hora{font-family:Sora;font-size:19px;font-weight:800;color:#7c3aed;min-width:58px;}
+      #vAgenda .ag-btn{font-size:11.5px;font-weight:700;border:1px solid #e2dcf0;background:#fff;color:#4c3d6b;padding:7px 12px;border-radius:10px;cursor:pointer;}
+      #vAgenda .ag-btn:hover{border-color:#7c3aed;color:#7c3aed;}
+      #vAgenda .ag-st{font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:3px 9px;border-radius:10px;}
+    </style>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;gap:13px;"><div style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#e84393);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(168,85,247,.35);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div><h1 style="margin:0;">Agenda</h1><p style="margin:2px 0 0;">Reuniões que a Julia marcou — e as suas</p></div></div>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="ag-btn" onclick="agCarregar()">🔄</button>
+        <button class="pillbtn" onclick="agNovo()">+ Agendamento</button>
+      </div>
+    </div>
+    <div id="agCorpo"><div class="vazio" style="padding:40px;"><span class="ic">📅</span><b>Carregando…</b></div></div>
   </div>
   <div class="view" id="vRelatorios">
     <div class="r-top">
@@ -2429,6 +2450,91 @@ function dispPrevNome(){
   var p=document.getElementById('dspPrev');
   if(p)p.textContent=(DSP_TPLS[t]||'').replace('{{nome}}',nome);
 }
+
+/* ══ AGENDA ══ */
+var AG=[];
+function agCarregar(){
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var iso=hoje.toISOString().slice(0,10);
+  fetch(SUPA_URL+'/rest/v1/reunioes?select=*&order=data_hora.asc&data_hora=gte.'+iso+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){AG=rows||[];agRender();})
+  .catch(function(){AG=[];agRender();});
+}
+function agRender(){
+  var box=document.getElementById('agCorpo'); if(!box)return;
+  var vivos=AG.filter(function(a){return String(a.status||'agendada')==='agendada';});
+  if(!vivos.length){box.innerHTML='<div class="vazio" style="padding:46px;"><span class="ic">📅</span><b>Nenhuma reunião marcada</b><small>Quando a Julia agendar (ou você, no botão acima), aparece aqui.</small></div>';return;}
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var ama=new Date(hoje.getTime()+86400000);
+  function dia(d){var x=new Date(d);x.setHours(0,0,0,0);return x.getTime();}
+  var g={hoje:[],ama:[],prox:[]};
+  vivos.forEach(function(a){
+    var t=dia(a.data_hora);
+    if(t===hoje.getTime())g.hoje.push(a);
+    else if(t===ama.getTime())g.ama.push(a);
+    else g.prox.push(a);
+  });
+  var h='';
+  function bloco(tit,ls){
+    if(!ls.length)return '';
+    var o='<div class="ag-sec">'+tit+' · '+ls.length+'</div>';
+    ls.forEach(function(a){
+      var d=new Date(a.data_hora);
+      var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      var dd=d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+      var tel=String(a.telefone||'').replace(/\D/g,'');
+      o+='<div class="ag-card">'
+        +'<div class="ag-hora">'+hh+'<div style="font-size:9px;color:#b0a8c6;font-weight:700;">'+dd+'</div></div>'
+        +'<div style="flex:1;min-width:170px;"><b style="font-size:13.5px;">'+ehtml(a.nome_cliente||'Sem nome')+'</b><div style="font-size:11px;color:#8a7fa8;">'+ehtml(a.telefone||'')+'</div>'
+        +(a.interesse?'<div style="font-size:11.5px;color:#4c3d6b;margin-top:3px;">'+ehtml(a.interesse)+'</div>':'')+'</div>'
+        +'<span class="ag-st" style="background:#f4efff;color:#7c3aed;">AGENDADA</span>'
+        +'<button class="ag-btn" onclick="window.open(\'https://wa.me/\'+\''+tel+'\',\'_blank\')">💬 WhatsApp</button>'
+        +'<button class="ag-btn" style="color:#0a7d43;border-color:#bfe4cd;" onclick="agStatus(\''+a.id+'\',\'concluida\')">✓ Concluir</button>'
+        +'<button class="ag-btn" style="color:#b42318;border-color:#f4c6c2;" onclick="agStatus(\''+a.id+'\',\'cancelada\')">✕ Cancelar</button>'
+        +'</div>';
+    });
+    return o;
+  }
+  h+=bloco('🔥 HOJE',g.hoje)+bloco('☀️ AMANHÃ',g.ama)+bloco('📆 PRÓXIMOS DIAS',g.prox);
+  box.innerHTML=h;
+}
+function agStatus(id,st){
+  var a=AG.filter(function(x){return x.id===id;})[0];
+  if(!confirm((st==='concluida'?'Concluir':'Cancelar')+' a reunião'+(a?(' com '+(a.nome_cliente||'')):'')+'?'))return;
+  fetch(SUPA_URL+'/rest/v1/reunioes?id=eq.'+id,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({status:st})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);if(a)a.status=st;agRender();})
+  .catch(function(e){alert('Falhou ('+e.message+')');});
+}
+function agNovo(){
+  var ov=document.createElement('div');ov.className='pf-ov on';ov.id='agModal';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var hj=new Date().toISOString().slice(0,10);
+  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:94vw;padding:22px 24px;">'
+    +'<b style="font-family:Sora;font-size:16px;">📅 Novo agendamento</b>'
+    +'<div style="margin-top:14px;"><label class="f-lbl">Nome do cliente</label><input class="f-in" id="agNome" placeholder="ex: Marina Souza"/></div>'
+    +'<div style="margin-top:10px;"><label class="f-lbl">WhatsApp (só dígitos)</label><input class="f-in" id="agTel" placeholder="5581999998888"/></div>'
+    +'<div style="display:flex;gap:10px;margin-top:10px;"><div style="flex:1;"><label class="f-lbl">Data</label><input class="f-in" type="date" id="agData" value="'+hj+'"/></div><div style="flex:1;"><label class="f-lbl">Hora</label><input class="f-in" type="time" id="agHora" value="10:00"/></div></div>'
+    +'<div style="margin-top:10px;"><label class="f-lbl">Assunto</label><input class="f-in" id="agAss" placeholder="ex: Apresentação do Conquista Paulista"/></div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;"><button class="ag-btn" onclick="document.getElementById(\'agModal\').remove()">Cancelar</button><button class="pillbtn" onclick="agSalvar()">Salvar</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+function agSalvar(){
+  var n=document.getElementById('agNome').value.trim();
+  var t=document.getElementById('agTel').value.replace(/\D/g,'');
+  var d=document.getElementById('agData').value, h=document.getElementById('agHora').value;
+  if(!n||!d||!h){alert('Nome, data e hora são obrigatórios.');return;}
+  fetch(SUPA_URL+'/rest/v1/reunioes',{method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({conta_id:(window.CONTA_VIEW||CONTA_ID),nome_cliente:n,telefone:t||null,data_hora:d+'T'+h+':00',interesse:document.getElementById('agAss').value.trim()||null,status:'agendada'})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);document.getElementById('agModal').remove();agCarregar();})
+  .catch(function(e){alert('Falhou ('+e.message+')');});
+}
+
 /* ── TEMPO REAL: WebSocket Supabase (instantâneo) + polling 10s de backup ── */
 var RT_WS=null,RT_REF=0,RT_TRY=0;
 function rtRefresh(){
