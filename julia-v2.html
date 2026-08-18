@@ -1660,7 +1660,7 @@ body.vw-adm .adm-pill{display:block;}
     </div>
     <div class="pl-corpo">
     <div class="pl-lista">
-      <div class="pl-hd" style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;"><b id="plTit">Plantão 👋</b><small id="plSub" style="display:block;">Conversas direcionadas</small></div><button class="pl-dev" style="flex-shrink:0;" onclick="plKanban()" title="Ver o funil em colunas">📋 Kanban</button></div>
+      <div class="pl-hd" style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;"><b id="plTit">Plantão 👋</b><small id="plSub" style="display:block;">Conversas direcionadas</small></div><button class="pl-dev" style="flex-shrink:0;" onclick="plCarregar()" title="Atualizar agora">🔄</button><button class="pl-dev" style="flex-shrink:0;" onclick="plKanban()" title="Ver o funil em colunas">📋 Kanban</button></div>
       <div class="pl-filtros" id="plFiltros"></div>
       <div class="pl-busca">🔍 <input id="plBusca" placeholder="Buscar por nome ou número…" oninput="plRender()" style="width:88%;"></div>
       <div id="plChips" style="display:flex;gap:6px;padding:8px 14px 4px;flex-wrap:wrap;"></div>
@@ -3108,6 +3108,17 @@ function modoVendedor(u){
 bootPainel();
 /* ── PLANTÃO (WhatsApp) ── */
 var PL={leads:[],vends:[],sel:-1,filtro:'todos',fConta:'todas',contas:[],meu:null,nomeMe:''};
+function plRessuscitar(rows){
+  (rows||[]).forEach(function(l){
+    if(l.assumido_por&&(String(l.status||'')==='descartado'||String(l.etapa||'')==='descartado')){
+      l.status='ativo'; if(String(l.etapa||'')==='descartado')l.etapa='conversa';
+      fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
+        headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({status:'ativo',etapa:l.etapa})}).catch(function(){});
+    }
+  });
+  return rows;
+}
 function plCarregar(){
   var qs='?select=*&order=created_at.desc&limit=200';
   if(CONTA_ID)qs+='&conta_id=eq.'+CONTA_ID;
@@ -3119,7 +3130,7 @@ function plCarregar(){
     ? fetch(SUPA_URL+'/rest/v1/contas?select=id,empresa',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.ok?r.json():[];})
     : Promise.resolve([]);
   Promise.all([pLeads,pVends,pContas]).then(function(res){
-    PL.leads=res[0]; PL.vends=res[1]; PL.contas=res[2]||[];
+    PL.leads=plRessuscitar(res[0]); PL.vends=res[1]; PL.contas=res[2]||[];
     var ni=document.getElementById('niPlantao');
     if(ni&&(EH_ADMIN||VENDEDOR_ID||PL.vends.length>0))ni.style.display='';
     plRender();plPlacar();
@@ -3628,9 +3639,11 @@ function baixarTodosZip(){
 }
 function transferirPara(btn,vid){
   var l=leadAtual(); if(!l||!l.id){alert('Lead sem id — recarregue a página.');return;}
+  var body={assumido_por:vid,pausado:false};
+  if(String(l.st||l.e||'')==='descartado'||String(l.e||'')==='descartado'){body.status='ativo';body.etapa='conversa';l.e='conversa';l.st='ativo';}
   fetch(SUPA_URL+'/rest/v1/leads?id=eq.'+l.id,{method:'PATCH',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-    body:JSON.stringify({assumido_por:vid,pausado:false})})
+    body:JSON.stringify(body)})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
     btn.closest('.pf-ov').remove();
     alert('Atendimento direcionado ✓ — vai aparecer no plantão do vendedor.');
