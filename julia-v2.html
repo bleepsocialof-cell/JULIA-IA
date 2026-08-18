@@ -1018,19 +1018,19 @@ body.vw-adm .adm-pill{display:block;}
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="#0668E1"><path d="M6.9 7.5c-2.6 0-4.7 2.7-4.7 5.8 0 2 1 3.4 2.7 3.4 1.2 0 2.1-.6 3.6-2.9l1.2-1.9 1.4 2.3c1.4 2.2 2.4 2.5 3.5 2.5 1.9 0 3.2-1.6 3.2-4 0-3.2-2.1-5.2-4.6-5.2-1.4 0-2.6.7-3.8 2.3-1.1-1.5-2.1-2.3-2.5-2.3zm-.1 2c.4 0 .9.5 1.9 2l-.9 1.5c-1 1.6-1.5 2-2.1 2-.7 0-1.1-.6-1.1-1.6 0-2.2 1.2-3.9 2.2-3.9zm6.4 0c1.4 0 2.6 1.4 2.6 3.4 0 1.2-.5 1.9-1.2 1.9-.6 0-1-.3-2.1-2l-.8-1.3c.6-1.3 1-2 1.5-2z"/></svg></span><span class="nm3">Meta Lead Ads</span><span class="nst off" id="nsMeta">DESCONECTADO</span></div>
           <div class="ds">Preencheu formulário no Facebook/Instagram? A Julia pega o número e chama no WhatsApp.</div>
-          <button class="nbtn" id="nbMeta" onclick="nConectar('Meta')">Conectar com Meta</button>
+          <button class="nbtn off2" id="nbMeta" onclick="alert('Meta Lead Ads entra na fase 2 — precisa da conexão oficial com o Facebook (OAuth). Enquanto isso: o formulário do anúncio pode apontar pro webhook do card Site/Landing, que a Julia já recebe.')">Em implantação · fase 2</button>
         </div>
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.4z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9z"/><path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5L6.4 10c.8-2.3 3-4 5.6-4z"/></svg></span><span class="nm3">Google Lead Form</span><span class="nst off" id="nsGoogle">DESCONECTADO</span></div>
           <div class="ds">Lead do formulário do Google Ads entra direto na fila da Julia.</div>
-          <div class="n-wh"><code>julia.app/webhook/google</code><button onclick="nCopiar(this,'https://julia.app/webhook/google')">Copiar</button></div>
-          <button class="nbtn" id="nbGoogle" onclick="nConectar('Google')">Ativar</button>
+          <div class="n-wh"><code id="nUrlGoogle" style="font-size:9px;word-break:break-all;">gerando…</code><button onclick="nCopiar(this,document.getElementById('nUrlGoogle').textContent)">Copiar</button></div>
+          <div class="ds" style="font-size:10px;margin-top:6px;">Cole esta URL no webhook do formulário — cada lead entra na fila e a Julia chama.</div>
         </div>
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="none" stroke="#17141f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg></span><span class="nm3">Site / Landing Page</span><span class="nst off" id="nsSite">DESCONECTADO</span></div>
           <div class="ds">Cole o webhook no formulário do seu site — qualquer plataforma. Chegou lead, a Julia chama.</div>
-          <div class="n-wh"><code>julia.app/webhook/site</code><button onclick="nCopiar(this,'https://julia.app/webhook/site')">Copiar</button></div>
-          <button class="nbtn" id="nbSite" onclick="nConectar('Site')">Ativar</button>
+          <div class="n-wh"><code id="nUrlSite" style="font-size:9px;word-break:break-all;">gerando…</code><button onclick="nCopiar(this,document.getElementById('nUrlSite').textContent)">Copiar</button></div>
+          <div class="ds" style="font-size:10px;margin-top:6px;">Funciona em qualquer plataforma que envie formulário pra webhook (Elementor, WordPress, RD, etc).</div>
         </div>
       </div>
 
@@ -1040,20 +1040,22 @@ body.vw-adm .adm-pill{display:block;}
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="none" stroke="#0e8ea0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span><span class="nm3">CRM <span style="font-weight:600;color:#7c3aed;font-size:9px;">· DESTINO PRINCIPAL</span></span><span class="nst off" id="nsCrm">DESCONECTADO</span></div>
           <div class="ds">Lead qualificado vai automático pro seu CRM, com histórico e score. Escolha o destino:</div>
           <select class="f-sel" id="nCrmSel" onchange="nCrmTroca()">
-            <option>Ju CRM</option><option>RD Station</option><option>Pipedrive</option><option>HubSpot</option><option>Outro (via API/webhook)</option>
+            <option>Ju CRM</option><option>Supremo (API Aberta)</option><option>RD Station</option><option>Pipedrive</option><option>HubSpot</option><option>Outro (via API/webhook)</option>
           </select>
-          <input class="f-in" id="nCrmTok" placeholder="Token de API do CRM · ex: rd_live_xxxxx" style="display:none;"/>
-          <button class="nbtn" id="nbCrm" onclick="nConectarCrm()">Conectar CRM</button>
+          <input class="f-in" id="nCrmTok" placeholder="Token de API · no Supremo: Integrações → API Aberta" style="display:none;"/>
+          <button class="nbtn" id="nbCrm" onclick="nConectarCrm()">Salvar destino</button>
+          <div class="ds" style="font-size:10px;margin-top:6px;" id="nCrmNota"></div>
         </div>
         <div class="nc">
           <div class="h"><span class="ic3"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span><span class="nm3">WhatsApp do corretor</span><span class="nst off" id="nsZap">DESCONECTADO</span></div>
           <div class="ds">Sem CRM? A Julia manda o resumo do lead quente direto no WhatsApp de quem você indicar.</div>
           <input class="f-in" id="nZapNum" placeholder="WhatsApp do corretor · ex: (81) 9 9999-9999"/>
-          <button class="nbtn" id="nbZap" onclick="nConectarZap()">Ativar envio</button>
+          <button class="nbtn" id="nbZap" onclick="nConectarZap()">Salvar corretor</button>
+          <div class="ds" style="font-size:10px;margin-top:6px;" id="nZapNota"></div>
         </div>
       </div>
 
-      <div class="n-sec" style="margin-top:22px;"><span class="ic2" style="background:#f3eefb;">🔑</span><div><b>Chaves de API</b><small>Uma chave por sistema — revogue uma sem derrubar as outras</small></div></div>
+      <div class="n-sec" style="margin-top:22px;"><span class="ic2" style="background:#f3eefb;">🔑</span><div><b>Chaves de API <span style="font-size:9px;color:#a855f7;font-weight:800;">EM BREVE</span></b><small>Para sistemas externos chamarem a Julia via API pública. Por enquanto, use os webhooks acima — fazem o mesmo papel.</small></div></div>
       <div class="card" style="padding:14px 18px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <span style="font-size:10.5px;color:var(--sub);font-family:'Sora';font-weight:700;" id="nkQtd"></span>
@@ -4717,20 +4719,62 @@ function nLiga(id,btn,txtOn){
   document.getElementById(id).className='nst ok';
   var b=document.getElementById(btn);b.textContent=txtOn;b.className='nbtn off2';
 }
-function nConectar(qual){
-  if(qual==='Meta'){alert('Na versão conectada, abre o login do Meta (Embedded Signup).');nLiga('nsMeta','nbMeta','Conta conectada ✓');}
-  if(qual==='Google'){nLiga('nsGoogle','nbGoogle','Webhook ativo ✓');}
-  if(qual==='Site'){nLiga('nsSite','nbSite','Webhook ativo ✓');}
+/* ── INTEGRAÇÕES REAIS (estado em contas) ── */
+function nContaPatch(body,ok){
+  var cid=window.CONTA_VIEW||CONTA_ID;
+  return fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+cid,{method:'PATCH',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify(body)})
+  .then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+' — '+t.slice(0,120));});if(ok)ok();})
+  .catch(function(e){alert('Não salvei ('+e.message+'). Rodou o SQL das colunas?');});
 }
+function nIntegCarregar(){
+  var cid=window.CONTA_VIEW||CONTA_ID; if(!cid){setTimeout(nIntegCarregar,700);return;}
+  fetch(SUPA_URL+'/rest/v1/contas?select=crm_tipo,crm_token,zap_corretor,lead_token,zap_360&id=eq.'+cid,
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){
+    var c=rows&&rows[0]; if(!c)return;
+    var base='https://jadsonsantos.app.n8n.cloud/webhook/lead-entrada?c='+cid+'&t='+(c.lead_token||'')+'&origem=';
+    var g=document.getElementById('nUrlGoogle'); if(g)g.textContent=base+'google';
+    var st=document.getElementById('nUrlSite'); if(st)st.textContent=base+'site';
+    function liga(id,tx){var e=document.getElementById(id);if(e){e.textContent=tx;e.className='nst ok';}}
+    liga('nsGoogle','PRONTO PRA COLAR'); liga('nsSite','PRONTO PRA COLAR');
+    if(c.crm_tipo){
+      liga('nsCrm','CONFIGURADO');
+      var sel=document.getElementById('nCrmSel');
+      for(var i=0;i<sel.options.length;i++)if(sel.options[i].text===c.crm_tipo)sel.selectedIndex=i;
+      nCrmTroca();
+      if(c.crm_token)document.getElementById('nCrmTok').value=c.crm_token;
+      document.getElementById('nCrmNota').textContent='✓ Destino salvo. O envio automático liga junto com a regra de qualificação (em implantação).';
+    }
+    if(c.zap_corretor){
+      liga('nsZap','CONFIGURADO');
+      document.getElementById('nZapNum').value=c.zap_corretor;
+      document.getElementById('nZapNota').textContent='✓ Corretor salvo. A Julia envia o resumo do qualificado assim que a regra automática ligar (em implantação).';
+    }
+  }).catch(function(){});
+}
+nIntegCarregar();
 function nConectarCrm(){
   var d=document.getElementById('nCrmSel').value;
-  if(d!=='Ju CRM' && !document.getElementById('nCrmTok').value.trim()){alert('Cola o token de API do '+d);return;}
-  nLiga('nsCrm','nbCrm',d+' conectado ✓');
+  var tk=document.getElementById('nCrmTok').value.trim();
+  if(d!=='Ju CRM' && !tk){alert('Cola o token de API do '+d+' (fica no painel dele, em Integrações/API).');return;}
+  nContaPatch({crm_tipo:d,crm_token:tk||null},function(){
+    nLiga('nsCrm','nbCrm','Salvar destino');
+    document.getElementById('nsCrm').textContent='CONFIGURADO';
+    document.getElementById('nCrmNota').textContent='✓ Destino salvo. O envio automático liga junto com a regra de qualificação (em implantação).';
+  });
 }
 function nConectarZap(){
-  var n=document.getElementById('nZapNum').value.trim();
-  if(!n){alert('Coloca o WhatsApp do corretor');return;}
-  nLiga('nsZap','nbZap','Enviando para '+n+' ✓');
+  var n=document.getElementById('nZapNum').value.replace(/\D/g,'');
+  if(n.length<10){alert('Coloca o WhatsApp do corretor com DDD (só números).');return;}
+  if(n.length<=11)n='55'+n;
+  nContaPatch({zap_corretor:n},function(){
+    nLiga('nsZap','nbZap','Salvar corretor');
+    document.getElementById('nsZap').textContent='CONFIGURADO';
+    document.getElementById('nZapNota').textContent='✓ Corretor salvo ('+n+'). A Julia envia o resumo do qualificado assim que a regra automática ligar (em implantação).';
+  });
 }
 </script>
 </body>
