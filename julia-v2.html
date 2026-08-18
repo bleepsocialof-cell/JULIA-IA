@@ -1118,24 +1118,50 @@ body.vw-adm .adm-pill{display:block;}
 
   <!-- ══ RELATÓRIOS ══ -->
   <div class="view" id="vDisparos">
-    <div class="i-top"><div><h1>Disparos de Reativação</h1><p>Reacenda leads antigos com um disparo em massa — respondeu, vira conversa</p></div></div>
-    <div class="card" style="padding:20px 22px;margin-bottom:14px;">
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <label style="font-size:12px;font-weight:700;color:#4c3d6b;">Parados há pelo menos</label>
-        <input id="dspDias" type="number" min="1" value="30" style="width:80px;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"/> 
-        <label style="font-size:12px;font-weight:700;color:#4c3d6b;">dias</label>
+    <div class="i-top"><div><h1>Disparos de Reativação</h1><p>Reacenda leads antigos com template aprovado — respondeu, vira conversa</p></div></div>
+
+    <div class="card" style="padding:18px 22px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin-bottom:10px;">1 · ESCOLHA O PÚBLICO</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Parados há pelo menos</label>
+          <input id="dspDias" type="number" min="1" value="30" style="width:80px;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"/></div>
+        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Score mínimo</label>
+          <select id="dspScore" style="padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="0">Todos</option><option value="50">50+</option><option value="70">70+</option></select></div>
         <button class="pillbtn" onclick="dispRender()">Buscar parados</button>
         <span id="dspInfo" style="font-size:12px;color:#8a7fa8;margin-left:auto;">—</span>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div id="dspLista" style="max-height:420px;overflow:auto;"></div>
-      <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid #eee9f6;background:#faf9ff;">
-        <b id="dspSel" style="font-size:13px;">0 selecionados</b>
-        <span id="dspCusto" style="font-size:12px;color:#8a7fa8;">custo estimado R$ 0,00</span>
-        <button class="pillbtn" style="margin-left:auto;opacity:.5;cursor:not-allowed;" title="Workflow de disparo entra na próxima sessão">Disparar reativação</button>
+
+    <div class="card" style="padding:18px 22px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin-bottom:10px;">2 · MENSAGEM E AGENDAMENTO</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+        <div style="flex:1;min-width:220px;"><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Template aprovado (Meta)</label>
+          <select id="dspTpl" onchange="dispTpl()" style="width:100%;padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="reativacao_juliablee">reativacao_juliablee</option><option value="abandono_trafegou_blee">abandono_trafegou_blee</option></select></div>
+        <div><label style="display:block;font-size:11px;font-weight:700;color:#4c3d6b;margin-bottom:4px;">Quando</label>
+          <select id="dspQuando" style="padding:8px 10px;border:1px solid #d8d2e8;border-radius:8px;font-size:13px;font-weight:700;"><option value="agora">Agora</option><option value="agendar">Agendar data e hora…</option></select></div>
       </div>
-      <div style="padding:10px 18px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Seleção e custos já são reais: R$ 0,50 por disparo, respondeu vira conversa e conta na franquia.</div>
+      <div style="background:#faf9ff;border:1px solid #eee9f6;border-radius:10px;padding:10px 14px;max-width:480px;">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.6px;color:#8a7fa8;margin-bottom:4px;">PRÉVIA</div>
+        <div id="dspPrev" style="font-size:13px;color:#2b2140;line-height:1.5;">Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?</div>
+        <div style="font-size:10.5px;color:#b0a8c6;margin-top:5px;">O texto oficial é o aprovado na Meta para este template.</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <div style="padding:12px 18px;border-bottom:1px solid #f1ecf9;font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;">3 · CONFIRA QUEM VAI RECEBER</div>
+      <div id="dspLista" style="max-height:340px;overflow:auto;"></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid #eee9f6;background:#faf9ff;flex-wrap:wrap;">
+        <b id="dspSel" style="font-size:13px;">0 selecionados</b>
+        <span id="dspCusto" style="font-size:12px;color:#8a7fa8;">custo R$ 0,00</span>
+        <span id="dspSaldo" style="font-size:12px;color:#8a7fa8;">· saldo da franquia: —</span>
+        <button class="pillbtn" style="margin-left:auto;opacity:.5;cursor:not-allowed;" title="Workflow de disparo em massa entra na próxima sessão">Disparar reativação</button>
+      </div>
+      <div style="padding:10px 18px;font-size:11.5px;color:#8a7fa8;background:#fdf9ee;border-top:1px solid #f3e8c8;">⚙️ O botão liga no workflow de disparo em massa (próxima sessão). Envio escalonado 1 msg a cada 6s, só horário comercial. Cada disparo consome 1 conversa da franquia; excedente sob confirmação.</div>
+    </div>
+
+    <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:#8a7fa8;margin:0 2px 8px;">HISTÓRICO DE DISPAROS</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="dspHist"><div class="vazio" style="padding:32px;"><span class="ic">📤</span><b>Nenhum disparo ainda</b><small>Quando você disparar a primeira reativação, o histórico com enviados, respostas e custo aparece aqui.</small></div></div>
     </div>
   </div>
   <div class="view" id="vRelatorios">
@@ -2188,12 +2214,54 @@ function origemNome(o){
   return 'WhatsApp';
 }
 window.DSP_SEL={};
+var DSP_TPLS={
+  reativacao_juliablee:'Oi {{nome}}! Aqui é a Julia, da Blee 👋 Faz um tempinho que a gente não se fala — ainda posso te ajudar?',
+  abandono_trafegou_blee:'Oi {{nome}}! Vi que você chegou pertinho de garantir o Trafegou e parou no caminho. Ainda tá aí a vontade de dominar o tráfego pago? 🚀'
+};
+function dispTpl(){
+  var t=(document.getElementById('dspTpl')||{}).value||'reativacao_juliablee';
+  var p=document.getElementById('dspPrev'); if(p)p.textContent=DSP_TPLS[t]||'';
+}
+function dispSaldo(){
+  var conta=(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea');
+  Promise.all([
+    fetch(SUPA_URL+'/rest/v1/rpc/consumo_mes',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_conta:conta})}).then(function(r){return r.json();}),
+    fetch(SUPA_URL+'/rest/v1/contas?id=eq.'+conta+'&select=franquia_convs',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}}).then(function(r){return r.json();})
+  ]).then(function(res){
+    var tot=((res[0]&&res[0][0])||{}).total||0;
+    var fr=(res[1]&&res[1][0]&&res[1][0].franquia_convs)||300;
+    var s=document.getElementById('dspSaldo');
+    if(s)s.innerHTML='· saldo da franquia: <b style="color:'+(fr-tot<=0?'#ef4444':'#16a34a')+';">'+Math.max(0,fr-tot)+'</b> de '+fr;
+  }).catch(function(){});
+}
+function dispHist(){
+  var conta=(window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea');
+  fetch(SUPA_URL+'/rest/v1/disparos?conta_id=eq.'+conta+'&order=criado_em.desc&limit=20',{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.json();}).then(function(rows){
+    var el=document.getElementById('dspHist'); if(!el)return;
+    if(!rows||!rows.length)return;
+    el.innerHTML=rows.map(function(d){
+      var dt=supaData(d.criado_em),dts=dt?(('0'+dt.getDate()).slice(-2)+'/'+('0'+(dt.getMonth()+1)).slice(-2)):'—';
+      var st=d.status==='agendado'?'<span style="background:#fdf3d8;color:#a06b00;font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;">Agendado</span>'
+            :'<span style="font-size:12px;color:#8a7fa8;">Respostas <b style="color:#2b2140;">'+(d.respostas||0)+'</b></span>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid #f1ecf9;">'
+        +'<div><b style="font-size:13px;">'+ehtml(d.nome||d.template)+'</b><div style="font-size:11.5px;color:#8a7fa8;">'+dts+' · '+ehtml(d.template)+' · R$ '+Number(d.custo||0).toFixed(2).replace('.',',')+'</div></div>'
+        +'<div style="display:flex;gap:14px;align-items:center;"><span style="font-size:12px;color:#8a7fa8;">Enviados <b style="color:#2b2140;">'+(d.enviados||0)+'</b></span>'+st+'</div></div>';
+    }).join('');
+  }).catch(function(){});
+}
 function dispRender(){
   var dias=parseInt((document.getElementById('dspDias')||{}).value||'30',10);
+  var sc=parseInt((document.getElementById('dspScore')||{}).value||'0',10);
   var corte=Date.now()-dias*86400000;
-  var parados=GL.filter(function(l){var d=l.cr?new Date(l.cr).getTime():0;return d&&d<corte;});
+  var parados=GL.filter(function(l){
+    var d=l.cr?new Date(l.cr).getTime():0;
+    if(!(d&&d<corte))return false;
+    if(sc>0&&(Number(l.score)||0)<sc)return false;
+    return true;
+  });
   var el=document.getElementById('dspLista'); if(!el)return;
-  if(!parados.length){el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado h\u00e1 '+dias+'+ dias</b><small>Todos os contatos tiveram movimento recente.</small></div>';}
+  if(!parados.length){el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado h\u00e1 '+dias+'+ dias'+(sc>0?' com score '+sc+'+':'')+'</b><small>Todos os contatos tiveram movimento recente.</small></div>';}
   else{
     el.innerHTML=parados.map(function(l,ix){
       var d=Math.floor((Date.now()-new Date(l.cr).getTime())/86400000);
@@ -2207,6 +2275,8 @@ function dispRender(){
   }
   var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=parados.length+' contato'+(parados.length===1?'':'s')+' parado'+(parados.length===1?'':'s');
   dispConta();
+  dispSaldo();
+  dispHist();
 }
 function dispConta(){
   var n=0; for(var k in window.DSP_SEL)if(window.DSP_SEL[k])n++;
