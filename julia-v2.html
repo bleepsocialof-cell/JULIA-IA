@@ -1307,8 +1307,12 @@ body.vw-adm .adm-pill{display:block;}
         <span class="qtd" id="dbQtd">1 produto cadastrado</span>
         <div class="g-busca" style="margin-left:auto;max-width:280px;"><input id="dbBusca" placeholder="Buscar produto" oninput="dbRender()"/></div>
       </div>
-      <div id="dbCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;"></div>
-      <table style="display:none;"><tbody id="dbBody"></tbody></table>
+      <div class="card d-tab">
+        <table>
+          <thead><tr><th>Produto</th><th>Ficha</th><th style="width:200px;">Valor</th><th style="width:70px;">Status</th><th style="width:130px;text-align:right;">Ações</th></tr></thead>
+          <tbody id="dbBody"></tbody>
+        </table>
+      </div>
       <button class="d-add" onclick="dbNovo()">+ Adicionar novo produto</button>
     </div>
 
@@ -3942,25 +3946,24 @@ function dbIcone(p){
 }
 function dbRender(){
   var q=(document.getElementById('dbBusca').value||'').toLowerCase();
-  var b=document.getElementById('dbCards'); if(!b)return; b.innerHTML='';
+  var b=document.getElementById('dbBody'); if(!b)return; b.innerHTML='';
   var vis=0;
   DB.forEach(function(p,i){
     if(q && p.nome.toLowerCase().indexOf(q)<0 && p.tipo.toLowerCase().indexOf(q)<0)return;
     vis++;
     var ic=dbIcone(p);
     b.insertAdjacentHTML('beforeend',
-      '<div style="background:#fff;border:1px solid #eee9f6;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(60,40,110,.05);">'
-      +'<div style="height:58px;background:'+ic[1]+';display:flex;align-items:center;justify-content:center;font-size:22px;">'+ic[0]+'</div>'
-      +'<div style="padding:10px 12px;">'
-      +'<div style="font-size:13px;font-weight:800;font-family:Sora;line-height:1.3;">'+ehtml(p.nome)+'</div>'
-      +'<div style="font-size:11px;color:#0a7d43;font-weight:700;margin-top:2px;">'+ehtml(p.valor||'—')+'</div>'
-      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">'+dbPills(p)+'</div>'
-      +'<div style="display:flex;align-items:center;gap:6px;margin-top:9px;">'
-      +'<span style="width:7px;height:7px;border-radius:50%;background:#1D9E75;"></span><small style="font-size:10px;color:#8a7fa8;flex:1;">'+ehtml(p.tipo||'')+'</small>'
-      +'<button class="ga" onclick="dbEditar('+i+')">Editar</button><button class="ga" style="color:#b42318;border-color:#f4c6c2;" onclick="dbExcluir('+i+')">Excluir</button>'
-      +'</div></div></div>');
+      '<tr>'
+      +'<td><div style="display:flex;align-items:center;gap:11px;">'
+      +'<div style="width:38px;height:38px;border-radius:11px;background:'+ic[1]+';display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">'+ic[0]+'</div>'
+      +'<div><div class="pn">'+ehtml(p.nome)+'</div><div class="ps">'+ehtml(p.tipo||'')+'</div></div></div></td>'
+      +'<td><div style="display:flex;gap:4px;flex-wrap:wrap;max-width:420px;">'+(dbPills(p)||'<small style="color:#c4bcd8;">—</small>')+'</div></td>'
+      +'<td><b style="color:#0a7d43;font-size:12.5px;">'+ehtml(p.valor||'—')+'</b></td>'
+      +'<td><span class="st-on"></span></td>'
+      +'<td><div style="display:flex;gap:6px;justify-content:flex-end;"><button class="ga" onclick="dbEditar('+i+')">Editar</button><button class="ga" style="color:#b42318;border-color:#f4c6c2;" onclick="dbExcluir('+i+')">Excluir</button></div></td>'
+      +'</tr>');
   });
-  if(!vis)b.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#a8a2ba;font-style:italic;padding:30px;">Nenhum produto encontrado</div>';
+  if(!vis)b.innerHTML='<tr><td colspan="5" style="text-align:center;color:#a8a2ba;font-style:italic;padding:24px;">Nenhum produto encontrado</td></tr>';
   document.getElementById('dbQtd').textContent=DB.length+' produto'+(DB.length===1?'':'s')+' no catálogo da Julia';
 }
 function dbNovo(){dbEdit=-1;dbLimpar();setorAplicar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);mdCarregar();}
