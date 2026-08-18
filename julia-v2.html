@@ -2582,6 +2582,16 @@ function agSalvar(){
   var t=document.getElementById('agTel').value.replace(/\D/g,'');
   var d=document.getElementById('agData').value, h=document.getElementById('agHora').value;
   if(!n||!d||!h){alert('Nome, data e hora são obrigatórios.');return;}
+  fetch(SUPA_URL+'/rest/v1/reunioes?select=nome_cliente,data_hora,status&data_hora=gte.'+d+'T00:00:00&data_hora=lte.'+d+'T23:59:59'+(window.CONTA_VIEW?('&conta_id=eq.'+window.CONTA_VIEW):''),
+    {headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY}})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){
+    var choque=(rows||[]).filter(function(x){return String(x.status||'agendada')==='agendada'&&String(x.data_hora).slice(11,16)===h;});
+    if(choque.length&&!confirm('⚠️ Já existe reunião às '+h+' nesse dia com '+(choque[0].nome_cliente||'alguém')+'. Marcar MESMO ASSIM?'))return;
+    agGravar(n,t,d,h);
+  }).catch(function(){agGravar(n,t,d,h);});
+}
+function agGravar(n,t,d,h){
   fetch(SUPA_URL+'/rest/v1/reunioes',{method:'POST',
     headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
     body:JSON.stringify({conta_id:(window.CONTA_VIEW||CONTA_ID),nome_cliente:n,telefone:t||null,data_hora:d+'T'+h+':00',interesse:document.getElementById('agAss').value.trim()||null,status:'agendada'})})
