@@ -1657,7 +1657,7 @@ body.vw-adm .adm-pill{display:block;}
     </div>
     <div class="pl-corpo">
     <div class="pl-lista">
-      <div class="pl-hd"><b id="plTit">Plantão 👋</b><small id="plSub">Conversas direcionadas</small></div>
+      <div class="pl-hd" style="display:flex;align-items:flex-start;gap:8px;"><div style="flex:1;"><b id="plTit">Plantão 👋</b><small id="plSub" style="display:block;">Conversas direcionadas</small></div><button class="pl-dev" style="flex-shrink:0;" onclick="plKanban()" title="Ver o funil em colunas">📋 Kanban</button></div>
       <div class="pl-filtros" id="plFiltros"></div>
       <div class="pl-busca">🔍 <input id="plBusca" placeholder="Buscar por nome ou número…" oninput="plRender()" style="width:88%;"></div>
       <div id="plChips" style="display:flex;gap:6px;padding:8px 14px 4px;flex-wrap:wrap;"></div>
@@ -3354,13 +3354,50 @@ function plPausaReal(tel,v){
     body:JSON.stringify({telefone:tel,pausada:v,atualizado_em:new Date().toISOString().replace('Z','')})
   }).catch(function(e){console.warn('pausa plantao falhou',e);});
 }
-function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPausaReal(l.telefone,true);plPatch(l,{pausado:true},function(){plAbrir(PL.sel);});}
+function plKanban(){
+  var ov=document.createElement('div');ov.className='pf-ov on';ov.id='plKb';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  var ets=['chegou','conversa','qualificacao','documentacao','agendamento','crm'];
+  var leads=PL.leads.filter(function(l){return String(l.status||'')!=='descartado'&&String(l.etapa||'')!=='descartado';});
+  var h='<div style="background:#fff;border-radius:18px;max-width:1240px;width:96vw;max-height:88vh;overflow:auto;padding:18px 20px;">';
+  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><b style="font-family:Sora;font-size:16px;">📋 Funil do plantão</b><small style="color:#8a7fa8;">arraste os cards entre as etapas · clique num card pra abrir a conversa</small><button class="pl-dev" style="margin-left:auto;" onclick="document.getElementById(\'plKb\').remove()">Fechar</button></div>';
+  h+='<div style="display:flex;gap:10px;align-items:flex-start;">';
+  ets.forEach(function(e){
+    var ls=leads.filter(function(l){var le=String(l.etapa||'chegou');return le===e||(e==='chegou'&&!l.etapa);});
+    h+='<div ondragover="event.preventDefault()" ondrop="plKbDrop(event,\''+e+'\')" style="flex:1;min-width:150px;background:#faf9ff;border:1px solid #eee9f6;border-radius:12px;padding:10px;min-height:120px;">';
+    h+='<div style="font-size:10.5px;font-weight:800;color:#4c3d6b;letter-spacing:.4px;margin-bottom:8px;">'+(ETAPA_NOME[e]||e).toUpperCase()+' <span style="color:#8a7fa8;">('+ls.length+')</span></div>';
+    ls.forEach(function(l){
+      var ix=PL.leads.indexOf(l);
+      var t=String(l.temperatura||'');var te=t==='quente'?'🔥':(t==='morno'?'🌤':(t==='frio'?'🥶':''));
+      h+='<div draggable="true" ondragstart="plKbDrag(event,'+ix+')" onclick="document.getElementById(\'plKb\').remove();plAbrir('+ix+');" style="background:#fff;border:1px solid #eee9f6;border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:grab;">'
+        +'<b style="font-size:12.5px;">'+ehtml(String(l.nome||'Sem nome').split(' ').slice(0,2).join(' '))+'</b> '+te
+        +'<div style="font-size:10.5px;color:#8a7fa8;margin-top:2px;">'+supaTempo(l.updated_at||l.created_at)+'</div></div>';
+    });
+    if(!ls.length)h+='<div style="font-size:11px;color:#c4bcd8;text-align:center;padding:14px 0;">vazio</div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+  ov.innerHTML=h;document.body.appendChild(ov);
+}
+function plKbDrag(ev,ix){ev.dataTransfer.setData('text/plain',String(ix));}
+function plKbDrop(ev,et){
+  ev.preventDefault();
+  var ix=parseInt(ev.dataTransfer.getData('text/plain'),10);
+  var l=PL.leads[ix]; if(!l)return;
+  plPatch(l,{etapa:et},function(){var kb=document.getElementById('plKb');if(kb){kb.remove();plKanban();}});
+}
+function plVivo(l,extra){
+  var b=extra||{};
+  if(String(l.status||'')==='descartado'||String(l.etapa||'')==='descartado'){b.status='ativo';if(!b.etapa)b.etapa='conversa';}
+  return b;
+}
+function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPausaReal(l.telefone,true);plPatch(l,plVivo(l,{pausado:true}),function(){plAbrir(PL.sel);});}
 function plDevolver(){var l=PL.leads[PL.sel];if(!l)return;plPausaReal(l.telefone,false);plPatch(l,{pausado:false,assumido_por:null},function(){plAbrir(PL.sel);});}
 function plDirecionar(){
   var l=PL.leads[PL.sel];if(!l)return;
   var sel=document.getElementById('plDirSel');
   if(!sel||!sel.value){alert('Escolha o vendedor.');return;}
-  plPatch(l,{assumido_por:sel.value,pausado:false},function(){plAbrir(PL.sel);});
+  plPatch(l,plVivo(l,{assumido_por:sel.value,pausado:false}),function(){plAbrir(PL.sel);});
 }
 function plEnviar(){
   var l=PL.leads[PL.sel];if(!l)return;
@@ -3373,6 +3410,8 @@ function plEnviar(){
     var ms=document.getElementById('plMsgs'),d=new Date();
     ms.insertAdjacentHTML('beforeend','<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(t)+'<div class="mt">'+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ✓✓</div></div>');
     ms.scrollTop=999999; i.value='';
+    var rec=plVivo(l,{});
+    if(rec.status)plPatch(l,rec,function(){});
   })
   .catch(function(e){alert('Não consegui enviar ('+e.message+'). Tente de novo em instantes.');});
 }
