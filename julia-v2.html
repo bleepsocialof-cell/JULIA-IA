@@ -3201,7 +3201,7 @@ function plRender(){
     var u=(window.DSP_ULT||{})[t8];
     return !!(u&&u>(LID[t8]||0));
   }
-  function desc(l){return String(l.status||l.etapa||'')==='descartado';}
+  function desc(l){if(l.assumido_por)return false;return String(l.status||'')==='descartado'||String(l.etapa||'')==='descartado';}
   var base=PL.leads.filter(function(l){
     var alvo=(String(l.nome||'')+' '+String(l.telefone||'')).toLowerCase();
     if(q&&alvo.indexOf(q)<0)return false;
@@ -3374,7 +3374,14 @@ function plKanban(){
   var ov=document.createElement('div');ov.className='pf-ov on';ov.id='plKb';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   var ets=['chegou','conversa','qualificacao','documentacao','agendamento','aprovado','vendido'];
-  var leads=PL.leads.filter(function(l){return String(l.status||'')!=='descartado'&&String(l.etapa||'')!=='descartado';});
+  var leads=PL.leads.filter(function(l){
+    if(!l.assumido_por)return false;
+    if(!VENDEDOR_ID){
+      if(EH_ADMIN&&PL.fConta!=='todas'&&l.conta_id!==PL.fConta)return false;
+      if(PL.filtro&&PL.filtro!=='todos'&&PL.filtro!=='julia'&&l.assumido_por!==PL.filtro)return false;
+    }
+    return String(l.status||'')!=='descartado'&&String(l.etapa||'')!=='descartado';
+  });
   var h='<div style="background:#fff;border-radius:18px;max-width:1240px;width:96vw;max-height:88vh;overflow:auto;padding:18px 20px;">';
   h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><b style="font-family:Sora;font-size:16px;">📋 Funil do plantão</b><small style="color:#8a7fa8;">arraste os cards entre as etapas · clique num card pra abrir a conversa</small><button class="pl-dev" style="margin-left:auto;" onclick="document.getElementById(\'plKb\').remove()">Fechar</button></div>';
   h+='<div style="display:flex;gap:10px;align-items:flex-start;">';
@@ -3400,7 +3407,10 @@ function plKbDrop(ev,et){
   ev.preventDefault();
   var ix=parseInt(ev.dataTransfer.getData('text/plain'),10);
   var l=PL.leads[ix]; if(!l)return;
-  plPatch(l,{etapa:et},function(){var kb=document.getElementById('plKb');if(kb){kb.remove();plKanban();}});
+  plPatch(l,{etapa:et},function(){
+    var kb=document.getElementById('plKb');if(kb){kb.remove();plKanban();}
+    if(PL.sel===ix){var se=document.getElementById('plEtapaSel');if(se)se.value=et;}
+  });
 }
 function plVivo(l,extra){
   var b=extra||{};
