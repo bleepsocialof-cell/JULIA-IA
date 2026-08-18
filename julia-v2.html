@@ -1302,26 +1302,13 @@ body.vw-adm .adm-pill{display:block;}
         <div><h1>Banco de Dados</h1><p>Julia envia automaticamente o material certo para cada cliente</p></div>
         <button class="pillbtn" onclick="dbNovo()">+ Novo produto</button>
       </div>
-      <div class="d-plan">
-        <div class="d-badge"><small>PLANO</small>PRO</div>
-        <div class="d-track">
-          <div class="tk"><div class="fl" id="dbUsoFl" style="width:7%"></div></div>
-          <div class="d-mark" style="left:33.3%"><span>START · 5</span></div>
-          <div class="d-mark" style="left:66.6%"><span>PLUS · 10</span></div>
-          <div class="d-mark" style="right:0;left:auto;"><span style="left:auto;right:0;transform:none;">PRO · 15</span></div>
-        </div>
-        <div class="d-info"><b id="dbUsoTx">1 de 15 produtos</b><a href="#" onclick="alert('Upgrade para CUSTOM (∞): fale com a Jul.ia');return false;">Upgrade → Custom ∞</a></div>
-      </div>
+<span id="dbUsoTx" style="display:none;"></span><span id="dbUsoFl" style="display:none;"></span>
       <div class="d-bar">
         <span class="qtd" id="dbQtd">1 produto cadastrado</span>
         <div class="g-busca" style="margin-left:auto;max-width:280px;"><input id="dbBusca" placeholder="Buscar produto" oninput="dbRender()"/></div>
       </div>
-      <div class="card d-tab">
-        <table>
-          <thead><tr><th>Produto</th><th>Tipo</th><th id="thDet">Localização</th><th>Valor</th><th>Status</th><th style="width:130px;text-align:right;">Ações</th></tr></thead>
-          <tbody id="dbBody"></tbody>
-        </table>
-      </div>
+      <div id="dbCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;"></div>
+      <table style="display:none;"><tbody id="dbBody"></tbody></table>
       <button class="d-add" onclick="dbNovo()">+ Adicionar novo produto</button>
     </div>
 
@@ -1370,6 +1357,11 @@ body.vw-adm .adm-pill{display:block;}
             </div>
             <div id="fgImovel">
             <div class="f-row3">
+              <div><label class="f-lbl">Negócio</label><select class="f-sel" id="fNeg" onchange="dbResumo()"><option selected>Lançamento</option><option>Usado</option><option>Aluguel</option><option>Loteamento</option></select></div>
+              <div><label class="f-lbl">Vagas</label><select class="f-sel" id="fVaga" onchange="dbResumo()"><option>Nenhuma</option><option selected>1 vaga</option><option>2 vagas</option><option>3+ vagas</option></select></div>
+              <div><label class="f-lbl">Área (m²)</label><input class="f-in" id="fArea" placeholder="ex: 52" oninput="dbResumo()"/></div>
+            </div>
+            <div class="f-row3">
               <div><label class="f-lbl">Quartos</label><select class="f-sel" id="fQtos" onchange="dbResumo()"><option>1 quarto</option><option selected>2 quartos</option><option>3 quartos</option><option>4+ quartos</option></select></div>
               <div><label class="f-lbl">Suítes</label><select class="f-sel" id="fSui"><option>Nenhuma</option><option selected>1 suíte</option><option>2 suítes</option><option>3+ suítes</option></select></div>
               <div><label class="f-lbl">Banheiros</label><select class="f-sel" id="fBan"><option>1 banheiro</option><option selected>2 banheiros</option><option>3+ banheiros</option></select></div>
@@ -1412,6 +1404,13 @@ body.vw-adm .adm-pill{display:block;}
           <div class="card f-resumo">
             <div class="h3">Resumo do produto</div><div class="hsub">Atualiza enquanto você preenche</div>
             <div style="margin-top:8px;" id="fResumo"></div>
+          </div>
+          <div class="card f-files" style="background:#0e0a1f;border-color:#241c3f;">
+            <div class="h3" style="color:#fff;">✨ Como a Julia apresenta</div><div class="hsub" style="color:#8b80ad;">Prévia ao vivo — muda enquanto você preenche</div>
+            <div style="background:#dcf8c6;border-radius:12px 12px 12px 4px;padding:10px 13px;margin-top:10px;">
+              <div id="fPrevJu" style="font-size:12.5px;color:#1f2c22;line-height:1.55;">Preencha os campos e veja a Julia montar a fala…</div>
+              <div style="font-size:9.5px;color:#5b7a63;text-align:right;margin-top:4px;">agora ✓✓</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1720,7 +1719,7 @@ body.vw-adm .adm-pill{display:block;}
       <div class="pa-hero">
         <div>
           <small>SEU PLANO ATUAL</small>
-          <h2 id="paNome">Start · Mensal</h2>
+          <h2 id="paNome">Essencial · Mensal</h2>
           <div class="pv" id="paInfo">R$ 1.697/mês · <b style="color:#4ade80;">em dia</b></div>
         </div>
         <button class="pa-grad" onclick="paComercial('upgrade')">Fazer upgrade ↗</button>
@@ -1734,7 +1733,7 @@ body.vw-adm .adm-pill{display:block;}
         </div>
         <div class="pa-card">
           <h3>Mudar de plano</h3>
-          <p>Plus (R$ 1.997/mês · 500 conversas) · Pro (R$ 2.497/mês · 800 conversas) · Customizado sob consulta. Fale com o comercial e a mudança entra na hora.</p>
+          <p>Plus (R$ 1.997/mês · 500 conversas) · Performance (R$ 2.497/mês · 800 conversas) · Customizado sob consulta. Fale com o comercial e a mudança entra na hora.</p>
           <button class="pa-dark" onclick="paComercial('upgrade')">💬 Falar com o comercial</button>
         </div>
       </div>
@@ -1789,7 +1788,7 @@ function goTo(id){
   if(id==='vPlano'&&typeof frqCarregar==='function')frqCarregar();
 }
 /* ── PLANO E COBRANÇA ── */
-var PA_PRECOS={Start:'R$ 1.697',Plus:'R$ 1.997',Pro:'R$ 2.497',Customizado:'Sob consulta'};
+var PA_PRECOS={Essencial:'R$ 1.697',Plus:'R$ 1.997',Performance:'R$ 2.497',Start:'R$ 1.697',Pro:'R$ 2.497',Customizado:'Sob consulta'};
 function paComercial(tipo){
   var msg=tipo==='acessos'
     ?'Olá! Quero contratar acessos de Vendedor de Plantão (R$ 47/mês cada) na minha conta Jul.ia. Como faço o pagamento?'
@@ -3913,22 +3912,56 @@ function dbCarregar(){
   }).catch(function(e){console.warn('produtos indisponíveis',e);});
 }
 var dbEdit=-1, DB_MAX=15;
+function dbPills(p){
+  var c=p.car||{}, h='';
+  function pill(t,hi){return '<span style="font-size:9.5px;font-weight:700;background:'+(hi?'#f4efff':'#f6f4fb')+';border:1px solid '+(hi?'#e4d9ff':'#e8e3f4')+';color:'+(hi?'#7c3aed':'#6b6580')+';padding:2px 8px;border-radius:9px;">'+t+'</span>';}
+  if(c.setor==='imovel'||(!c.setor&&SETOR==='imovel')){
+    if(c.neg)h+=pill(c.neg,true);
+    if(c.qtos)h+=pill('🛏 '+String(c.qtos).replace(' quartos','').replace(' quarto',''));
+    if(c.sui&&c.sui!=='Nenhuma')h+=pill('🚿 '+c.sui.replace(' suítes','s').replace(' suíte',''));
+    if(c.vaga&&c.vaga!=='Nenhuma')h+=pill('🚗 '+String(c.vaga).replace(' vagas','').replace(' vaga',''));
+    if(c.area)h+=pill('📐 '+c.area+'m²');
+    if(c.tg&&c.tg.fVar)h+=pill('varanda');
+    if(c.tg&&c.tg.fPis)h+=pill('piscina');
+    if(c.tg&&c.tg.fMcmv)h+=pill('MCMV',true);
+  }else if(c.setor==='curso'){
+    if(c.formato)h+=pill(c.formato,true);
+    if(c.carga)h+=pill(c.carga);
+    if(c.tg&&c.tg.fCert)h+=pill('certificado');
+    if(c.tg&&c.tg.fGar7)h+=pill('garantia 7d');
+  }else{
+    if(c.dur)h+=pill(c.dur,true);
+  }
+  return h;
+}
+function dbIcone(p){
+  var st=(p.car&&p.car.setor)||SETOR;
+  if(st==='imovel')return ['🏢','linear-gradient(120deg,#2d2154,#534AB7)'];
+  if(st==='curso')return ['🎓','linear-gradient(120deg,#7F77DD,#e84393)'];
+  return ['🛠','linear-gradient(120deg,#0F6E56,#1D9E75)'];
+}
 function dbRender(){
   var q=(document.getElementById('dbBusca').value||'').toLowerCase();
-  var b=document.getElementById('dbBody'); b.innerHTML='';
+  var b=document.getElementById('dbCards'); if(!b)return; b.innerHTML='';
   var vis=0;
   DB.forEach(function(p,i){
     if(q && p.nome.toLowerCase().indexOf(q)<0 && p.tipo.toLowerCase().indexOf(q)<0)return;
     vis++;
-    b.insertAdjacentHTML('beforeend','<tr><td><div class="pn">'+p.nome+'</div><div class="ps">Produto cadastrado</div></td>'
-      +'<td>'+p.tipo+'</td><td>'+(SETOR==='curso'?((p.car&&p.car.formato)||p.loc||'—'):(SETOR==='servico'?((p.car&&p.car.dur)||p.loc||'—'):(p.loc||'—')))+'</td><td>'+(p.valor||'—')+'</td>'
-      +'<td><span class="st-on"></span></td>'
-      +'<td><div style="display:flex;gap:6px;justify-content:flex-end;"><button class="ga" onclick="dbEditar('+i+')">Editar</button><button class="ga" style="color:#b42318;border-color:#f4c6c2;" onclick="dbExcluir('+i+')">Excluir</button></div></td></tr>');
+    var ic=dbIcone(p);
+    b.insertAdjacentHTML('beforeend',
+      '<div style="background:#fff;border:1px solid #eee9f6;border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(60,40,110,.05);">'
+      +'<div style="height:58px;background:'+ic[1]+';display:flex;align-items:center;justify-content:center;font-size:22px;">'+ic[0]+'</div>'
+      +'<div style="padding:10px 12px;">'
+      +'<div style="font-size:13px;font-weight:800;font-family:Sora;line-height:1.3;">'+ehtml(p.nome)+'</div>'
+      +'<div style="font-size:11px;color:#0a7d43;font-weight:700;margin-top:2px;">'+ehtml(p.valor||'—')+'</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;">'+dbPills(p)+'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-top:9px;">'
+      +'<span style="width:7px;height:7px;border-radius:50%;background:#1D9E75;"></span><small style="font-size:10px;color:#8a7fa8;flex:1;">'+ehtml(p.tipo||'')+'</small>'
+      +'<button class="ga" onclick="dbEditar('+i+')">Editar</button><button class="ga" style="color:#b42318;border-color:#f4c6c2;" onclick="dbExcluir('+i+')">Excluir</button>'
+      +'</div></div></div>');
   });
-  if(!vis)b.innerHTML='<tr><td colspan="6" style="text-align:center;color:#a8a2ba;font-style:italic;padding:24px;">Nenhum produto encontrado</td></tr>';
-  document.getElementById('dbQtd').textContent=DB.length+' produto'+(DB.length===1?'':'s')+' cadastrado'+(DB.length===1?'':'s');
-  document.getElementById('dbUsoTx').textContent=DB.length+' de '+DB_MAX+' produtos';
-  document.getElementById('dbUsoFl').style.width=Math.min(100,DB.length/DB_MAX*100)+'%';
+  if(!vis)b.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#a8a2ba;font-style:italic;padding:30px;">Nenhum produto encontrado</div>';
+  document.getElementById('dbQtd').textContent=DB.length+' produto'+(DB.length===1?'':'s')+' no catálogo da Julia';
 }
 function dbNovo(){dbEdit=-1;dbLimpar();setorAplicar();document.getElementById('dbFTit').textContent='Novo produto';dbTroca(true);mdCarregar();}
 function dbEditar(i){
@@ -3963,11 +3996,12 @@ function dbExcluir(i){
 }
 function dbSalvar(){
   var nome=fNome.value.trim(); if(!nome){alert('Dá um nome pro produto');fNome.focus();return;}
-  if(dbEdit<0 && DB.length>=DB_MAX){alert('Limite do plano PRO atingido ('+DB_MAX+'). Faça upgrade.');return;}
   var car={loc:fLoc.value.trim()||'—',valor:fValor.value.trim()||'—',setor:SETOR};
   if(SETOR==='imovel'){
     var tg={}; ['fVar','fPis','fAca','fGar','fMcmv','fMb'].forEach(function(id){tg[id]=document.getElementById(id).checked;});
     car.qtos=fQtos.value; car.ent=document.getElementById('fEnt').value; car.tg=tg;
+    car.neg=document.getElementById('fNeg').value; car.vaga=document.getElementById('fVaga').value;
+    car.sui=document.getElementById('fSui').value; car.area=document.getElementById('fArea').value.trim();
   } else if(SETOR==='curso'){
     var tgc={}; ['fCert','fSup','fGar7','fVagas'].forEach(function(id){tgc[id]=document.getElementById(id).checked;});
     car.formato=document.getElementById('fFormato').value; car.data=document.getElementById('fData').value.trim();
@@ -4132,7 +4166,34 @@ function mdLimparProduto(pid){
 function dbVoltar(){dbTroca(false);}
 function dbTroca(form){document.getElementById('dbLista').style.display=form?'none':'block';document.getElementById('dbForm').style.display=form?'block':'none';}
 function dbLimpar(){['fNome','fLoc','fValor','fEnt','fObs','fData','fCarga','fLinkPg','fDur','fLinkAg'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['fVar','fPis','fAca','fGar','fMcmv','fMb','fCert','fSup','fGar7','fVagas'].forEach(function(id){var el=document.getElementById(id);if(el)el.checked=false;});fCont.textContent='0/1000 caracteres';dbResumo();}
+function dbPrevJulia(){
+  var el=document.getElementById('fPrevJu'); if(!el)return;
+  var nome=fNome.value.trim()||'esse produto';
+  var t='';
+  if(SETOR==='imovel'){
+    var q=(document.getElementById('fQtos')||{}).value||'', su=(document.getElementById('fSui')||{}).value||'';
+    var vg=(document.getElementById('fVaga')||{}).value||'', ar=(document.getElementById('fArea')||{}).value||'';
+    var ng=(document.getElementById('fNeg')||{}).value||'';
+    var extras=[];
+    if(document.getElementById('fVar')&&document.getElementById('fVar').checked)extras.push('varanda');
+    if(document.getElementById('fPis')&&document.getElementById('fPis').checked)extras.push('piscina');
+    if(document.getElementById('fMcmv')&&document.getElementById('fMcmv').checked)extras.push('entra no Minha Casa Minha Vida');
+    t='O '+nome+' tem '+q+(su&&su!=='Nenhuma'?' sendo '+su:'')+(ar?', '+ar+'m²':'')+(vg&&vg!=='Nenhuma'?', '+vg:'')
+      +(extras.length?' — '+extras.join(', '):'')
+      +'. '+(fValor.value?fValor.value+(ng==='Aluguel'?'/mês':'')+'. ':'')+'Quer que eu te mande as fotos e o book? 😊';
+  }else if(SETOR==='curso'){
+    var fo=(document.getElementById('fFormato')||{}).value||'', ca=(document.getElementById('fCarga')||{}).value||'';
+    t='O '+nome+' é '+(fo?fo.toLowerCase():'um curso')+(ca?' de '+ca:'')
+      +(document.getElementById('fCert')&&document.getElementById('fCert').checked?', com certificado':'')
+      +'. '+(fValor.value?fValor.value+'. ':'')+'Quer garantir sua vaga? 😊';
+  }else{
+    t='O '+nome+((document.getElementById('fDur')||{}).value?' ('+(document.getElementById('fDur')||{}).value+')':'')
+      +(fValor.value?' sai por '+fValor.value:'')+'. Quer que eu agende pra você? 😊';
+  }
+  el.textContent=t;
+}
 function dbResumo(){
+  dbPrevJulia();
   var r=document.getElementById('fResumo'); if(!r)return;
   var h='<div class="ri">Nome: <b>'+(fNome.value||'—')+'</b></div>'
    +'<div class="ri">Tipo: <b>'+dbTipoVal()+'</b></div>';
