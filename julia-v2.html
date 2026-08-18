@@ -1121,7 +1121,7 @@ body.vw-adm .adm-pill{display:block;}
           <label class="f-lbl">Tom de voz</label>
           <select class="f-sel" id="jTom" onchange="jPrev()"><option>Consultivo — entende e orienta</option><option>Direto — objetivo e rápido</option><option>Amigável — leve e próximo</option><option>Caloroso — acolhedor e humano</option><option>Profissional — formal e seguro</option><option>Entusiasmado — energia de vendedora</option></select>
           <label class="f-lbl">Objetivo principal</label>
-          <select class="f-sel" id="jObj" onchange="jPrev()"><option>Fechar venda</option><option>Agendar visita</option><option>Qualificar e enviar ao corretor</option><option>Qualificar e enviar ao CRM</option><option>Conduzir documentação</option></select>
+          <select class="f-sel" id="jObj" onchange="jPrev()"><option>Fechar venda</option><option>Agendar visita</option><option>Qualificar e enviar ao corretor</option><option>Qualificar e enviar ao CRM</option><option>Conduzir documentação</option><option>Qualificar + agendar visita</option><option>Qualificar + pegar documentação</option><option>Pegar documentação + agendar visita</option><option>Qualificar + documentação + visita (jornada completa)</option></select>
           <div class="kv" style="padding:10px 0 4px;border:none;margin-top:10px;border-top:1px solid var(--line2);"><span>Tamanho do prompt</span><b id="jTam">0 caracteres</b></div>
           <div class="kv" style="border:none;"><span>Última atualização</span><b id="jUpd">—</b></div>
         </div>
@@ -2640,6 +2640,10 @@ function jPrev(){
     'Entusiasmado':'Oi! Julia na área 🚀 Chegou no lugar certo — bora achar o ideal pra você?'
   };
   var FECHA={
+    'Qualificar + agendar visita':'Perfeito, seu perfil encaixa certinho! Bora marcar uma visita? Tenho amanhã 10h ou 15h 📅',
+    'Qualificar + pegar documentação':'Seu perfil encaixa! Pra adiantar sua análise, me manda RG, CPF e comprovante de renda por aqui 📄',
+    'Pegar documentação + agendar visita':'Me manda seus documentos por aqui que eu já deixo sua análise andando — e marco sua visita 📄📅',
+    'Qualificar + documentação + visita (jornada completa)':'Perfil aprovado! Me manda os documentos que eu adianto a análise e já marco sua visita 🚀',
     'Fechar venda':'Consigo uma condição especial pra você HOJE. Te passo agora?',
     'Agendar visita':'Que tal conhecer pessoalmente? Tenho horário amanhã às 10h ou 15h 📅',
     'Qualificar e enviar ao corretor':'Perfeito! Já te conecto com nosso especialista pra fechar os detalhes 🤝',
