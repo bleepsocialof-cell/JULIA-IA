@@ -1476,7 +1476,7 @@ body.vw-adm .adm-pill{display:block;}
       </div>
       <div class="a">Primeiro veja em Configurações se o toggle "Pausar a Julia" está desligado e se o modo de atendimento cobre o horário atual. Depois confira em Integrações se o WhatsApp aparece como ATIVO. Persistindo, fale com o suporte — a gente verifica a conexão pra você.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como mudo o jeito que a Julia fala?<span>+</span></div><div class="a">Em Inteligência Julia você edita o prompt, o tom e o objetivo. Use as variáveis clicáveis (como nome do cliente) e valide tudo na aba Testar antes de salvar — a mudança sincroniza na hora.</div></div>
-      <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como coloco meus corretores pra atender?<span>+</span></div><div class="a">Cada corretor é um acesso de equipe (R$ 97/mês), com login e senha próprios e visão restrita. Você define quais leads ele pode assumir; ao Assumir, a Julia pausa só naquele contato e ele conversa pelo painel, no mesmo número. Contrate em Plano e Cobrança.</div></div>
+      <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como coloco meus corretores pra atender?<span>+</span></div><div class="a">Cada corretor é um acesso de equipe (R$ 47/mês), com login e senha próprios e visão restrita. Você define quais leads ele pode assumir; ao Assumir, a Julia pausa só naquele contato e ele conversa pelo painel, no mesmo número. Contrate em Plano e Cobrança.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Cheguei no limite de conversas do plano. O que faço?<span>+</span></div><div class="a">Em Plano e Cobrança você compra pacotes avulsos (+50, +100 ou +200 conversas) sem mudar de plano — cai na conta na hora e não expira enquanto o plano estiver ativo. Se virar rotina, vale o upgrade.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Como a Julia envia leads pro meu CRM?<span>+</span></div><div class="a">Em Integrações você escolhe a saída: Ju CRM (nativo), seu CRM atual via token de API (RD, Pipedrive, HubSpot…) ou webhook genérico pra Zapier/Make. Tem também o fallback: enviar o lead pronto direto pro WhatsApp de um corretor.</div></div>
       <div class="aj-faq"><div class="q" onclick="ajFaq(this)">Posso pausar a Julia só em um cliente?<span>+</span></div><div class="a">Sim — abra a conversa e clique em Assumir. A Julia pausa apenas naquele contato e você fala pelo painel. Nos outros clientes ela segue atendendo normalmente. Pra pausar tudo, use o toggle em Configurações.</div></div>
@@ -1607,7 +1607,7 @@ body.vw-adm .adm-pill{display:block;}
           <div class="cc-fl"><label>Plano</label><select id="ccFPlano"><option>Start</option><option>Plus</option><option>Pro</option><option>Customizado</option></select></div>
         </div>
         <div class="cc-gr" style="grid-template-columns:1fr 1fr;">
-          <div class="cc-fl"><label>Acessos extras (R$ 97/mês cada)</label><input id="ccFSeats" type="number" min="0" value="0"/></div>
+          <div class="cc-fl"><label>Acessos extras (R$ 47/mês cada)</label><input id="ccFSeats" type="number" min="0" value="0"/></div>
           <div class="cc-fl"><label>Status</label><select id="ccFSt"><option value="ativa">Ativa</option><option value="pausada">Pausada</option><option value="inadimplente">Inadimplente</option></select></div>
         </div>
 
@@ -1700,7 +1700,7 @@ body.vw-adm .adm-pill{display:block;}
       <div class="pa-grid">
         <div class="pa-card">
           <h3>Acessos de equipe</h3>
-          <p>Vendedores de Plantão atendendo por dentro do painel, com login próprio e visão restrita. <b>R$ 97/mês por acesso</b> — o comercial libera após o pagamento.</p>
+          <p>Vendedores de Plantão atendendo por dentro do painel, com login próprio e visão restrita. <b>R$ 47/mês por acesso</b> — o comercial libera após o pagamento.</p>
           <button class="pa-dark" onclick="paComercial('acessos')">💬 Contratar acessos</button>
         </div>
         <div class="pa-card">
@@ -1763,7 +1763,7 @@ function goTo(id){
 var PA_PRECOS={Start:'R$ 1.347',Plus:'R$ 1.647',Pro:'R$ 1.997',Customizado:'Sob consulta'};
 function paComercial(tipo){
   var msg=tipo==='acessos'
-    ?'Olá! Quero contratar acessos de Vendedor de Plantão (R$ 97/mês cada) na minha conta Jul.ia. Como faço o pagamento?'
+    ?'Olá! Quero contratar acessos de Vendedor de Plantão (R$ 47/mês cada) na minha conta Jul.ia. Como faço o pagamento?'
     :'Olá! Quero mudar o plano da minha conta Jul.ia. Pode me passar as condições?';
   window.open('https://wa.me/'+COMERCIAL_ZAP+'?text='+encodeURIComponent(msg),'_blank');
 }
@@ -3242,12 +3242,10 @@ function plAbrir(ix){
 }
 function plFoot(l){
   var f=document.getElementById('plFoot');
-  if(VENDEDOR_ID&&!l.pausado){
+  if(!l.pausado){
     f.innerHTML='<div class="pl-assumir"><p>A Julia está segurando a conversa. Quando você assumir, ela pausa e <b>o cliente fala com você</b> — pelo mesmo WhatsApp.</p><button onclick="plAssumir()">▶ Assumir atendimento</button></div>';
-  }else if(VENDEDOR_ID){
-    f.innerHTML='<div class="pl-comp"><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
   }else{
-    f.innerHTML='';
+    f.innerHTML='<div class="pl-comp"><input id="plIn" placeholder="Digite uma mensagem…" onkeydown="if(event.key===\'Enter\')plEnviar()"><button class="send2" onclick="plEnviar()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
   }
 }
 function plPatch(l,body,ok){
@@ -3257,8 +3255,16 @@ function plPatch(l,body,ok){
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);Object.keys(body).forEach(function(k){l[k]=body[k];});if(ok)ok();plRender();plPlacar();})
   .catch(function(e){alert('Não consegui salvar ('+e.message+').');});
 }
-function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPatch(l,{pausado:true},function(){plAbrir(PL.sel);});}
-function plDevolver(){var l=PL.leads[PL.sel];if(!l)return;plPatch(l,{pausado:false,assumido_por:null},function(){plAbrir(PL.sel);});}
+function plPausaReal(tel,v){
+  tel=String(tel||'').replace(/\D/g,''); if(!tel)return;
+  fetch(SUPA_URL+'/rest/v1/pausas?on_conflict=telefone',{
+    method:'POST',
+    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+    body:JSON.stringify({telefone:tel,pausada:v,atualizado_em:new Date().toISOString().replace('Z','')})
+  }).catch(function(e){console.warn('pausa plantao falhou',e);});
+}
+function plAssumir(){var l=PL.leads[PL.sel];if(!l)return;plPausaReal(l.telefone,true);plPatch(l,{pausado:true},function(){plAbrir(PL.sel);});}
+function plDevolver(){var l=PL.leads[PL.sel];if(!l)return;plPausaReal(l.telefone,false);plPatch(l,{pausado:false,assumido_por:null},function(){plAbrir(PL.sel);});}
 function plDirecionar(){
   var l=PL.leads[PL.sel];if(!l)return;
   var sel=document.getElementById('plDirSel');
@@ -3268,9 +3274,10 @@ function plDirecionar(){
 function plEnviar(){
   var l=PL.leads[PL.sel];if(!l)return;
   var i=document.getElementById('plIn'),t=i.value.trim();if(!t)return;
-  fetch(SUPA_URL+'/rest/v1/conversas',{method:'POST',
-    headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-    body:JSON.stringify({telefone:l.telefone,nome:PL.nomeMe||'Vendedor',mensagem:t,papel:'vendedor'})})
+  var tel=String(l.telefone||'').replace(/\D/g,'');
+  fetch('https://jadsonsantos.app.n8n.cloud/webhook/envio-manual',{
+    method:'POST',headers:{'Content-Type':'application/json','X-Token':'blee-68abf71ef3737bd4b11d0ef1'},
+    body:JSON.stringify({telefone:tel,texto:t,conta_id:(l.conta_id||window.CONTA_VIEW||'96f67cd6-09c1-43a9-960c-e85cd89a07ea')})})
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);
     var ms=document.getElementById('plMsgs'),d=new Date();
     ms.insertAdjacentHTML('beforeend','<div class="m eu2"><span class="et2">VOCÊ</span>'+ehtml(t)+'<div class="mt">'+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+' ✓✓</div></div>');
