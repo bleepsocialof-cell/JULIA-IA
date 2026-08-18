@@ -2200,6 +2200,8 @@ function carregarConversasReais(){
         if(supaData(m.criado_em).getTime()>(LID[t8]||0))mapa[t8].nlc++;
       }
     });
+    var ult={}; for(var k8 in mapa){ if(mapa[k8].uc) ult[k8]=supaData(mapa[k8].uc).getTime(); }
+    window.DSP_ULT=ult;
     var hash=JSON.stringify(mapa);
     if(hash===CV_HASH)return;
     CV_HASH=hash;
@@ -2298,6 +2300,12 @@ function dispHist(){
   }).catch(function(){});
 }
 window.DSP_ROWS=[];window.DSP_PAG=0;var DSP_PP=5;
+function dspUltTs(l){
+  var t8=String(l.t||'').replace(/\D/g,'').slice(-8);
+  var u=(window.DSP_ULT||{})[t8];
+  if(u)return u;
+  return l.cr?new Date(l.cr).getTime():0;
+}
 function dispRender(){
   var dEl=document.getElementById('dspDias');
   var dias=Math.max(3,parseInt((dEl||{}).value||'30',10)||3);
@@ -2305,12 +2313,12 @@ function dispRender(){
   var sc=parseInt((document.getElementById('dspScore')||{}).value||'0',10);
   var corte=Date.now()-dias*86400000;
   window.DSP_ROWS=GL.filter(function(l){
-    var d=l.cr?new Date(l.cr).getTime():0;
+    var d=dspUltTs(l);
     if(!(d&&d<corte))return false;
     if(sc>0&&(Number(l.score)||0)<sc)return false;
     return true;
   }).sort(function(a,b){
-    return new Date(a.cr).getTime()-new Date(b.cr).getTime();
+    return dspUltTs(a)-dspUltTs(b);
   });
   window.DSP_PAG=0;
   var inf=document.getElementById('dspInfo'); if(inf)inf.textContent=window.DSP_ROWS.length+' contato'+(window.DSP_ROWS.length===1?'':'s')+' parado'+(window.DSP_ROWS.length===1?'':'s');
@@ -2328,7 +2336,7 @@ function dispPage(delta){
     el.innerHTML='<div class="vazio" style="padding:40px;"><span class="ic">\ud83c\udf89</span><b>Ningu\u00e9m parado nesse filtro</b><small>Todos os contatos tiveram movimento recente.</small></div>';
   }else{
     el.innerHTML=window.DSP_ROWS.slice(ini,fim).map(function(l){
-      var d=Math.floor((Date.now()-new Date(l.cr).getTime())/86400000);
+      var d=Math.floor((Date.now()-dspUltTs(l))/86400000);
       var tel=String(l.t||'').replace(/\D/g,'');
       var on=!!window.DSP_SEL[tel];
       return '<label class="dsp-row'+(on?' sel':'')+'">'
