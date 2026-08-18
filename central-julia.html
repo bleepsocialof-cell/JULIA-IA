@@ -195,6 +195,30 @@ tr:last-child td{border-bottom:none;}
       <div style="overflow-x:auto;"><table><thead><tr><th>PLANO</th><th>VALOR / MÊS</th><th>ACESSOS INCLUSOS</th><th>ACESSO EXTRA (R$)</th><th>MÁX. PRODUTOS</th><th>ATIVO</th><th></th></tr></thead><tbody id="tbPlanos"></tbody></table></div>
       <div class="hint" style="margin-top:10px;">Esses números valem na hora em toda a Central: wizard de nova conta, mensalidades, MRR e faturas novas. Nada fica cravado no código.</div>
     </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div style="display:flex;align-items:center;margin-bottom:4px;"><h3 style="margin:0;">Custos e margem (só você vê)</h3><div class="grow"></div><button class="btn gh" onclick="cxEdit()" id="cxEditBtn">⚙ Ajustar custos</button></div>
+      <div class="hint" style="margin-bottom:12px;">Origem dos custos: Anthropic (IA) + OpenAI (áudio) + reativações Meta = variável por conversa · 360dialog (licença do número) + n8n + Supabase + ElevenLabs rateados = fixo por cliente.</div>
+      <div id="cxAjuste" style="display:none;border:1px dashed var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#fbfaff;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <div class="fl" style="margin:0;min-width:170px;"><label>VARIÁVEL POR CONVERSA (R$)</label><input id="cxVar" type="number" step="0.01" value="0.65" oninput="cxPintar()"/></div>
+          <div class="fl" style="margin:0;min-width:170px;"><label>360DIALOG POR CLIENTE (R$/mês)</label><input id="cxD360" type="number" step="1" value="270" oninput="cxPintar()"/></div>
+          <div class="fl" style="margin:0;min-width:170px;"><label>INFRA RATEADA (R$/mês)</label><input id="cxInfra" type="number" step="1" value="137" oninput="cxPintar()"/></div>
+        </div>
+        <div class="hint" style="margin-top:8px;">Variável = Anthropic ~R$ 0,60 + OpenAI/reativações ~R$ 0,05 · Infra = (n8n + Supabase + ElevenLabs) ÷ nº de clientes.</div>
+      </div>
+      <div style="overflow-x:auto;"><table><thead><tr><th>PLANO</th><th>CONVERSAS</th><th>VARIÁVEL</th><th>FIXO</th><th>CUSTO</th><th>PREÇO</th><th>MARGEM</th></tr></thead><tbody id="cxBody"></tbody></table></div>
+
+      <div style="border-top:1px solid var(--bd);margin-top:14px;padding-top:14px;">
+        <div style="font-size:11px;font-weight:800;color:#6d28d9;letter-spacing:.06em;margin-bottom:10px;">🧮 SIMULADOR DE PLANO PERSONALIZADO</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;">
+          <div class="fl" style="margin:0;min-width:150px;"><label>CONVERSAS/MÊS</label><input id="cxSimConv" type="number" step="10" value="200" oninput="cxSim()"/></div>
+          <div class="fl" style="margin:0;min-width:150px;"><label>PREÇO PRETENDIDO (R$)</label><input id="cxSimPreco" type="number" step="10" value="1297" oninput="cxSim()"/></div>
+          <div id="cxSimOut" style="flex:1;min-width:260px;background:#f4efff;border:1px solid #e4d9ff;border-radius:12px;padding:10px 14px;font-size:13px;"></div>
+        </div>
+        <div class="hint" style="margin-top:8px;">Regra da casa: margem saudável ≥ 60%. O simulador sugere o preço mínimo pra isso.</div>
+      </div>
+    </div>
   </div>
 
   <div class="wrap" id="vMsg">
@@ -747,6 +771,32 @@ function meFotoPintar(){
   if(d)av.innerHTML='<img src="'+d+'" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;"/>';
 }
 meFotoPintar();
+
+var CX_PLANOS=[['1.697 / 300',300,1697],['1.997 / 500',500,1997],['2.497 / 800',800,2497]];
+function cxN(id,d){var e=document.getElementById(id);return e?Number(e.value||d):d;}
+function cxEdit(){var a=document.getElementById('cxAjuste');a.style.display=(a.style.display==='none')?'block':'none';}
+function cxCusto(conv){
+  var v=cxN('cxVar',0.65), f=cxN('cxD360',270)+cxN('cxInfra',137);
+  return {vr:conv*v, fx:f, tot:conv*v+f};
+}
+function cxPintar(){
+  var b=document.getElementById('cxBody'); if(!b)return;
+  b.innerHTML=CX_PLANOS.map(function(p){
+    var c=cxCusto(p[1]), mg=p[2]-c.tot, mp=Math.round(mg*100/p[2]);
+    return '<tr><td><b>'+p[0]+'</b></td><td>'+p[1]+'</td><td>'+brl(c.vr)+'</td><td>'+brl(c.fx)+'</td><td><b>'+brl(c.tot)+'</b></td><td>'+brl(p[2])+'</td><td><b style="color:'+(mp>=60?'#0a7d43':(mp>=45?'#a06b00':'#c02626'))+';">'+brl(mg)+' ('+mp+'%)</b></td></tr>';
+  }).join('');
+  cxSim();
+}
+function cxSim(){
+  var conv=cxN('cxSimConv',200), preco=cxN('cxSimPreco',1297);
+  var c=cxCusto(conv), mg=preco-c.tot, mp=preco>0?Math.round(mg*100/preco):0;
+  var sug=Math.ceil((c.tot/(1-0.60))/10)*10-3;
+  var el=document.getElementById('cxSimOut'); if(!el)return;
+  el.innerHTML='Custo estimado: <b>'+brl(c.tot)+'</b> ('+brl(c.vr)+' variável + '+brl(c.fx)+' fixo)<br/>'
+    +'Sua margem nesse preço: <b style="color:'+(mp>=60?'#0a7d43':(mp>=45?'#a06b00':'#c02626'))+';">'+brl(mg)+' ('+mp+'%)</b><br/>'
+    +'<small style="color:#6b6580;">Preço mínimo pra margem 60%: <b>'+brl(sug)+'</b></small>';
+}
+cxPintar();
 </script>
 </body>
 </html>
