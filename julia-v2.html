@@ -1410,9 +1410,18 @@ body.vw-adm .adm-pill{display:block;}
 
   <!-- ══ LEADS ══ -->
   <div class="view" id="vLeads">
-    <div class="k-top">
-      <div><h1>Leads</h1><p>Pipeline em tempo real — leads agrupados por etapa</p></div>
-      <button class="pillbtn" onclick="carregarLeadsReais();alert('Pipeline recarregado do banco ✓')">⟳ Atualizar</button>
+    <div style="background:linear-gradient(135deg,#0e0a1f 55%,#1a1035);border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:Sora;font-size:17px;font-weight:800;color:#fff;">Leads · <span id="ldTot">0</span> no funil</div>
+        <div style="font-size:11px;color:#8b80ad;margin-top:2px;">Pipeline em tempo real</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="ld-sa" data-f="quentes" onclick="ldFiltro(this)" style="background:#173c2e;border-radius:10px;padding:8px 14px;text-align:center;cursor:pointer;border:2px solid transparent;"><div style="font-family:Sora;font-size:17px;font-weight:800;color:#4ade80;" id="ldQ">0</div><div style="font-size:8.5px;letter-spacing:.6px;color:#7fb89c;font-weight:700;">QUENTES</div></div>
+        <div class="ld-sa" data-f="esfriando" onclick="ldFiltro(this)" style="background:#3a2d14;border-radius:10px;padding:8px 14px;text-align:center;cursor:pointer;border:2px solid transparent;"><div style="font-family:Sora;font-size:17px;font-weight:800;color:#fbbf24;" id="ldE">0</div><div style="font-size:8.5px;letter-spacing:.6px;color:#c2a86a;font-weight:700;">ESFRIANDO</div></div>
+        <div class="ld-sa" data-f="resgatar" onclick="ldFiltro(this)" style="background:#3a1717;border-radius:10px;padding:8px 14px;text-align:center;cursor:pointer;border:2px solid transparent;"><div style="font-family:Sora;font-size:17px;font-weight:800;color:#f87171;" id="ldR">0</div><div style="font-size:8.5px;letter-spacing:.6px;color:#c98484;font-weight:700;">RESGATAR</div></div>
+      </div>
+      <input id="ldBusca" placeholder="Buscar nome ou número…" oninput="pintarReal()" style="width:170px;background:#1c1438;border:1px solid #2d2154;color:#fff;border-radius:10px;padding:9px 12px;font-size:12px;outline:none;"/>
+      <button class="pillbtn" style="padding:10px 16px;" onclick="carregarLeadsReais()">⟳</button>
     </div>
     <div class="kb">
       <div class="kcol"><div class="kch"><span class="kd" style="background:#7c3aed"></span><b>Novo lead</b><span class="kn">2</span></div>
@@ -2520,6 +2529,20 @@ function perOk(l){
   if(PERIODO==='ano')return d.getFullYear()===a.getFullYear();
   return true;
 }
+window.LD_F='todos';
+function ldFiltro(el){
+  var f=el.getAttribute('data-f');
+  window.LD_F=(window.LD_F===f)?'todos':f;
+  document.querySelectorAll('.ld-sa').forEach(function(x){x.style.borderColor=(x.getAttribute('data-f')===window.LD_F)?'#a855f7':'transparent';});
+  pintarReal();
+}
+function ldSem(l){
+  var ts=(typeof dspUltTs==='function')?dspUltTs(l):(l.cr?new Date(l.cr).getTime():0);
+  if(!ts)return 'verde';
+  var d=(Date.now()-ts)/86400000;
+  return d>=7?'vermelho':(d>=3?'ambar':'verde');
+}
+function ldQuente(l){return String(l.temperatura||'')==='quente'||((l.sc||0)>=(window.SCORE_QUENTE||70)&&String(l.temperatura||'')!=='frio');}
 var ETAPAS=[['chegou','Novo lead','#7c3aed'],['conversa','Em conversa','#a855f7'],['qualificacao','Qualificação','#10b981'],['documentacao','Documentação','#0ea5e9'],['agendamento','Agendamento','#f59e0b'],['crm','Enviado ao CRM','#14b8a6'],['descartado','Descartado','#94a3b8']];
 function pintarReal(){
   bootPronto();
@@ -2654,13 +2677,49 @@ function pintarReal(){
       +(gn===0?'<div class="vazio"><span class="ic">📊</span><b>Sem dados ainda</b><small>Os relatórios completos (gráficos, canais, horários de pico) enchem quando a Julia começar a atender pelo WhatsApp.</small></div>'
              :'<div class="cf-card" style="margin-top:14px;"><div class="sb" style="margin:0;">Gráficos por dia, canais e horários de pico entram junto com o histórico do n8n.</div></div>');
   }
-  /* — Kanban real — */
+  /* — Kanban real (1A: semáforo + saúde) — */
   var kb=document.querySelector('.kb');
   if(kb){
+    var lq=(document.getElementById('ldBusca')||{}).value||'';
+    lq=String(lq).trim().toLowerCase(); var lqd=lq.replace(/\D/g,'');
+    var abertos=GL.filter(function(l){return l.e!=='descartado'&&l.st!=='nq';});
+    var nQ=abertos.filter(ldQuente).length;
+    var nE=abertos.filter(function(l){return ldSem(l)==='ambar';}).length;
+    var nR=abertos.filter(function(l){return ldSem(l)==='vermelho';}).length;
+    var tEl=document.getElementById('ldTot'); if(tEl)tEl.textContent=abertos.length;
+    var qEl=document.getElementById('ldQ'); if(qEl)qEl.textContent=nQ;
+    var eEl=document.getElementById('ldE'); if(eEl)eEl.textContent=nE;
+    var rEl=document.getElementById('ldR'); if(rEl)rEl.textContent=nR;
+    var SEMC={verde:'#1D9E75',ambar:'#EF9F27',vermelho:'#E24B4A'};
     kb.innerHTML=ETAPAS.map(function(e){
-      var ls=GL.filter(function(l){return l.e===e[0];});
-      return '<div class="kcol"><div class="kch"><span class="kd" style="background:'+e[2]+'"></span><b>'+e[1]+'</b><span class="kn">'+ls.length+'</span></div>'
-        +ls.map(function(l){return '<div class="kc"><div class="nm2">'+ehtml(l.n)+'</div><div class="ph3">'+ehtml(l.t)+'</div><div class="tags"><span class="mp a">'+e[1].toUpperCase()+'</span></div><div class="foot"><span class="tm">'+l.u+'</span><span class="kav">JU</span></div></div>';}).join('')
+      var ls=GL.filter(function(l){
+        if(l.e!==e[0])return false;
+        if(e[0]!=='descartado'){
+          if(window.LD_F==='quentes'&&!ldQuente(l))return false;
+          if(window.LD_F==='esfriando'&&ldSem(l)!=='ambar')return false;
+          if(window.LD_F==='resgatar'&&ldSem(l)!=='vermelho')return false;
+        }
+        if(lq){
+          var nm=String(l.n||'').toLowerCase(), td=String(l.t||'').replace(/\D/g,'');
+          if(nm.indexOf(lq)<0&&!(lqd.length>=3&&td.indexOf(lqd)>-1))return false;
+        }
+        return true;
+      });
+      var cA=ls.filter(function(l){return ldSem(l)==='ambar';}).length;
+      var cR=ls.filter(function(l){return ldSem(l)==='vermelho';}).length;
+      var mini=(cR?'<span style="width:7px;height:7px;border-radius:50%;background:#E24B4A;display:inline-block;"></span><small style="font-size:9.5px;color:#A32D2D;font-weight:700;">'+cR+'</small>':'')
+             +(cA?' <span style="width:7px;height:7px;border-radius:50%;background:#EF9F27;display:inline-block;"></span><small style="font-size:9.5px;color:#854F0B;font-weight:700;">'+cA+'</small>':'');
+      return '<div class="kcol"><div class="kch"><span class="kd" style="background:'+e[2]+'"></span><b>'+e[1]+'</b><span class="kn">'+ls.length+'</span><span style="margin-left:auto;display:flex;gap:3px;align-items:center;">'+mini+'</span></div>'
+        +ls.map(function(l){
+          var sm=ldSem(l), qh=ldQuente(l);
+          var dono=l.assumido_por?'<span class="kav" style="background:#dbeafe;color:#1d4ed8;">V</span>':'<span class="kav">JU</span>';
+          var ts=(typeof dspUltTs==='function')?dspUltTs(l):0;
+          var dd=ts?Math.floor((Date.now()-ts)/86400000):null;
+          var tm=dd===null?(l.u||''):(dd<1?'ativa hoje':(dd+'d parado'));
+          return '<div class="kc" style="border-left:3px solid '+SEMC[sm]+';border-radius:0 12px 12px 0;">'
+            +'<div class="nm2">'+ehtml(l.n)+(qh?' 🔥':'')+'</div><div class="ph3">'+ehtml(l.t)+'</div>'
+            +'<div class="foot"><span class="tm" style="color:'+(sm==='vermelho'?'#A32D2D':(sm==='ambar'?'#854F0B':'#0F6E56'))+';font-weight:700;">'+tm+'</span>'+dono+'</div></div>';
+        }).join('')
         +(ls.length===0?'<div style="padding:14px 10px;font-size:10.5px;color:var(--sub);text-align:center;">vazio</div>':'')
         +'</div>';
     }).join('');
