@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Jul.ia · Central Julia</title>
+<title>Jul.ia · Central Julia v4.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -119,6 +119,52 @@ tr:last-child td{border-bottom:none;}
 .resta{font-weight:800;color:var(--navy);white-space:nowrap;}
 .pln input{width:92px;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;font-family:inherit;font-size:13px;text-align:right;}
 .pln input.nm{width:130px;text-align:left;}
+/* ═══ wizard nova conta v4.7 ═══ */
+.md.wz{max-width:760px;padding:0;}
+.wzh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:22px 24px 14px;border-bottom:1px solid var(--bd);}
+.wzh h2{margin:0;}
+.wzx{border:none;background:var(--pg);color:var(--tx2);width:32px;height:32px;border-radius:8px;font-size:20px;cursor:pointer;line-height:1;}
+.wzs{display:flex;align-items:center;gap:8px;padding:12px 24px;background:#fbfaff;border-bottom:1px solid var(--bd);}
+.wzs .st{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--tx2);white-space:nowrap;}
+.wzs .st span{width:22px;height:22px;border-radius:50%;background:#e9e4f5;color:var(--tx2);display:inline-flex;align-items:center;justify-content:center;font-size:11px;}
+.wzs .st.on{color:var(--roxo);}
+.wzs .st.on span{background:linear-gradient(90deg,var(--mag),var(--roxo));color:#fff;}
+.wzs .st.done{color:var(--ok);}
+.wzs .st.done span{background:var(--okbg);color:var(--ok);}
+.wzs i{flex:1;height:1px;background:var(--bd);}
+#ncBody{padding:18px 24px 22px;}
+.wzg2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+.wzg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.wzg3 input{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:9px;font-family:inherit;font-size:13px;}
+.wzfull{grid-column:1/-1;}
+.wzn{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;padding-top:14px;border-top:1px solid var(--bd);}
+.pcs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+.pc{border:1.5px solid var(--bd);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:.15s;}
+.pc:hover{border-color:#c9b8f0;}
+.pc.sel{border-color:var(--roxo);background:#faf5ff;box-shadow:0 0 0 3px rgba(124,58,237,.12);}
+.pc b{font-family:'Sora';font-size:14px;display:block;}
+.pc .pv{font-family:'Sora';font-weight:800;font-size:18px;color:var(--roxo);margin-top:4px;}
+.pc .pv small{font-size:11px;font-weight:600;color:var(--tx2);}
+.pc .pd{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.4;}
+.stp{display:flex;gap:6px;align-items:center;}
+.stp input{text-align:center;width:70px;}
+.stp .btn{padding:9px 14px;}
+.pvb{border:1px dashed var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#fbfaff;}
+.pvt{font-size:10.5px;font-weight:800;color:#6d28d9;letter-spacing:.06em;margin-bottom:8px;}
+.chk{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin:6px 0 12px;cursor:pointer;background:#fff;}
+.chk input{margin-top:3px;accent-color:var(--roxo);width:16px;height:16px;}
+.chk b{display:block;font-size:13px;}
+.chk small{display:block;color:var(--tx2);font-size:11.5px;line-height:1.45;margin-top:2px;}
+.okb{display:flex;gap:14px;align-items:center;background:var(--okbg);border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.okt{width:40px;height:40px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:none;}
+.okb b{font-family:'Sora';font-size:15px;display:block;}
+.okb small{color:#166534;font-size:12px;display:block;margin-top:2px;}
+.crs{border:1px solid var(--bd);border-radius:12px;overflow:hidden;}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);font-size:12.5px;}
+.cr:last-child{border-bottom:none;}
+.cr span{font-weight:700;color:var(--tx2);white-space:nowrap;}
+.cr code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--tx);background:var(--pg);padding:4px 8px;border-radius:6px;word-break:break-all;text-align:right;}
+@media(max-width:640px){.wzg2,.wzg3,.pcs{grid-template-columns:1fr;}.wzs .st{font-size:0;}.wzs .st span{font-size:11px;}}
 </style>
 </head>
 <body>
@@ -688,13 +734,18 @@ function gerarSenha(){
   return 'Ju'+s;
 }
 
-function ncCalc(){
-  var sel=document.getElementById('ncPlano');var p=PLANOS.find(function(x){return x.id===sel.value;});
-  var ex=Number(document.getElementById('ncExtras').value||0);
-  var tot=p?Number(p.valor||0)+ex*47:0;
-  var det=p?(brl(p.valor)+' plano'+(ex?(' + '+ex+' plantonista'+(ex>1?'s':'')+' × R$ 47'):'')+' · '+((p.acessos_inclusos||0)+ex)+' acessos · até '+p.max_produtos+' produtos'):'';
-  document.getElementById('ncTot').innerHTML='Mensalidade total: <b>'+brl(tot)+'</b><br/><small style="font-weight:500;">'+det+'</small>';
-}
+/* ═══════════════ NOVA CONTA · WIZARD v4.7 ═══════════════ */
+var NC={step:1,plano:null,extras:0};
+var UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+var NC_SEG=['Imobiliária','Construtora','Corretor autônomo','Clínica / Saúde','Escola / Curso','Loja / Serviço local','Agência / Consultoria','Outro'];
+var NC_TONS=['Direto','Consultivo','Leve e próximo','Formal','Entusiasmado','Técnico'];
+var NC_OBJ=['Agendar reunião','Fechar venda no chat','Qualificar e transferir','Tirar dúvidas e reter'];
+
+function ncToken(){var s='';var ch='abcdef0123456789';for(var i=0;i<32;i++)s+=ch[Math.floor(Math.random()*ch.length)];return s;}
+function ncV(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function ncSet(id,v){var el=document.getElementById(id);if(el)el.value=v;}
+function ncPlanoAtual(){return PLANOS.find(function(x){return x.id===NC.plano;})||null;}
+function ncMens(){var p=ncPlanoAtual();return (p?Number(p.valor||0):0)+NC.extras*47;}
 
 function novaConta(){
   fetch(SUPA_URL+'/rest/v1/planos?select=*&order=valor.asc',{headers:H})
@@ -703,95 +754,201 @@ function novaConta(){
   .catch(function(){novaContaAbrir();});
 }
 function novaContaAbrir(){
-  var ov=document.createElement('div');ov.className='ov';
-  ov.onclick=function(e){if(e.target===ov)ov.remove();};
-  var ops='';PLANOS.filter(function(p){return p.ativo;}).forEach(function(p){
-    ops+='<option value="'+p.id+'">'+eh(p.nome)+' · '+brl(p.valor)+'/mês · '+p.acessos_inclusos+' acesso'+(p.acessos_inclusos>1?'s':'')+'</option>';
-  });
-  ov.innerHTML='<div class="md">'
-    +'<h2>Nova conta</h2><div class="sub">Cria o cliente, o acesso, a assinatura e a primeira fatura</div>'
-    +'<div class="fl"><label>EMPRESA *</label><input id="ncEmp" placeholder="Ex.: Alisson Santos Imobiliária"/></div>'
-    +'<div class="fl"><label>RESPONSÁVEL *</label><input id="ncResp" placeholder="Nome de quem manda"/></div>'
-    +'<div class="fl"><label>CNPJ</label><input id="ncCnpj" placeholder="00.000.000/0000-00"/></div>'
-    +'<div class="fl"><label>E-MAIL DE ACESSO *</label><input id="ncMail" placeholder="email@cliente.com.br"/></div>'
-    +'<div class="fl"><label>SENHA PROVISÓRIA *</label><div class="row"><input id="ncSenha"/><button class="btn gh" onclick="document.getElementById(\'ncSenha\').value=gerarSenha()">Gerar</button></div></div>'
-    +'<div class="fl"><label>PLANO</label><select id="ncPlano" onchange="ncCalc()">'+ops+'</select></div>'
-    +'<div class="fl"><label>PLANTONISTAS (R$ 47/mês cada)</label><input id="ncExtras" type="number" min="0" step="1" value="0" oninput="ncCalc();ncExtrasBlocos();"/></div>'
-    +'<div id="ncExtrasBox"></div>'
-    +'<div class="tot" id="ncTot"></div>'
-    +'<div class="fl"><label>NÚMERO WHATSAPP 360 (opcional — dá pra conectar depois)</label><input id="ncZap360" placeholder="5581999330650 · só dígitos"/></div>'
-    +'<div class="fl"><label>WHATSAPP DO RESPONSÁVEL (avisos e cobrança)</label><input id="ncZapDono" placeholder="5581999998888 · só dígitos"/></div>'
-    +'<div class="bts"><button class="btn gh" onclick="this.closest(\'.ov\').remove()">Cancelar</button><button class="btn pri" onclick="criarConta(this)">Criar conta</button></div>'
+  NC={step:1,plano:null,extras:0,d:{}};
+  var at=PLANOS.filter(function(p){return p.ativo;});
+  if(at.length)NC.plano=at[0].id;
+  var ov=document.createElement('div');ov.className='ov';ov.id='ncOv';
+  ov.innerHTML='<div class="md wz">'
+    +'<div class="wzh"><div><h2>Nova conta</h2><div class="sub">Cliente, acesso, assinatura, primeira fatura e a Julia configurada. Credenciais saem prontas pro WhatsApp.</div></div>'
+    +'<button class="wzx" onclick="document.getElementById(\'ncOv\').remove()" aria-label="Fechar">×</button></div>'
+    +'<div class="wzs" id="ncSteps"></div>'
+    +'<div id="ncBody"></div>'
     +'</div>';
   document.body.appendChild(ov);
-  document.getElementById('ncSenha').value=gerarSenha();
-  ncCalc();
+  ncRender();
+}
+function ncSteps(){
+  var L=['Empresa','Plano e acessos','Julia','Pronto'];
+  return L.map(function(t,i){var n=i+1;var cls=n<NC.step?'done':(n===NC.step?'on':'');return '<div class="st '+cls+'"><span>'+(n<NC.step?'✓':n)+'</span>'+t+'</div>';}).join('<i></i>');
+}
+function ncRender(){
+  document.getElementById('ncSteps').innerHTML=ncSteps();
+  var b=document.getElementById('ncBody');
+  if(NC.step===1)b.innerHTML=ncPasso1();
+  else if(NC.step===2){b.innerHTML=ncPasso2();ncExtrasBlocos();ncCalc();}
+  else if(NC.step===3){b.innerHTML=ncPasso3();ncPromptGerar();}
+  else b.innerHTML=ncPasso4();
+  var md=document.querySelector('#ncOv .md');if(md)md.scrollTop=0;
+}
+function ncGuardar(){
+  ['ncEmp','ncSeg','ncResp','ncZapDono','ncMail','ncCnpj','ncUf','ncCid','ncVence','ncZap360','ncTom','ncObj','ncPrompt','ncSenha'].forEach(function(id){var el=document.getElementById(id);if(el)NC.d[id]=el.value;});
+  var ad=document.getElementById('ncAdesao');if(ad)NC.d.adesao=ad.checked;
+  var n=NC.extras;NC.d.pls=[];
+  for(var i=1;i<=n;i++){NC.d.pls[i-1]={nome:ncV('pvNome'+i),email:ncV('pvMail'+i),senha:ncV('pvSenha'+i)};}
+}
+function ncIr(passo){
+  ncGuardar();
+  if(passo>NC.step){
+    if(NC.step===1){
+      if(!NC.d.ncEmp||!NC.d.ncResp||!NC.d.ncMail||!NC.d.ncZapDono){alert('Preencha empresa, responsável, WhatsApp e e-mail.');return;}
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(NC.d.ncMail)){alert('E-mail inválido.');return;}
+    }
+    if(NC.step===2){
+      if(!ncPlanoAtual()){alert('Escolha um plano.');return;}
+      for(var i=0;i<NC.d.pls.length;i++){var p=NC.d.pls[i];if(!p.nome||!p.email||!p.senha){alert('Plantonista '+(i+1)+': nome, e-mail e senha.');return;}}
+    }
+  }
+  NC.step=passo;ncRender();
+}
+function ncOpts(arr,sel){return arr.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+eh(x)+'</option>';}).join('');}
+
+function ncPasso1(){
+  var d=NC.d;
+  return '<div class="wzg2">'
+    +'<div class="fl wzfull"><label>NOME DA EMPRESA *</label><input id="ncEmp" value="'+eh(d.ncEmp||'')+'" placeholder="Ex.: Imobiliária Costa Azul"/></div>'
+    +'<div class="fl"><label>SEGMENTO</label><select id="ncSeg">'+ncOpts(NC_SEG,d.ncSeg||NC_SEG[0])+'</select></div>'
+    +'<div class="fl"><label>VENCE DIA</label><input id="ncVence" type="number" min="1" max="28" value="'+eh(d.ncVence||'10')+'"/></div>'
+    +'<div class="fl"><label>RESPONSÁVEL *</label><input id="ncResp" value="'+eh(d.ncResp||'')+'" placeholder="Dono ou diretor"/></div>'
+    +'<div class="fl"><label>WHATSAPP DO RESPONSÁVEL *</label><input id="ncZapDono" value="'+eh(d.ncZapDono||'')+'" placeholder="(81) 99999-9999"/></div>'
+    +'<div class="fl"><label>E-MAIL DE ACESSO *</label><input id="ncMail" type="email" value="'+eh(d.ncMail||'')+'" placeholder="dono@empresa.com.br"/></div>'
+    +'<div class="fl"><label>CPF OU CNPJ</label><input id="ncCnpj" value="'+eh(d.ncCnpj||'')+'" placeholder="só números"/></div>'
+    +'<div class="fl"><label>ESTADO</label><select id="ncUf"><option value="">— escolha —</option>'+UFS.map(function(u){return '<option'+(u===(d.ncUf||'PE')?' selected':'')+'>'+u+'</option>';}).join('')+'</select></div>'
+    +'<div class="fl"><label>CIDADE</label><input id="ncCid" value="'+eh(d.ncCid||'')+'" placeholder="Recife"/></div>'
+    +'</div>'
+    +'<div class="wzn"><span></span><button class="btn pri" onclick="ncIr(2)">Continuar →</button></div>';
 }
 
+function ncPasso2(){
+  var d=NC.d;
+  var cards=PLANOS.filter(function(p){return p.ativo;}).map(function(p){
+    var sel=p.id===NC.plano?' sel':'';
+    var conv=p.conversas||p.limite_conversas||'';
+    return '<div class="pc'+sel+'" onclick="ncPlanoSel(\''+p.id+'\')"><b>'+eh(p.nome)+'</b><div class="pv">'+brl(p.valor)+'<small>/mês</small></div>'
+      +'<div class="pd">'+(conv?conv+' conversas · ':'')+(p.acessos_inclusos||1)+' acesso'+((p.acessos_inclusos||1)>1?'s':'')+' · até '+(p.max_produtos||'∞')+' produtos</div></div>';
+  }).join('');
+  return '<div class="fl"><label>PLANO</label><div class="pcs">'+cards+'</div></div>'
+    +'<div class="wzg2">'
+    +'<div class="fl"><label>PLANTONISTAS (R$ 47/mês cada)</label><div class="stp"><button class="btn gh" onclick="ncExtrasSet(NC.extras-1)">−</button><input id="ncExtras" type="number" min="0" max="20" value="'+NC.extras+'" oninput="ncExtrasSet(this.value)"/><button class="btn gh" onclick="ncExtrasSet(NC.extras+1)">+</button></div></div>'
+    +'<div class="fl"><label>SENHA DO DONO</label><div class="row"><input id="ncSenha" value="'+eh(d.ncSenha||gerarSenha())+'"/><button class="btn gh" onclick="ncSet(\'ncSenha\',gerarSenha())">Gerar</button></div></div>'
+    +'</div>'
+    +'<div id="ncExtrasBox"></div>'
+    +'<label class="chk"><input type="checkbox" id="ncAdesao"'+(d.adesao?' checked':'')+' onchange="ncCalc()"/><div><b>Cobrar adesão antes de liberar</b><small>A adesão é o valor do plano. Marcado, a conta nasce "pendente" e a primeira fatura sai com adesão + mensalidade.</small></div></label>'
+    +'<div class="tot" id="ncTot"></div>'
+    +'<div class="wzn"><button class="btn gh" onclick="ncIr(1)">← Voltar</button><button class="btn pri" onclick="ncIr(3)">Continuar →</button></div>';
+}
+function ncPlanoSel(id){ncGuardar();NC.plano=id;ncRender();}
+function ncExtrasSet(n){ncGuardar();NC.extras=Math.max(0,Math.min(20,Number(n)||0));ncSet('ncExtras',NC.extras);ncExtrasBlocos();ncCalc();}
 function ncExtrasBlocos(){
-  var n=Math.max(0,Math.min(20,Number(document.getElementById('ncExtras').value||0)));
-  var box=document.getElementById('ncExtrasBox');
-  var h='';
-  for(var i=1;i<=n;i++){
-    h+='<div style="border:1px dashed var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fbfaff;">'
-      +'<div style="font-size:11px;font-weight:800;color:#6d28d9;letter-spacing:.06em;margin-bottom:8px;">🎧 PLANTONISTA '+i+'</div>'
-      +'<div class="fl" style="margin-bottom:8px;"><input id="pvNome'+i+'" placeholder="Nome do plantonista"/></div>'
-      +'<div class="fl" style="margin-bottom:8px;"><input id="pvMail'+i+'" placeholder="email@plantao.com"/></div>'
-      +'<div class="fl" style="margin-bottom:0;"><div class="row"><input id="pvSenha'+i+'" placeholder="Senha"/><button class="btn gh" onclick="document.getElementById(\'pvSenha'+i+'\').value=gerarSenha()">Gerar</button></div></div>'
-      +'</div>';
+  var box=document.getElementById('ncExtrasBox');if(!box)return;
+  var h='';var pls=NC.d.pls||[];
+  for(var i=1;i<=NC.extras;i++){
+    var p=pls[i-1]||{};
+    h+='<div class="pvb"><div class="pvt">🎧 PLANTONISTA '+i+'</div><div class="wzg3">'
+      +'<input id="pvNome'+i+'" value="'+eh(p.nome||'')+'" placeholder="Nome"/>'
+      +'<input id="pvMail'+i+'" value="'+eh(p.email||'')+'" placeholder="email@plantao.com"/>'
+      +'<div class="row"><input id="pvSenha'+i+'" value="'+eh(p.senha||gerarSenha())+'"/><button class="btn gh" onclick="ncSet(\'pvSenha'+i+'\',gerarSenha())">Gerar</button></div>'
+      +'</div></div>';
   }
   box.innerHTML=h;
-  for(var j=1;j<=n;j++){var s=document.getElementById('pvSenha'+j);if(s&&!s.value)s.value=gerarSenha();}
 }
+function ncCalc(){
+  var p=ncPlanoAtual();var tot=ncMens();var el=document.getElementById('ncTot');if(!el)return;
+  var ad=document.getElementById('ncAdesao');var adesao=(ad&&ad.checked&&p)?Number(p.valor||0):0;
+  el.innerHTML='Mensalidade: <b>'+brl(tot)+'</b>'+(p?'<br/><small style="font-weight:500;">'+brl(p.valor)+' plano'+(NC.extras?(' + '+NC.extras+' plantonista'+(NC.extras>1?'s':'')+' × R$ 47'):'')+'</small>':'')
+    +(adesao?'<br/><small style="font-weight:600;">Primeira fatura: '+brl(adesao+tot)+' (adesão '+brl(adesao)+' + mensalidade)</small>':'');
+}
+
+function ncPasso3(){
+  var d=NC.d;
+  return '<div class="wzg2">'
+    +'<div class="fl wzfull"><label>NÚMERO WHATSAPP DA JULIA (360dialog · opcional, dá pra conectar depois)</label><input id="ncZap360" value="'+eh(d.ncZap360||'')+'" placeholder="5581999330650 · só dígitos"/></div>'
+    +'<div class="fl"><label>TOM DE VOZ</label><select id="ncTom" onchange="ncPromptGerar()">'+ncOpts(NC_TONS,d.ncTom||NC_TONS[0])+'</select></div>'
+    +'<div class="fl"><label>OBJETIVO PRINCIPAL</label><select id="ncObj" onchange="ncPromptGerar()">'+ncOpts(NC_OBJ,d.ncObj||NC_OBJ[0])+'</select></div>'
+    +'</div>'
+    +'<div class="fl"><label>PROMPT INICIAL DA JULIA <small style="font-weight:500;letter-spacing:0;">gerado a partir do cadastro · o cliente refina depois na aba Inteligência</small></label>'
+    +'<textarea id="ncPrompt" rows="14" style="width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;font-family:inherit;font-size:12.5px;line-height:1.5;color:var(--tx);"></textarea>'
+    +'<div class="hint" id="ncPromptN" style="margin-top:6px;"></div></div>'
+    +'<div class="wzn"><button class="btn gh" onclick="ncIr(2)">← Voltar</button><button class="btn pri" id="ncCriar" onclick="criarConta(this)">Criar conta</button></div>';
+}
+function ncPromptGerar(){
+  var d=NC.d;var emp=d.ncEmp||'a empresa';var resp=d.ncResp||'o responsável';var seg=d.ncSeg||'Outro';
+  var tom=ncV('ncTom')||NC_TONS[0];var obj=ncV('ncObj')||NC_OBJ[0];
+  var imob=/Imobili|Construtora|Corretor/i.test(seg);
+  var t='Você é Julia, atendente comercial da '+emp+' no WhatsApp. Escreve como gente: curto, leve, direto. Entende a dor e conduz pro próximo passo. Se apresente só no primeiro contato. NUNCA use travessão.\n\n'
+  +'NOME: use só o NOME DO CLIENTE do contexto ou o que ele disser nesta conversa; sem nome, não use nenhum. NUNCA invente nome. Nunca peça desculpa sem erro real.\n\n'
+  +'FONTE DE VERDADE: preços, condições, links e mídias vêm SEMPRE do CATÁLOGO OFICIAL no fim deste contexto. Dado que não está no catálogo: diga que confirma com o time e siga; nunca invente.\n\n'
+  +'OBJETIVO: '+obj+'. TOM: '+tom+'.\n\n'
+  +'MÉTODO: 1 DIAGNÓSTICO: antes de qualquer pitch, UMA pergunta sobre a realidade do cliente'+(imob?' (compra ou aluguel, região, faixa de valor, prazo)':' (o que busca, pra quando, o que já tentou)')+'. 2 VALOR: responda com o ganho concreto ligado ao que ele disse + 1 prova real. 3 PREÇO: só depois do valor, sempre ancorado no ganho. 4 AÇÃO: um convite claro pro próximo passo, dizendo o formato e com quem ('+resp+'). Nunca repita o mesmo convite; se ele perguntar de novo, responda com substância e ofereça de novo só com ângulo novo, no máximo 1 convite a cada 2 mensagens.\n\n'
+  +'SAUDAÇÃO SECA ("oi"): primeiro contato = apresentação em 1 frase + UMA pergunta aberta. Retorno = cumprimento leve + gancho do último assunto. Sem preço, sem link, sem convite.\n\n'
+  +'REGRA MAIS IMPORTANTE: WhatsApp, não e-mail. Até 2 frases curtas (~180 caracteres); 3 só se pediu detalhes. UMA ideia por mensagem. Duas mensagens suas seguidas nunca terminam com pergunta. Nada de múltipla escolha. Repita as palavras que o CLIENTE usou pra dor.\n\n'
+  +'NUNCA DIGA QUE NÃO SABE: responda 1 frase de valor pelo que sabe e leve pro '+resp+'. Registre em linha separada no fim: FEEDBACK '+resp.toUpperCase()+' | Cliente: [nome] | Assunto: [o que pediu].\n\n'
+  +'MÍDIAS: o texto conduz e a mídia PROVA. Argumentou um tema que tem mídia no CATÁLOGO? Envie junto, sem perguntar antes. UMA mídia por mensagem, nunca repetida.\n\n'
+  +'AGENDAMENTO: use a linha AGORA e a AGENDA DE REUNIÕES do contexto; nunca chute dia nem hora. Sugira no máximo 2 opções, hora cheia, no futuro, com 2h de folga do AGORA e livres na AGENDA. Horário ocupado: NUNCA diga quem está agendado. Só registre após ele escolher, confirmando natural e acrescentando em linha separada: REUNIÃO CONFIRMADA | Cliente: [nome] | Data: [DD/MM/AAAA] | Hora: [HH:MM] | Interesse: [assunto] | REUNIAO COM '+resp.toUpperCase()+'\n\n'
+  +'OBJEÇÕES (máx 3 frases): "tá caro" mostre o retorno; "vou pensar" pergunte com leveza o que falta decidir; "já tenho" pergunte o que falta no atual.\n\n'
+  +'LIMITES: nunca invente informação. Nunca prometa resultado. Nunca pressione. Máximo 1 emoji. VARIE SEMPRE: frase repetida = robô. CHECK antes de enviar: cabe na tela do celular? Parece vendedora top? Senão corte pela metade. Duas perguntas? Apague uma. Pitch sem diagnóstico? Pergunte primeiro. Convite igual ao anterior? Corte e entregue valor.';
+  ncSet('ncPrompt',t);
+  var n=document.getElementById('ncPromptN');if(n)n.textContent=t.length+' / 15.000 caracteres';
+}
+
 function criarConta(btn){
-  function v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
-  var emp=v('ncEmp'),resp=v('ncResp'),mail=v('ncMail').toLowerCase(),senha=v('ncSenha');
-  if(!emp||!resp||!mail||!senha){alert('Preencha empresa, responsável, e-mail e senha.');return;}
-  var p=PLANOS.find(function(x){return x.id===document.getElementById('ncPlano').value;});
-  var extras=Number(v('ncExtras')||0);
-  var body={empresa:emp,responsavel:resp,cnpj:v('ncCnpj')||null,email_login:mail,senha_provisoria:senha,email_contato:mail,
-    plano:p?p.nome:'Start',status:'ativa',
-    zap_360:v('ncZap360').replace(/\D/g,'')||null,
-    zap_dono:v('ncZapDono').replace(/\D/g,'')||null};
+  ncGuardar();
+  var d=NC.d;var p=ncPlanoAtual();var mail=(d.ncMail||'').toLowerCase();var senha=d.ncSenha||gerarSenha();
+  var zapDono=(d.ncZapDono||'').replace(/\D/g,'');if(zapDono&&zapDono.length<=11)zapDono='55'+zapDono;
+  var zap360=(d.ncZap360||'').replace(/\D/g,'')||null;
+  var mens=ncMens();var adesao=(d.adesao&&p)?Number(p.valor||0):0;
+  var base={empresa:d.ncEmp,responsavel:d.ncResp,cnpj:d.ncCnpj||null,email_login:mail,senha_provisoria:senha,email_contato:mail,
+    plano:p?p.nome:'Essencial',status:adesao?'pendente':'ativa',zap_360:zap360,zap_dono:zapDono||null,lead_token:ncToken()};
+  var extra={segmento:d.ncSeg||null,uf:d.ncUf||null,cidade:d.ncCid||null,vence_dia:Number(d.ncVence||10),cobrar_adesao:!!adesao};
   btn.disabled=true;btn.textContent='Criando…';
-  fetch(SUPA_URL+'/rest/v1/contas',{method:'POST',headers:Object.assign({Prefer:'return=representation'},HJ),body:JSON.stringify(body)})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  function post(body){return fetch(SUPA_URL+'/rest/v1/contas',{method:'POST',headers:Object.assign({Prefer:'return=representation'},HJ),body:JSON.stringify(body)});}
+  post(Object.assign({},base,extra))
+  .then(function(r){if(r.ok)return r.json();if(r.status===400)return post(base).then(function(r2){if(!r2.ok)throw new Error('HTTP '+r2.status);return r2.json();});throw new Error('HTTP '+r.status);})
   .then(function(rows){
-    var c=rows[0];
-    var mens=(p?Number(p.valor||0):0)+extras*47;
+    var c=rows[0];NC.conta=c;
     var comp=new Date();var compStr=comp.getFullYear()+'-'+String(comp.getMonth()+1).padStart(2,'0')+'-01';
-    var prox=new Date();prox.setMonth(prox.getMonth()+1);
+    var prox=new Date();prox.setMonth(prox.getMonth()+1);prox.setDate(Math.min(28,Number(d.ncVence||10)));
+    var pls=(d.pls||[]).filter(function(x){return x.nome&&x.email&&x.senha;}).map(function(x){return {conta_id:c.id,nome:x.nome,email:x.email.toLowerCase(),papel:'vendedor',senha_provisoria:x.senha};});
+    NC.pls=pls;
     return Promise.all([
-      fetch(SUPA_URL+'/rest/v1/assinaturas',{method:'POST',headers:HJ,
-        body:JSON.stringify({conta_id:c.id,ciclo:'mensal',status:'em_dia',proxima_cobranca:prox.toISOString().slice(0,10)})}).catch(function(){}),
-      fetch(SUPA_URL+'/rest/v1/faturas',{method:'POST',headers:HJ,
-        body:JSON.stringify({conta_id:c.id,competencia:compStr,valor:mens,status:'aberta'})}).catch(function(){})
+      fetch(SUPA_URL+'/rest/v1/assinaturas',{method:'POST',headers:HJ,body:JSON.stringify({conta_id:c.id,ciclo:'mensal',status:adesao?'pendente':'em_dia',proxima_cobranca:prox.toISOString().slice(0,10)})}).catch(function(){}),
+      fetch(SUPA_URL+'/rest/v1/faturas',{method:'POST',headers:HJ,body:JSON.stringify({conta_id:c.id,competencia:compStr,valor:mens+adesao,status:'aberta'})}).catch(function(){}),
+      pls.length?fetch(SUPA_URL+'/rest/v1/usuarios',{method:'POST',headers:HJ,body:JSON.stringify(pls)}).catch(function(){}):Promise.resolve(),
+      fetch(SUPA_URL+'/rest/v1/julia_config',{method:'POST',headers:HJ,body:JSON.stringify({conta_id:c.id,instrucoes:d.ncPrompt||'',tom_voz:d.ncTom||'Direto',objetivo:d.ncObj||'Agendar reunião'})}).catch(function(){})
     ]).then(function(){return c;});
   })
   .then(function(c){
-    var n=Math.max(0,Math.min(20,Number(v('ncExtras')||0)));
-    var pls=[];
-    for(var i=1;i<=n;i++){
-      var pn=v('pvNome'+i),pm=(v('pvMail'+i)||'').toLowerCase(),ps=v('pvSenha'+i);
-      if(pn&&pm&&ps)pls.push({conta_id:c.id,nome:pn,email:pm,papel:'vendedor',senha_provisoria:ps});
-    }
-    var reqPl=pls.length
-      ?fetch(SUPA_URL+'/rest/v1/usuarios',{method:'POST',headers:HJ,body:JSON.stringify(pls)}).catch(function(){})
-      :Promise.resolve();
-    return reqPl.then(function(){return {c:c,pls:pls};});
-  })
-  .then(function(r){
-    var c=r.c;
-    registrarMsg('Conta criada: '+c.empresa+' · acesso '+mail+(r.pls.length?(' · '+r.pls.length+' plantonista(s)'):''));
-    document.querySelector('.ov').remove();
-    var cred='Conta criada ✓\n\n👑 DONO\nE-mail: '+mail+'\nSenha: '+senha;
-    r.pls.forEach(function(p,ix){cred+='\n\n🎧 PLANTONISTA '+(ix+1)+' — '+p.nome+'\nE-mail: '+p.email+'\nSenha: '+p.senha_provisoria;});
-    cred+='\n\nPainel: julia-ia-nine.vercel.app/julia-v2.html\nA fatura do mês já nasceu em aberto.';
-    alert(cred);
-    carregar();
+    registrarMsg('Conta criada: '+c.empresa+' · acesso '+mail+(NC.pls.length?(' · '+NC.pls.length+' plantonista(s)'):''));
+    NC.step=4;ncRender();carregar();
   })
   .catch(function(e){alert('Não consegui criar ('+e.message+').');btn.disabled=false;btn.textContent='Criar conta';});
 }
+
+function ncCredTexto(){
+  var d=NC.d;var c=NC.conta||{};
+  var t='Olá, '+(d.ncResp||'')+'! Sua Julia está no ar 🎉\n\n'
+    +'*Painel:* https://julia-ia-nine.vercel.app/login-julia.html\n\n'
+    +'👑 *Seu acesso*\nE-mail: '+(d.ncMail||'').toLowerCase()+'\nSenha: '+(d.ncSenha||'')+'\n';
+  (NC.pls||[]).forEach(function(p,i){t+='\n🎧 *Plantonista '+(i+1)+' · '+p.nome+'*\nE-mail: '+p.email+'\nSenha: '+p.senha_provisoria+'\n';});
+  t+='\nPróximos passos: 1) entrar e trocar a senha · 2) cadastrar produtos e mídias no Banco de Dados · 3) revisar o prompt na aba Inteligência.'
+    +(d.adesao?'\n\nA fatura de adesão + primeira mensalidade já está disponível na aba Plano e Cobrança.':'');
+  return t;
+}
+function ncPasso4(){
+  var d=NC.d;var c=NC.conta||{};
+  var zap=(d.ncZapDono||'').replace(/\D/g,'');if(zap&&zap.length<=11)zap='55'+zap;
+  var cred=ncCredTexto();
+  var pls=(NC.pls||[]).map(function(p,i){return '<div class="cr"><span>🎧 Plantonista '+(i+1)+' · '+eh(p.nome)+'</span><code>'+eh(p.email)+' · '+eh(p.senha_provisoria)+'</code></div>';}).join('');
+  return '<div class="okb"><div class="okt">✓</div><div><b>'+eh(c.empresa||d.ncEmp)+' criada</b><small>'+(d.adesao?'Status pendente até a adesão ser paga':'Ativa e pronta pra usar')+' · fatura de '+brl(ncMens()+((d.adesao&&ncPlanoAtual())?Number(ncPlanoAtual().valor||0):0))+' em aberto · Julia com prompt inicial</small></div></div>'
+    +'<div class="crs"><div class="cr"><span>👑 Dono</span><code>'+eh((d.ncMail||'').toLowerCase())+' · '+eh(d.ncSenha||'')+'</code></div>'+pls
+    +'<div class="cr"><span>🔗 Painel</span><code>julia-ia-nine.vercel.app/login-julia.html</code></div>'
+    +'<div class="cr"><span>🧩 Lead token</span><code>'+eh(c.lead_token||'')+'</code></div></div>'
+    +'<div class="hint" style="margin:10px 0 14px;">Falta fora daqui: clonar o workflow n8n pra essa conta (id <b>'+eh(c.id||'')+'</b>) e conectar o número na 360dialog.</div>'
+    +'<textarea id="ncCred" style="display:none;">'+eh(cred)+'</textarea>'
+    +'<div class="wzn"><button class="btn gh" onclick="ncCopiar()">Copiar credenciais</button><div class="row">'
+    +(zap?'<button class="btn pri" onclick="window.open(\'https://wa.me/'+zap+'?text=\'+encodeURIComponent(document.getElementById(\'ncCred\').value),\'_blank\')">Enviar no WhatsApp</button>':'')
+    +'<button class="btn gh" onclick="document.getElementById(\'ncOv\').remove()">Fechar</button></div></div>';
+}
+function ncCopiar(){var t=document.getElementById('ncCred').value;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){alert('Credenciais copiadas.');});else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('Credenciais copiadas.');}}
 
 function meFotoSet(inp){
   var f=inp.files&&inp.files[0]; if(!f)return;
