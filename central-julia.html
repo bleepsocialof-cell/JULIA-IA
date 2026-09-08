@@ -165,6 +165,8 @@ tr:last-child td{border-bottom:none;}
 .cr span{font-weight:700;color:var(--tx2);white-space:nowrap;}
 .cr code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--tx);background:var(--pg);padding:4px 8px;border-radius:6px;word-break:break-all;text-align:right;}
 @media(max-width:640px){.wzg2,.wzg3,.pcs{grid-template-columns:1fr;}.wzs .st{font-size:0;}.wzs .st span{font-size:11px;}}
+.pc.dash{border-style:dashed;}
+.pc.dash .pv{font-size:14px;color:var(--tx2);}
 </style>
 </head>
 <body>
@@ -744,7 +746,9 @@ var NC_OBJ=['Agendar reunião','Fechar venda no chat','Qualificar e transferir',
 function ncToken(){var s='';var ch='abcdef0123456789';for(var i=0;i<32;i++)s+=ch[Math.floor(Math.random()*ch.length)];return s;}
 function ncV(id){var el=document.getElementById(id);return el?el.value.trim():'';}
 function ncSet(id,v){var el=document.getElementById(id);if(el)el.value=v;}
-function ncPlanoAtual(){return PLANOS.find(function(x){return x.id===NC.plano;})||null;}
+var N8N_MAIL='https://jadsonsantos.app.n8n.cloud/webhook/envio-credenciais';var N8N_TOKEN='blee-68abf71ef3737bd4b11d0ef1';
+function ncCustom(){return NC.plano==='custom';}
+function ncPlanoAtual(){if(ncCustom())return {id:'custom',nome:'Personalizado',valor:Number(String(NC.d.ncCustomValor||'0').replace(/\D/g,'')||0),conversas:Number(NC.d.ncCustomConv||0)||'',acessos_inclusos:Number(NC.d.ncCustomAc||1)||1,max_produtos:'∞'};return PLANOS.find(function(x){return x.id===NC.plano;})||null;}
 function ncMens(){var p=ncPlanoAtual();return (p?Number(p.valor||0):0)+NC.extras*47;}
 
 function novaConta(){
@@ -781,7 +785,7 @@ function ncRender(){
   var md=document.querySelector('#ncOv .md');if(md)md.scrollTop=0;
 }
 function ncGuardar(){
-  ['ncEmp','ncSeg','ncResp','ncZapDono','ncMail','ncCnpj','ncUf','ncCid','ncVence','ncZap360','ncTom','ncObj','ncPrompt','ncSenha'].forEach(function(id){var el=document.getElementById(id);if(el)NC.d[id]=el.value;});
+  ['ncEmp','ncSeg','ncResp','ncZapDono','ncMail','ncCnpj','ncUf','ncCid','ncVence','ncZap360','ncTom','ncObj','ncPrompt','ncSenha','ncCustomValor','ncCustomConv','ncCustomAc'].forEach(function(id){var el=document.getElementById(id);if(el)NC.d[id]=el.value;});
   var ad=document.getElementById('ncAdesao');if(ad)NC.d.adesao=ad.checked;
   var n=NC.extras;NC.d.pls=[];
   for(var i=1;i<=n;i++){NC.d.pls[i-1]={nome:ncV('pvNome'+i),email:ncV('pvMail'+i),senha:ncV('pvSenha'+i)};}
@@ -795,6 +799,7 @@ function ncIr(passo){
     }
     if(NC.step===2){
       if(!ncPlanoAtual()){alert('Escolha um plano.');return;}
+      if(ncCustom()&&!(Number(String(NC.d.ncCustomValor||'').replace(/\D/g,''))>0)){alert('Personalizado: informe a mensalidade.');return;}
       for(var i=0;i<NC.d.pls.length;i++){var p=NC.d.pls[i];if(!p.nome||!p.email||!p.senha){alert('Plantonista '+(i+1)+': nome, e-mail e senha.');return;}}
     }
   }
@@ -826,7 +831,13 @@ function ncPasso2(){
     return '<div class="pc'+sel+'" onclick="ncPlanoSel(\''+p.id+'\')"><b>'+eh(p.nome)+'</b><div class="pv">'+brl(p.valor)+'<small>/mês</small></div>'
       +'<div class="pd">'+(conv?conv+' conversas · ':'')+(p.acessos_inclusos||1)+' acesso'+((p.acessos_inclusos||1)>1?'s':'')+' · até '+(p.max_produtos||'∞')+' produtos</div></div>';
   }).join('');
-  return '<div class="fl"><label>PLANO</label><div class="pcs">'+cards+'</div></div>'
+  cards+='<div class="pc dash'+(ncCustom()?' sel':'')+'" onclick="ncPlanoSel(\'custom\')"><b>Personalizado</b><div class="pv">sob medida</div><div class="pd">Mensalidade, conversas e acessos definidos por você</div></div>';
+  var custom=ncCustom()?'<div class="pvb"><div class="pvt">✦ PLANO PERSONALIZADO</div><div class="wzg3">'
+    +'<input id="ncCustomValor" value="'+eh(d.ncCustomValor||'')+'" placeholder="Mensalidade R$ (só números)" oninput="ncGuardar();ncCalc()"/>'
+    +'<input id="ncCustomConv" type="number" min="0" value="'+eh(d.ncCustomConv||'')+'" placeholder="Conversas/mês" oninput="ncGuardar()"/>'
+    +'<input id="ncCustomAc" type="number" min="1" value="'+eh(d.ncCustomAc||'1')+'" placeholder="Acessos inclusos" oninput="ncGuardar()"/>'
+    +'</div></div>':'';
+  return '<div class="fl"><label>PLANO</label><div class="pcs">'+cards+'</div></div>'+custom
     +'<div class="wzg2">'
     +'<div class="fl"><label>PLANTONISTAS (R$ 47/mês cada)</label><div class="stp"><button class="btn gh" onclick="ncExtrasSet(NC.extras-1)">−</button><input id="ncExtras" type="number" min="0" max="20" value="'+NC.extras+'" oninput="ncExtrasSet(this.value)"/><button class="btn gh" onclick="ncExtrasSet(NC.extras+1)">+</button></div></div>'
     +'<div class="fl"><label>SENHA DO DONO</label><div class="row"><input id="ncSenha" value="'+eh(d.ncSenha||gerarSenha())+'"/><button class="btn gh" onclick="ncSet(\'ncSenha\',gerarSenha())">Gerar</button></div></div>'
@@ -898,6 +909,7 @@ function criarConta(btn){
   var mens=ncMens();var adesao=(d.adesao&&p)?Number(p.valor||0):0;
   var base={empresa:d.ncEmp,responsavel:d.ncResp,cnpj:d.ncCnpj||null,email_login:mail,senha_provisoria:senha,email_contato:mail,
     plano:p?p.nome:'Essencial',status:adesao?'pendente':'ativa',zap_360:zap360,zap_dono:zapDono||null,lead_token:ncToken()};
+  if(ncCustom())base.mensalidade_custom=mens;
   var extra={segmento:d.ncSeg||null,uf:d.ncUf||null,cidade:d.ncCid||null,vence_dia:Number(d.ncVence||10),cobrar_adesao:!!adesao};
   btn.disabled=true;btn.textContent='Criando…';
   function post(body){return fetch(SUPA_URL+'/rest/v1/contas',{method:'POST',headers:Object.assign({Prefer:'return=representation'},HJ),body:JSON.stringify(body)});}
@@ -918,11 +930,25 @@ function criarConta(btn){
   })
   .then(function(c){
     registrarMsg('Conta criada: '+c.empresa+' · acesso '+mail+(NC.pls.length?(' · '+NC.pls.length+' plantonista(s)'):''));
-    NC.step=4;ncRender();carregar();
+    NC.mail='enviando';NC.step=4;ncRender();carregar();
+    ncEnviarEmail();
   })
   .catch(function(e){alert('Não consegui criar ('+e.message+').');btn.disabled=false;btn.textContent='Criar conta';});
 }
 
+function ncEnviarEmail(){
+  var d=NC.d;var c=NC.conta||{};
+  fetch(N8N_MAIL,{method:'POST',headers:{'Content-Type':'application/json','X-Token':N8N_TOKEN},body:JSON.stringify({
+    conta_id:c.id,empresa:c.empresa,responsavel:d.ncResp,email:(d.ncMail||'').toLowerCase(),senha:d.ncSenha,
+    plantonistas:NC.pls||[],painel:'https://julia-ia-nine.vercel.app/login-julia.html',texto:ncCredTexto()})})
+  .then(function(r){NC.mail=r.ok?'ok':'erro';}).catch(function(){NC.mail='erro';})
+  .then(function(){var el=document.getElementById('ncMailSt');if(el)el.innerHTML=ncMailSt();});
+}
+function ncMailSt(){
+  if(NC.mail==='ok')return '<span style="color:var(--ok);font-weight:700;">✓ E-mail de acesso enviado</span>';
+  if(NC.mail==='erro')return '<span style="color:var(--warn);font-weight:700;">⚠ E-mail não enviado</span> <small>(webhook envio-credenciais off) · use Copiar ou WhatsApp</small>';
+  return '<span style="color:var(--tx2);">⏳ Enviando e-mail de acesso…</span>';
+}
 function ncCredTexto(){
   var d=NC.d;var c=NC.conta||{};
   var t='Olá, '+(d.ncResp||'')+'! Sua Julia está no ar 🎉\n\n'
@@ -942,7 +968,8 @@ function ncPasso4(){
     +'<div class="crs"><div class="cr"><span>👑 Dono</span><code>'+eh((d.ncMail||'').toLowerCase())+' · '+eh(d.ncSenha||'')+'</code></div>'+pls
     +'<div class="cr"><span>🔗 Painel</span><code>julia-ia-nine.vercel.app/login-julia.html</code></div>'
     +'<div class="cr"><span>🧩 Lead token</span><code>'+eh(c.lead_token||'')+'</code></div></div>'
-    +'<div class="hint" style="margin:10px 0 14px;">Falta fora daqui: clonar o workflow n8n pra essa conta (id <b>'+eh(c.id||'')+'</b>) e conectar o número na 360dialog.</div>'
+    +'<div class="hint" id="ncMailSt" style="margin:10px 0 4px;">'+ncMailSt()+'</div>'
+    +'<div class="hint" style="margin:0 0 14px;">Falta fora daqui: clonar o workflow n8n pra essa conta (id <b>'+eh(c.id||'')+'</b>) e conectar o número na 360dialog.</div>'
     +'<textarea id="ncCred" style="display:none;">'+eh(cred)+'</textarea>'
     +'<div class="wzn"><button class="btn gh" onclick="ncCopiar()">Copiar credenciais</button><div class="row">'
     +(zap?'<button class="btn pri" onclick="window.open(\'https://wa.me/'+zap+'?text=\'+encodeURIComponent(document.getElementById(\'ncCred\').value),\'_blank\')">Enviar no WhatsApp</button>':'')
